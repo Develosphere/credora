@@ -1,0 +1,66 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Credora token storage (sensitive)
+.credora_tokens.json
+.credora_key
+
+# Environment files (contain secrets)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test/Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.hypothesis/
+
+# Java build
+credora-engine/target/
+*.class
+*.jar
+
+# Node.js
+credora-frontend/node_modules/
+credora-frontend/.next/
+credora-frontend/out/
+
+# Lock files (optional - remove if you want to include them)
+# uv.lock
+# credora-frontend/package-lock.json
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Documentation artifacts (generated)
+ARCHITECTURE_AUDIT_REPORT.md
+ARCHITECTURE_FIXES_COMPLETE.md
+CODEBASE_WALKTHROUGH.md
+
+# Kiro IDE
+.kiro/
