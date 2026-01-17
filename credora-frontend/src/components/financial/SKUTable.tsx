@@ -80,12 +80,12 @@ export function filterSKUData(data: SKUAnalysis[], filterText: string): SKUAnaly
 
 function SortIcon({ field, currentField, direction }: { field: SortField; currentField: SortField; direction: SortDirection }) {
   if (field !== currentField) {
-    return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
+    return <ArrowUpDown className="h-4 w-4 text-gray-500" />;
   }
   return direction === "asc" ? (
-    <ChevronUp className="h-4 w-4 text-blue-600" />
+    <ChevronUp className="h-4 w-4 text-credora-orange" />
   ) : (
-    <ChevronDown className="h-4 w-4 text-blue-600" />
+    <ChevronDown className="h-4 w-4 text-credora-orange" />
   );
 }
 
@@ -95,42 +95,42 @@ interface ExpandedRowProps {
 
 function ExpandedRow({ sku }: ExpandedRowProps) {
   return (
-    <tr className="bg-gray-50">
+    <tr className="bg-[#1a1a1a]">
       <td colSpan={8} className="px-6 py-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
             <span className="text-gray-500">SKU ID:</span>
-            <span className="ml-2 font-mono text-gray-900">{sku.skuId}</span>
+            <span className="ml-2 font-mono text-white">{sku.skuId}</span>
           </div>
           <div>
             <span className="text-gray-500">CAC:</span>
-            <span className="ml-2 font-medium text-gray-900">{formatCurrency(sku.cac)}</span>
+            <span className="ml-2 font-medium text-white">{formatCurrency(sku.cac)}</span>
           </div>
           <div>
             <span className="text-gray-500">Profit per Unit:</span>
-            <span className={`ml-2 font-medium ${sku.profitPerUnit >= 0 ? "text-green-600" : "text-red-600"}`}>
+            <span className={`ml-2 font-medium ${sku.profitPerUnit >= 0 ? "text-green-400" : "text-red-400"}`}>
               {formatCurrency(sku.profitPerUnit)}
             </span>
           </div>
           <div>
             <span className="text-gray-500">Inventory Days:</span>
-            <span className="ml-2 font-medium text-gray-900">{formatDays(sku.inventoryDays)}</span>
+            <span className="ml-2 font-medium text-white">{formatDays(sku.inventoryDays)}</span>
           </div>
         </div>
-        <div className="mt-4 p-3 bg-white rounded border border-gray-200">
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Profitability Breakdown</h4>
+        <div className="mt-4 p-3 bg-[#282828] rounded border border-[#333]">
+          <h4 className="text-sm font-medium text-gray-300 mb-2">Profitability Breakdown</h4>
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500">Revenue:</span>
-              <span className="font-mono">{formatCurrency(sku.totalRevenue)}</span>
+              <span className="font-mono text-white">{formatCurrency(sku.totalRevenue)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Refund Rate:</span>
-              <span className="font-mono">{formatPercent(sku.refundRate)}</span>
+              <span className="font-mono text-white">{formatPercent(sku.refundRate)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Net Profit:</span>
-              <span className={`font-mono ${sku.totalProfit >= 0 ? "text-green-600" : "text-red-600"}`}>
+              <span className={`font-mono ${sku.totalProfit >= 0 ? "text-green-400" : "text-red-400"}`}>
                 {formatCurrency(sku.totalProfit)}
               </span>
             </div>
@@ -164,7 +164,7 @@ export function SKUTable({ data, sortField, sortDirection, onSort, filterText }:
 
   if (processedData.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+      <div className="bg-[#1e1e1e] rounded-lg border border-[#2a2a2a] p-8 text-center">
         <p className="text-gray-500">
           {filterText ? "No SKUs match your filter criteria" : "No SKU data available"}
         </p>
@@ -173,16 +173,16 @@ export function SKUTable({ data, sortField, sortDirection, onSort, filterText }:
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-[#1e1e1e] rounded-lg border border-[#2a2a2a] overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-[#2a2a2a]">
+          <thead className="bg-[#1a1a1a]">
             <tr>
               <th className="w-10 px-3 py-3"></th>
               {columns.map((col) => (
                 <th
                   key={col.field}
-                  className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 ${
+                  className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-[#282828] ${
                     col.align === "right" ? "text-right" : "text-left"
                   }`}
                   onClick={() => onSort(col.field)}
@@ -195,19 +195,19 @@ export function SKUTable({ data, sortField, sortDirection, onSort, filterText }:
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-[#1e1e1e] divide-y divide-[#2a2a2a]">
             {processedData.map((sku) => {
               const isExpanded = expandedRows.has(sku.skuId);
               return (
                 <>
                   <tr
                     key={sku.skuId}
-                    className="hover:bg-gray-50 cursor-pointer"
+                    className="hover:bg-[#282828] cursor-pointer"
                     onClick={() => toggleRow(sku.skuId)}
                   >
                     <td className="px-3 py-4">
                       <ChevronRight
-                        className={`h-4 w-4 text-gray-400 transition-transform ${
+                        className={`h-4 w-4 text-gray-500 transition-transform ${
                           isExpanded ? "rotate-90" : ""
                         }`}
                       />
@@ -218,11 +218,11 @@ export function SKUTable({ data, sortField, sortDirection, onSort, filterText }:
                         className={`px-6 py-4 whitespace-nowrap text-sm ${
                           col.align === "right" ? "text-right font-mono" : "text-left"
                         } ${
-                          col.field === "name" ? "font-medium text-gray-900" : "text-gray-700"
+                          col.field === "name" ? "font-medium text-white" : "text-gray-300"
                         } ${
-                          col.field === "totalProfit" && sku.totalProfit < 0 ? "text-red-600" : ""
+                          col.field === "totalProfit" && sku.totalProfit < 0 ? "text-red-400" : ""
                         } ${
-                          col.field === "totalProfit" && sku.totalProfit >= 0 ? "text-green-600" : ""
+                          col.field === "totalProfit" && sku.totalProfit >= 0 ? "text-green-400" : ""
                         }`}
                       >
                         {col.format(sku[col.field])}
@@ -245,10 +245,10 @@ export function SKUTable({ data, sortField, sortDirection, onSort, filterText }:
  */
 export function SKUTableSkeleton() {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-[#1e1e1e] rounded-lg border border-[#2a2a2a] overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-[#2a2a2a]">
+          <thead className="bg-[#1a1a1a]">
             <tr>
               <th className="w-10 px-3 py-3"></th>
               {columns.map((col) => (
@@ -263,15 +263,15 @@ export function SKUTableSkeleton() {
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-[#1e1e1e] divide-y divide-[#2a2a2a]">
             {[...Array(5)].map((_, i) => (
               <tr key={i}>
                 <td className="px-3 py-4">
-                  <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-4 w-4 bg-[#333] rounded animate-pulse" />
                 </td>
                 {columns.map((col) => (
                   <td key={col.field} className="px-6 py-4">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-20" />
+                    <div className="h-4 bg-[#333] rounded animate-pulse w-20" />
                   </td>
                 ))}
               </tr>

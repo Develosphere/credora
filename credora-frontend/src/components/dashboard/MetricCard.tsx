@@ -13,6 +13,7 @@ interface MetricCardProps {
   onRetry?: () => void;
   onClick?: () => void;
   valueClassName?: string;
+  delay?: number;
 }
 
 export function MetricCard({
@@ -25,11 +26,12 @@ export function MetricCard({
   onRetry,
   onClick,
   valueClassName,
+  delay = 0,
 }: MetricCardProps) {
   // Error state
   if (error) {
     return (
-      <div className="rounded-lg border bg-card p-6">
+      <div className="glass-card rounded-xl p-6 animate-fade-in-up" style={{ animationDelay: `${delay}ms` }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-destructive">
             <AlertCircle className="h-5 w-5" />
@@ -38,14 +40,14 @@ export function MetricCard({
           {onRetry && (
             <button
               onClick={onRetry}
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-credora-orange transition-colors"
             >
               <RefreshCw className="h-4 w-4" />
               Retry
             </button>
           )}
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">
+        <p className="mt-2 text-xs text-gray-500">
           {error.message || "Unable to load metrics"}
         </p>
       </div>
@@ -55,13 +57,13 @@ export function MetricCard({
   // Loading state with skeleton
   if (isLoading) {
     return (
-      <div className="rounded-lg border bg-card p-6">
+      <div className="glass-card rounded-xl p-6 animate-fade-in-up" style={{ animationDelay: `${delay}ms` }}>
         <div className="flex items-center justify-between">
-          <div className="h-4 w-24 animate-pulse rounded bg-muted" />
-          <div className="h-8 w-8 animate-pulse rounded bg-muted" />
+          <div className="h-4 w-24 rounded-lg skeleton" />
+          <div className="h-10 w-10 rounded-xl skeleton" />
         </div>
-        <div className="mt-4 h-8 w-32 animate-pulse rounded bg-muted" />
-        <div className="mt-2 h-3 w-20 animate-pulse rounded bg-muted" />
+        <div className="mt-4 h-8 w-32 rounded-lg skeleton" />
+        <div className="mt-2 h-3 w-20 rounded-lg skeleton" />
       </div>
     );
   }
@@ -73,21 +75,35 @@ export function MetricCard({
     <CardWrapper
       onClick={onClick}
       className={cn(
-        "rounded-lg border bg-card p-6 text-left transition-colors",
-        onClick && "hover:bg-accent cursor-pointer"
+        "glass-card rounded-xl p-6 text-left transition-all duration-300",
+        "animate-fade-in-up",
+        onClick && "cursor-pointer hover:translate-y-[-4px] hover:shadow-card-hover hover:border-credora-orange/30 group"
       )}
+      style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-muted-foreground">{title}</span>
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-          <Icon className="h-4 w-4 text-primary" />
+        <span className="text-sm font-medium text-gray-500">{title}</span>
+        <div className={cn(
+          "flex h-10 w-10 items-center justify-center rounded-xl",
+          "bg-gradient-to-br from-primary-light to-secondary-light",
+          "transition-all duration-300",
+          onClick && "group-hover:from-credora-orange group-hover:to-credora-red group-hover:shadow-glow"
+        )}>
+          <Icon className={cn(
+            "h-5 w-5 text-credora-orange transition-colors duration-300",
+            onClick && "group-hover:text-white"
+          )} />
         </div>
       </div>
-      <div className={cn("mt-4 text-2xl font-bold", valueClassName)}>
+      <div className={cn(
+        "mt-4 text-2xl font-bold transition-all duration-300",
+        valueClassName,
+        onClick && "group-hover:text-credora-orange"
+      )}>
         {value || "-"}
       </div>
       {subtitle && (
-        <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
+        <p className="mt-1 text-xs text-gray-500">{subtitle}</p>
       )}
     </CardWrapper>
   );
@@ -96,15 +112,18 @@ export function MetricCard({
 /**
  * Skeleton loader for metric cards
  */
-export function MetricCardSkeleton() {
+export function MetricCardSkeleton({ delay = 0 }: { delay?: number }) {
   return (
-    <div className="rounded-lg border bg-card p-6">
+    <div 
+      className="glass-card rounded-xl p-6 animate-fade-in-up" 
+      style={{ animationDelay: `${delay}ms` }}
+    >
       <div className="flex items-center justify-between">
-        <div className="h-4 w-24 animate-pulse rounded bg-muted" />
-        <div className="h-8 w-8 animate-pulse rounded bg-muted" />
+        <div className="h-4 w-24 rounded-lg skeleton" />
+        <div className="h-10 w-10 rounded-xl skeleton" />
       </div>
-      <div className="mt-4 h-8 w-32 animate-pulse rounded bg-muted" />
-      <div className="mt-2 h-3 w-20 animate-pulse rounded bg-muted" />
+      <div className="mt-4 h-8 w-32 rounded-lg skeleton" />
+      <div className="mt-2 h-3 w-20 rounded-lg skeleton" />
     </div>
   );
 }

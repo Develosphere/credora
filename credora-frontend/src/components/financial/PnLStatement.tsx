@@ -33,20 +33,20 @@ function LineItem({
   
   return (
     <div
-      className={`flex justify-between py-2 ${
+      className={`flex justify-between py-2.5 transition-colors duration-200 hover:bg-[#282828] rounded-lg px-2 -mx-2 ${
         isTotal
-          ? "border-t-2 border-b-2 border-gray-800 font-bold text-lg"
+          ? "border-t-2 border-b-2 border-credora-orange font-bold text-lg bg-[#1a1a1a]"
           : isSubtotal
-          ? "border-t border-gray-300 font-semibold"
+          ? "border-t border-[#333] font-semibold"
           : ""
-      } ${indent ? "pl-4" : ""}`}
+      } ${indent ? "pl-6" : ""}`}
     >
-      <span className={isTotal ? "text-gray-900" : "text-gray-700"}>
+      <span className={isTotal ? "text-white" : "text-gray-300"}>
         {label}
       </span>
       <span
         className={`font-mono ${
-          displayValue < 0 ? "text-red-600" : "text-gray-900"
+          displayValue < 0 ? "text-red-400" : "text-white"
         } ${isTotal ? "text-lg" : ""}`}
       >
         {isNegative && value > 0 ? "(" : ""}
@@ -64,10 +64,10 @@ interface MarginDisplayProps {
 
 function MarginDisplay({ label, value }: MarginDisplayProps) {
   return (
-    <div className="flex justify-between py-1 text-sm">
+    <div className="flex justify-between py-1.5 text-sm px-2 -mx-2">
       <span className="text-gray-500">{label}</span>
       <span
-        className={`font-mono ${value < 0 ? "text-red-600" : "text-green-600"}`}
+        className={`font-mono font-medium ${value < 0 ? "text-red-400" : "text-emerald-400"}`}
       >
         {formatPercent(value)}
       </span>
@@ -77,11 +77,11 @@ function MarginDisplay({ label, value }: MarginDisplayProps) {
 
 export function PnLStatement({ data }: PnLStatementProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-6">
       <div className="space-y-1">
         {/* Revenue Section */}
-        <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+        <div className="mb-6">
+          <h3 className="text-sm font-semibold text-credora-orange uppercase tracking-wide mb-3">
             Revenue
           </h3>
           <LineItem label="Gross Revenue" value={data.revenue} />
@@ -95,8 +95,8 @@ export function PnLStatement({ data }: PnLStatementProps) {
         </div>
 
         {/* Cost of Goods Sold Section */}
-        <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+        <div className="mb-6">
+          <h3 className="text-sm font-semibold text-credora-orange uppercase tracking-wide mb-3">
             Cost of Goods Sold
           </h3>
           <LineItem label="COGS" value={data.cogs} isNegative indent />
@@ -105,8 +105,8 @@ export function PnLStatement({ data }: PnLStatementProps) {
         </div>
 
         {/* Operating Expenses Section */}
-        <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-2">
+        <div className="mb-6">
+          <h3 className="text-sm font-semibold text-credora-orange uppercase tracking-wide mb-3">
             Operating Expenses
           </h3>
           <LineItem label="Advertising Spend" value={data.adSpend} isNegative indent />
@@ -125,7 +125,7 @@ export function PnLStatement({ data }: PnLStatementProps) {
         </div>
 
         {/* Net Profit */}
-        <div className="pt-2">
+        <div className="pt-3">
           <LineItem label="Net Profit" value={data.netProfit} isTotal />
           <MarginDisplay label="Net Margin" value={data.netMargin} />
         </div>

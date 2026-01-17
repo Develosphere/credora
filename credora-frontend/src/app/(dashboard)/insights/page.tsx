@@ -31,15 +31,15 @@ export default function InsightsPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">AI Insights</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-white">AI Insights</h1>
+          <p className="text-gray-400 mt-1">
             AI-generated recommendations to improve your business
           </p>
         </div>
         <button
           onClick={() => refetch()}
           disabled={isLoading}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl text-gray-300 hover:border-credora-orange/50 hover:text-white disabled:opacity-50 transition-colors"
         >
           <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
           Refresh
@@ -49,39 +49,39 @@ export default function InsightsPage() {
       {/* Summary Stats */}
       {!isLoading && !isError && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
-              <Lightbulb className="h-4 w-4" />
+          <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] p-4">
+            <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
+              <Lightbulb className="h-4 w-4 text-credora-orange" />
               <span>Total Insights</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-3xl font-bold text-white">
               {activeInsights.length}
             </p>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-2 text-red-500 text-sm mb-1">
+          <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] p-4">
+            <div className="flex items-center gap-2 text-sm mb-2">
               <span className="h-2 w-2 rounded-full bg-red-500" />
-              <span>High Impact</span>
+              <span className="text-red-400">High Impact</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-3xl font-bold text-white">
               {activeInsights.filter((i) => i.impact === "high").length}
             </p>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-2 text-yellow-500 text-sm mb-1">
+          <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] p-4">
+            <div className="flex items-center gap-2 text-sm mb-2">
               <span className="h-2 w-2 rounded-full bg-yellow-500" />
-              <span>Medium Impact</span>
+              <span className="text-yellow-400">Medium Impact</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-3xl font-bold text-white">
               {activeInsights.filter((i) => i.impact === "medium").length}
             </p>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center gap-2 text-blue-500 text-sm mb-1">
+          <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] p-4">
+            <div className="flex items-center gap-2 text-sm mb-2">
               <span className="h-2 w-2 rounded-full bg-blue-500" />
-              <span>Low Impact</span>
+              <span className="text-blue-400">Low Impact</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">
+            <p className="text-3xl font-bold text-white">
               {activeInsights.filter((i) => i.impact === "low").length}
             </p>
           </div>
@@ -99,19 +99,19 @@ export default function InsightsPage() {
 
       {/* Error State */}
       {isError && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-red-800 font-medium">
+              <h3 className="text-red-400 font-medium">
                 Failed to load insights
               </h3>
-              <p className="text-red-600 text-sm mt-1">
+              <p className="text-red-400/70 text-sm mt-1">
                 {error?.message || "An unexpected error occurred"}
               </p>
             </div>
             <button
               onClick={() => refetch()}
-              className="px-4 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200"
+              className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
             >
               Retry
             </button>
@@ -123,12 +123,12 @@ export default function InsightsPage() {
       {!isLoading && !isError && (
         <>
           {activeInsights.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-              <Lightbulb className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] p-8 text-center">
+              <Lightbulb className="h-12 w-12 text-credora-orange/50 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-white mb-2">
                 No insights available
               </h3>
-              <p className="text-gray-500">
+              <p className="text-gray-400">
                 Check back later for AI-generated recommendations based on your
                 business data.
               </p>
@@ -151,7 +151,7 @@ export default function InsightsPage() {
             <div className="mt-8">
               <button
                 onClick={() => setShowDismissed(!showDismissed)}
-                className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors"
+                className="flex items-center gap-2 text-gray-400 hover:text-credora-orange transition-colors"
               >
                 {showDismissed ? (
                   <EyeOff className="h-4 w-4" />

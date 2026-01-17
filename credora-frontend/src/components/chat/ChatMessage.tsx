@@ -18,18 +18,18 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
   return (
     <div
-      className={`flex items-start gap-3 ${isUser ? "flex-row-reverse" : ""}`}
+      className={`flex items-start gap-3 animate-fade-in ${isUser ? "flex-row-reverse" : ""}`}
     >
       {/* Avatar */}
       <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-          isUser ? "bg-gray-200" : "bg-blue-100"
+        className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm transition-transform duration-300 hover:scale-110 ${
+          isUser ? "bg-gray-100" : "bg-gradient-to-br from-primary to-secondary"
         }`}
       >
         {isUser ? (
           <User className="h-4 w-4 text-gray-600" />
         ) : (
-          <MessageSquare className="h-4 w-4 text-blue-600" />
+          <MessageSquare className="h-4 w-4 text-white" />
         )}
       </div>
 
@@ -38,10 +38,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
         className={`flex flex-col max-w-[80%] ${isUser ? "items-end" : "items-start"}`}
       >
         <div
-          className={`rounded-lg px-4 py-2 ${
+          className={`rounded-2xl px-4 py-3 shadow-sm transition-all duration-300 hover:shadow-md ${
             isUser
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-900"
+              ? "bg-gradient-to-r from-primary to-secondary text-white"
+              : "bg-white/80 backdrop-blur-sm border border-gray-100 text-gray-900"
           }`}
         >
           <MessageContent content={message.content} isUser={isUser} />
@@ -53,7 +53,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         )}
 
         {/* Timestamp */}
-        <span className="text-xs text-gray-400 mt-1">
+        <span className="text-xs text-gray-400 mt-1.5">
           {formatTimestamp(message.timestamp)}
         </span>
       </div>
@@ -244,21 +244,21 @@ function SourceAttribution({ sources }: { sources: DataSource[] }) {
   };
 
   return (
-    <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-100">
-      <div className="flex items-center gap-1 text-xs text-blue-700 mb-1">
+    <div className="mt-2 p-3 bg-primary/5 rounded-xl border border-primary/10 backdrop-blur-sm">
+      <div className="flex items-center gap-1.5 text-xs text-primary mb-2">
         <FileText className="h-3 w-3" />
         <span className="font-medium">Sources</span>
       </div>
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {sources.map((source, index) => (
           <a
             key={index}
             href={getSourceLink(source.type)}
-            className="flex items-center gap-2 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+            className="flex items-center gap-2 text-xs text-gray-600 hover:text-primary transition-colors duration-200 group"
           >
             <span>{getSourceIcon(source.type)}</span>
-            <span>{source.summary || source.reference}</span>
-            <ExternalLink className="h-3 w-3" />
+            <span className="group-hover:underline">{source.summary || source.reference}</span>
+            <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
           </a>
         ))}
       </div>

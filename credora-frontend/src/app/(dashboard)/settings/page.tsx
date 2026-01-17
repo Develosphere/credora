@@ -183,26 +183,26 @@ export default function SettingsPage() {
   if (isAuthLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 max-w-4xl">
+    <div className="space-y-8 max-w-4xl animate-fade-in">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <p className="text-gray-400">
           Manage your account and preferences
         </p>
       </div>
 
       {/* User Profile Section - Requirements 14.1 */}
-      <section className="rounded-lg border bg-card p-6">
+      <section className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-4">
-          <User className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-lg font-semibold">Profile</h2>
+          <User className="h-5 w-5 text-credora-orange" />
+          <h2 className="text-lg font-semibold text-white">Profile</h2>
         </div>
         
         <div className="flex items-center gap-4">
@@ -210,17 +210,17 @@ export default function SettingsPage() {
             <img
               src={user.picture}
               alt={user.name}
-              className="h-16 w-16 rounded-full"
+              className="h-16 w-16 rounded-2xl shadow-md"
             />
           ) : (
-            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="h-8 w-8 text-primary" />
+            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-credora-orange to-credora-red flex items-center justify-center shadow-lg shadow-credora-orange/25">
+              <User className="h-8 w-8 text-white" />
             </div>
           )}
           <div>
-            <h3 className="font-semibold text-lg">{user?.name}</h3>
-            <p className="text-muted-foreground">{user?.email}</p>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h3 className="font-semibold text-lg text-white">{user?.name}</h3>
+            <p className="text-gray-400">{user?.email}</p>
+            <p className="text-sm text-gray-500 mt-1">
               Member since {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
             </p>
           </div>
@@ -228,16 +228,16 @@ export default function SettingsPage() {
       </section>
 
       {/* Platform Connections Section - Requirements 14.2, 14.3 */}
-      <section className="rounded-lg border bg-card p-6">
+      <section className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-4">
-          <Link2 className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-lg font-semibold">Connected Platforms</h2>
+          <Link2 className="h-5 w-5 text-credora-orange" />
+          <h2 className="text-lg font-semibold text-white">Connected Platforms</h2>
         </div>
         
         {isLoadingPlatforms ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
+              <div key={i} className="h-16 rounded-xl bg-[#282828] animate-pulse" />
             ))}
           </div>
         ) : (
@@ -253,36 +253,36 @@ export default function SettingsPage() {
                 <div
                   key={platform.type}
                   className={cn(
-                    "flex items-center justify-between rounded-lg border p-4",
-                    isConnected && "border-green-500/30 bg-green-500/5"
+                    "flex items-center justify-between rounded-xl border p-4 transition-all duration-300",
+                    isConnected ? "border-emerald-500/30 bg-emerald-500/5" : "border-[#333] bg-[#1a1a1a]"
                   )}
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-lg",
-                        isConnected ? "bg-green-500/10" : "bg-muted"
+                        "flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-300",
+                        isConnected ? "bg-emerald-500/10" : "bg-[#282828]"
                       )}
                     >
                       <Icon
                         className={cn(
                           "h-5 w-5",
-                          isConnected ? "text-green-500" : "text-muted-foreground"
+                          isConnected ? "text-emerald-400" : "text-gray-500"
                         )}
                       />
                     </div>
                     <div>
-                      <h4 className="font-medium">{platform.name}</h4>
-                      <p className="text-sm text-muted-foreground">
+                      <h4 className="font-medium text-white">{platform.name}</h4>
+                      <p className="text-sm text-gray-500">
                         {platform.description}
                       </p>
                       {status.lastSync && isConnected && (
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-gray-500 mt-1">
                           Last synced: {new Date(status.lastSync).toLocaleString()}
                         </p>
                       )}
                       {status.error && isFailed && (
-                        <p className="text-xs text-red-500 mt-1">{status.error}</p>
+                        <p className="text-xs text-red-400 mt-1">{status.error}</p>
                       )}
                     </div>
                   </div>
@@ -290,19 +290,19 @@ export default function SettingsPage() {
                   <div className="flex items-center gap-2">
                     {isConnected ? (
                       <>
-                        <span className="flex items-center gap-1 text-sm text-green-500">
+                        <span className="flex items-center gap-1 text-sm text-emerald-400 font-medium">
                           <CheckCircle2 className="h-4 w-4" />
                           Connected
                         </span>
                         <button
                           onClick={() => handleReconnect(platform.type)}
                           disabled={isReconnecting}
-                          className="ml-2 p-2 rounded-lg hover:bg-muted transition-colors"
+                          className="ml-2 p-2 rounded-xl hover:bg-[#333] transition-colors duration-200"
                           title="Reconnect"
                         >
                           <RefreshCw
                             className={cn(
-                              "h-4 w-4 text-muted-foreground",
+                              "h-4 w-4 text-gray-500",
                               isReconnecting && "animate-spin"
                             )}
                           />
@@ -312,7 +312,7 @@ export default function SettingsPage() {
                       <button
                         onClick={() => handleReconnect(platform.type)}
                         disabled={isReconnecting}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-red-500/50 text-sm text-red-500 hover:bg-red-500/10 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl border border-red-500/50 text-sm text-red-400 hover:bg-red-500/10 transition-all duration-200"
                       >
                         {isReconnecting ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -325,7 +325,7 @@ export default function SettingsPage() {
                       <button
                         onClick={() => handleReconnect(platform.type)}
                         disabled={isReconnecting}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-sm text-primary-foreground hover:bg-primary/90 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-credora-orange to-credora-red text-sm text-white hover:shadow-lg hover:shadow-credora-orange/25 transition-all duration-300"
                       >
                         {isReconnecting ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -343,21 +343,21 @@ export default function SettingsPage() {
       </section>
 
       {/* Preferences Section - Requirements 14.4 */}
-      <section className="rounded-lg border bg-card p-6">
+      <section className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-4">
-          <Globe className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-lg font-semibold">Preferences</h2>
+          <Globe className="h-5 w-5 text-credora-orange" />
+          <h2 className="text-lg font-semibold text-white">Preferences</h2>
         </div>
         
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Currency
             </label>
             <select
               value={preferences.currency}
               onChange={(e) => handlePreferenceChange("currency", e.target.value)}
-              className="w-full max-w-xs rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full max-w-xs rounded-xl border border-[#333] bg-[#282828] text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-credora-orange/20 focus:border-credora-orange/50 transition-all duration-200"
             >
               {CURRENCY_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -368,13 +368,13 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Reporting Frequency
             </label>
             <select
               value={preferences.reportingFrequency}
               onChange={(e) => handlePreferenceChange("reportingFrequency", e.target.value)}
-              className="w-full max-w-xs rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full max-w-xs rounded-xl border border-[#333] bg-[#282828] text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-credora-orange/20 focus:border-credora-orange/50 transition-all duration-200"
             >
               {FREQUENCY_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -388,7 +388,7 @@ export default function SettingsPage() {
             <button
               onClick={handleSavePreferences}
               disabled={isSavingPreferences}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-credora-orange to-credora-red text-white hover:shadow-lg hover:shadow-credora-orange/25 transition-all duration-300 disabled:opacity-50 font-medium"
             >
               {isSavingPreferences ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -404,13 +404,13 @@ export default function SettingsPage() {
       </section>
 
       {/* Account Deletion Section - Requirements 14.5 */}
-      <section className="rounded-lg border border-red-500/30 bg-red-500/5 p-6">
+      <section className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6">
         <div className="flex items-center gap-3 mb-4">
-          <Trash2 className="h-5 w-5 text-red-500" />
-          <h2 className="text-lg font-semibold text-red-500">Danger Zone</h2>
+          <Trash2 className="h-5 w-5 text-red-400" />
+          <h2 className="text-lg font-semibold text-red-400">Danger Zone</h2>
         </div>
         
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="text-sm text-gray-400 mb-4">
           Once you delete your account, there is no going back. All your data,
           including connected platforms, chat history, and preferences will be
           permanently deleted.
@@ -418,7 +418,7 @@ export default function SettingsPage() {
         
         <button
           onClick={() => setShowDeleteModal(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-red-500 text-red-500 hover:bg-red-500/10 transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500 text-red-400 hover:bg-red-500/10 transition-all duration-200 font-medium"
         >
           <Trash2 className="h-4 w-4" />
           Delete Account
@@ -427,29 +427,29 @@ export default function SettingsPage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl animate-scale-in">
             <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/10">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10">
+                <AlertTriangle className="h-5 w-5 text-red-400" />
               </div>
-              <h3 className="text-lg font-semibold">Delete Account</h3>
+              <h3 className="text-lg font-semibold text-white">Delete Account</h3>
             </div>
             
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-gray-400 mb-4">
               This action cannot be undone. This will permanently delete your
               account and remove all associated data from our servers.
             </p>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">
-                Type <span className="font-mono text-red-500">DELETE</span> to confirm
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Type <span className="font-mono text-red-400">DELETE</span> to confirm
               </label>
               <input
                 type="text"
                 value={deleteConfirmation}
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
-                className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full rounded-xl border border-[#333] bg-[#282828] text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500/50 transition-all duration-200"
                 placeholder="DELETE"
               />
             </div>
@@ -460,14 +460,14 @@ export default function SettingsPage() {
                   setShowDeleteModal(false);
                   setDeleteConfirmation("");
                 }}
-                className="px-4 py-2 rounded-lg border hover:bg-muted transition-colors"
+                className="px-4 py-2.5 rounded-xl border border-[#333] text-gray-300 hover:bg-[#282828] transition-all duration-200 font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteConfirmation !== "DELETE" || isDeleting}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
                 {isDeleting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

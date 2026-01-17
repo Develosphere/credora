@@ -63,7 +63,7 @@ export function ChatInput({
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      <div className="flex items-end gap-2 p-3 bg-white border border-gray-200 rounded-lg shadow-sm focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
+      <div className="flex items-end gap-2 p-3 bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl shadow-lg focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary/50 transition-all duration-300">
         <textarea
           ref={textareaRef}
           value={message}
@@ -79,9 +79,9 @@ export function ChatInput({
         <button
           type="submit"
           disabled={!canSubmit}
-          className={`flex-shrink-0 p-2 rounded-lg transition-colors ${
+          className={`flex-shrink-0 p-2.5 rounded-xl transition-all duration-300 ${
             canSubmit
-              ? "bg-blue-600 text-white hover:bg-blue-700"
+              ? "bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg hover:shadow-primary/25 hover:scale-105 active:scale-95"
               : "bg-gray-100 text-gray-400 cursor-not-allowed"
           }`}
           aria-label="Send message"
@@ -95,7 +95,7 @@ export function ChatInput({
       </div>
       
       {/* Helper text */}
-      <p className="mt-1 text-xs text-gray-400 text-center">
+      <p className="mt-2 text-xs text-gray-400 text-center">
         Press Enter to send, Shift+Enter for new line
       </p>
     </form>

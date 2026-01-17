@@ -24,13 +24,13 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       {/* Page Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+      <div className="flex items-center justify-between pb-4 border-b border-[#2a2a2a]">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <MessageSquare className="h-7 w-7" />
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <MessageSquare className="h-7 w-7 text-credora-orange" />
             AI Assistant
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-400 mt-1">
             Ask questions about your business finances
           </p>
         </div>
@@ -38,14 +38,14 @@ export default function ChatPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={refetchHistory}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:text-credora-orange hover:bg-[#282828] rounded-lg transition-colors"
             title="Refresh history"
           >
             <RefreshCw className="h-5 w-5" />
           </button>
           <button
             onClick={clearHistory}
-            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
             title="Clear history"
           >
             <Trash2 className="h-5 w-5" />
@@ -55,7 +55,7 @@ export default function ChatPage() {
 
       {/* Error Banner */}
       {error && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+        <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400">
           <AlertCircle className="h-5 w-5 flex-shrink-0" />
           <span className="text-sm">{error.message}</span>
           <button
@@ -68,7 +68,7 @@ export default function ChatPage() {
       )}
 
       {/* Chat Window */}
-      <div className="flex-1 mt-4 bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="flex-1 mt-4 bg-[#1e1e1e] rounded-lg border border-[#2a2a2a] overflow-hidden">
         <ChatWindow className="h-full" />
       </div>
 

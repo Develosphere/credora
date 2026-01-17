@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { CustomCursor } from "@/components/ui/CustomCursor";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -22,9 +23,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} font-sans antialiased cursor-none`}>
         <ThemeProvider defaultTheme="system" storageKey="credora-theme">
-          <QueryProvider>{children}</QueryProvider>
+          <QueryProvider>
+            <CustomCursor />
+            {children}
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

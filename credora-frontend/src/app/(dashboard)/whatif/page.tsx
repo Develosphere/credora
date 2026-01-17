@@ -91,21 +91,21 @@ export default function WhatIfPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Calculator className="h-7 w-7" />
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <Calculator className="h-7 w-7 text-credora-orange" />
           What-If Simulator
         </h1>
-        <p className="text-gray-500 mt-1">
+        <p className="text-gray-400 mt-1">
           Simulate business scenarios to make informed decisions
         </p>
       </div>
 
       {/* Scenario Type Selector - Requirements: 11.1 */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <h2 className="text-sm font-medium text-gray-700 mb-3">
+      <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-5">
+        <h2 className="text-sm font-semibold text-gray-300 mb-4">
           Select Scenario Type
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -113,28 +113,28 @@ export default function WhatIfPage() {
             <button
               key={scenario.value}
               onClick={() => handleScenarioChange(scenario.value)}
-              className={`p-4 rounded-lg border-2 text-left transition-all ${
+              className={`p-5 rounded-2xl border-2 text-left transition-all duration-300 ${
                 selectedScenario === scenario.value
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300 bg-white"
+                  ? "border-credora-orange bg-credora-orange/10 shadow-lg shadow-credora-orange/10"
+                  : "border-[#333] hover:border-credora-orange/30 bg-[#1a1a1a]"
               }`}
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`p-2 rounded-lg ${
+                  className={`p-2.5 rounded-xl transition-all duration-300 ${
                     selectedScenario === scenario.value
-                      ? "bg-blue-100 text-blue-600"
-                      : "bg-gray-100 text-gray-600"
+                      ? "bg-gradient-to-br from-credora-orange to-credora-red text-white"
+                      : "bg-[#282828] text-gray-400"
                   }`}
                 >
                   {scenario.icon}
                 </div>
                 <div>
                   <h3
-                    className={`font-medium ${
+                    className={`font-semibold ${
                       selectedScenario === scenario.value
-                        ? "text-blue-900"
-                        : "text-gray-900"
+                        ? "text-credora-orange"
+                        : "text-white"
                     }`}
                   >
                     {scenario.label}
@@ -150,16 +150,16 @@ export default function WhatIfPage() {
       </div>
 
       {/* Scenario Form - Requirements: 11.2 */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-6">
+        <h2 className="text-lg font-semibold text-white mb-4">
           Configure {SCENARIO_TYPES.find((s) => s.value === selectedScenario)?.label}
         </h2>
         {renderForm()}
       </div>
 
       {/* Results Section - Requirements: 11.3, 11.4, 11.5 */}
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="animate-slide-up">
+        <h2 className="text-lg font-semibold text-white mb-4">
           Simulation Results
         </h2>
         {renderResults()}

@@ -67,7 +67,7 @@ function ServiceHealthIndicator({ health }: { health: ServiceHealth }) {
         "flex items-center justify-between rounded-lg border p-4",
         health.status === "healthy" && "border-green-500/30 bg-green-500/5",
         health.status === "unhealthy" && "border-red-500/30 bg-red-500/5",
-        health.status === "unknown" && "border-gray-500/30 bg-gray-500/5"
+        health.status === "unknown" && "border-[#333] bg-[#1a1a1a]"
       )}
     >
       <div className="flex items-center gap-3">
@@ -76,27 +76,27 @@ function ServiceHealthIndicator({ health }: { health: ServiceHealth }) {
             "flex h-10 w-10 items-center justify-center rounded-lg",
             health.status === "healthy" && "bg-green-500/10",
             health.status === "unhealthy" && "bg-red-500/10",
-            health.status === "unknown" && "bg-gray-500/10"
+            health.status === "unknown" && "bg-[#282828]"
           )}
         >
           <Server
             className={cn(
               "h-5 w-5",
-              health.status === "healthy" && "text-green-500",
-              health.status === "unhealthy" && "text-red-500",
+              health.status === "healthy" && "text-green-400",
+              health.status === "unhealthy" && "text-red-400",
               health.status === "unknown" && "text-gray-500"
             )}
           />
         </div>
         <div>
-          <h4 className="font-medium">{serviceNames[health.service]}</h4>
+          <h4 className="font-medium text-white">{serviceNames[health.service]}</h4>
           {health.responseTime !== undefined && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-500">
               Response time: {health.responseTime}ms
             </p>
           )}
           {health.error && (
-            <p className="text-sm text-red-500">{health.error}</p>
+            <p className="text-sm text-red-400">{health.error}</p>
           )}
         </div>
       </div>
@@ -104,16 +104,16 @@ function ServiceHealthIndicator({ health }: { health: ServiceHealth }) {
         <StatusIcon
           className={cn(
             "h-5 w-5",
-            health.status === "healthy" && "text-green-500",
-            health.status === "unhealthy" && "text-red-500",
+            health.status === "healthy" && "text-green-400",
+            health.status === "unhealthy" && "text-red-400",
             health.status === "unknown" && "text-gray-500"
           )}
         />
         <span
           className={cn(
             "text-sm font-medium capitalize",
-            health.status === "healthy" && "text-green-500",
-            health.status === "unhealthy" && "text-red-500",
+            health.status === "healthy" && "text-green-400",
+            health.status === "unhealthy" && "text-red-400",
             health.status === "unknown" && "text-gray-500"
           )}
         >
@@ -139,32 +139,32 @@ function PlatformSyncStatus({ platform }: { platform: PlatformStatus }) {
     <div
       className={cn(
         "flex items-center justify-between rounded-lg border p-4",
-        isConnected && "border-green-500/30 bg-green-500/5"
+        isConnected ? "border-green-500/30 bg-green-500/5" : "border-[#333] bg-[#1a1a1a]"
       )}
     >
       <div className="flex items-center gap-3">
         <div
           className={cn(
             "flex h-10 w-10 items-center justify-center rounded-lg",
-            isConnected ? "bg-green-500/10" : "bg-muted"
+            isConnected ? "bg-green-500/10" : "bg-[#282828]"
           )}
         >
           <Icon
             className={cn(
               "h-5 w-5",
-              isConnected ? "text-green-500" : "text-muted-foreground"
+              isConnected ? "text-green-400" : "text-gray-500"
             )}
           />
         </div>
         <div>
-          <h4 className="font-medium">{name}</h4>
+          <h4 className="font-medium text-white">{name}</h4>
           {platform.lastSync ? (
-            <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <p className="text-sm text-gray-500 flex items-center gap-1">
               <Clock className="h-3 w-3" />
               Last synced: {new Date(platform.lastSync).toLocaleString()}
             </p>
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-500">
               {isConnected ? "Sync pending" : "Not connected"}
             </p>
           )}
@@ -172,12 +172,12 @@ function PlatformSyncStatus({ platform }: { platform: PlatformStatus }) {
       </div>
       <div className="flex items-center gap-2">
         {isConnected ? (
-          <span className="flex items-center gap-1 text-sm text-green-500">
+          <span className="flex items-center gap-1 text-sm text-green-400">
             <CheckCircle2 className="h-4 w-4" />
             Connected
           </span>
         ) : (
-          <span className="flex items-center gap-1 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1 text-sm text-gray-500">
             <XCircle className="h-4 w-4" />
             {platform.status === "failed" ? "Failed" : "Not Connected"}
           </span>
@@ -207,21 +207,21 @@ export default function StatusPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">System Status</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold text-white">System Status</h1>
+          <p className="text-gray-400">
             Monitor the health of Credora services
           </p>
         </div>
         <div className="flex items-center gap-4">
           {dataUpdatedAt && (
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-gray-500">
               Last updated: {new Date(dataUpdatedAt).toLocaleTimeString()}
             </span>
           )}
           <button
             onClick={handleManualRefresh}
             disabled={isFetching}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border hover:bg-muted transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#333] text-gray-300 hover:bg-[#282828] transition-colors disabled:opacity-50"
           >
             <RefreshCw className={cn("h-4 w-4", isFetching && "animate-spin")} />
             Refresh
@@ -230,15 +230,15 @@ export default function StatusPage() {
       </div>
 
       {/* Auto-refresh indicator */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Activity className="h-4 w-4" />
+      <div className="flex items-center gap-2 text-sm text-gray-500">
+        <Activity className="h-4 w-4 text-credora-orange" />
         <span>Auto-refreshing every {pollInterval / 1000} seconds</span>
       </div>
 
       {/* Loading State */}
       {isLoading && (
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
         </div>
       )}
 
@@ -246,17 +246,17 @@ export default function StatusPage() {
       {error && !isLoading && (
         <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-6">
           <div className="flex items-center gap-3">
-            <XCircle className="h-5 w-5 text-red-500" />
+            <XCircle className="h-5 w-5 text-red-400" />
             <div>
-              <h3 className="font-medium text-red-500">Failed to load status</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-medium text-red-400">Failed to load status</h3>
+              <p className="text-sm text-gray-500">
                 {error instanceof Error ? error.message : "An error occurred"}
               </p>
             </div>
           </div>
           <button
             onClick={handleManualRefresh}
-            className="mt-4 flex items-center gap-2 px-3 py-1.5 rounded-lg border border-red-500/50 text-sm text-red-500 hover:bg-red-500/10 transition-colors"
+            className="mt-4 flex items-center gap-2 px-3 py-1.5 rounded-lg border border-red-500/50 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
           >
             <RefreshCw className="h-4 w-4" />
             Retry
@@ -268,10 +268,10 @@ export default function StatusPage() {
       {/* Service Health Section - Requirements 15.2, 15.3 */}
       {status && (
         <>
-          <section className="rounded-lg border bg-card p-6">
+          <section className="rounded-lg border border-[#2a2a2a] bg-[#1e1e1e] p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Server className="h-5 w-5 text-muted-foreground" />
-              <h2 className="text-lg font-semibold">Service Health</h2>
+              <Server className="h-5 w-5 text-credora-orange" />
+              <h2 className="text-lg font-semibold text-white">Service Health</h2>
             </div>
             <div className="space-y-3">
               {status.services.map((service) => (
@@ -281,10 +281,10 @@ export default function StatusPage() {
           </section>
 
           {/* Platform Sync Status Section - Requirements 15.4 */}
-          <section className="rounded-lg border bg-card p-6">
+          <section className="rounded-lg border border-[#2a2a2a] bg-[#1e1e1e] p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Activity className="h-5 w-5 text-muted-foreground" />
-              <h2 className="text-lg font-semibold">Platform Sync Status</h2>
+              <Activity className="h-5 w-5 text-credora-orange" />
+              <h2 className="text-lg font-semibold text-white">Platform Sync Status</h2>
             </div>
             {status.platforms.length > 0 ? (
               <div className="space-y-3">
@@ -293,7 +293,7 @@ export default function StatusPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground">
+              <p className="text-gray-500">
                 No platforms connected. Connect platforms in Settings to see sync status.
               </p>
             )}
