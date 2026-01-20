@@ -239,16 +239,8 @@ async def oauth_callback(request: Request):
 # MCP Tools - Customer Accounts
 # =============================================================================
 
-@google_mcp.tool
-async def list_accessible_customers(user_id: str = "default") -> Dict[str, Any]:
-    """List all Google Ads customer accounts accessible to the user.
-    
-    Args:
-        user_id: User identifier for authentication
-        
-    Returns:
-        List of accessible customer accounts
-    """
+async def _fetch_accessible_customers(user_id: str = "default") -> Dict[str, Any]:
+    """Core logic for fetching accessible customers - shared by MCP tool and REST endpoint."""
     token_manager = get_token_manager()
     token_data = await token_manager.get_token(user_id, "google")
     
@@ -283,6 +275,19 @@ async def list_accessible_customers(user_id: str = "default") -> Dict[str, Any]:
             
         except httpx.HTTPStatusError as e:
             return {"error": f"Google Ads API error: {e.response.status_code} - {e.response.text}"}
+
+
+@google_mcp.tool
+async def list_accessible_customers(user_id: str = "default") -> Dict[str, Any]:
+    """List all Google Ads customer accounts accessible to the user.
+    
+    Args:
+        user_id: User identifier for authentication
+        
+    Returns:
+        List of accessible customer accounts
+    """
+    return await _fetch_accessible_customers(user_id)
 
 
 async def _get_customer_details(client: httpx.AsyncClient, customer_id: str) -> Optional[Dict]:
@@ -1225,6 +1230,61 @@ def _error_html(error: str) -> HTMLResponse:
 </body>
 </html>
 """, status_code=400)
+
+
+# =============================================================================
+# REST Wrapper Endpoints for MCP Router
+# =============================================================================
+# These endpoints wrap the MCP tools as REST API calls for the data sync service
+
+@google_mcp.custom_route("/tools/list_accessible_customers", methods=["POST"])
+async def rest_list_accessible_customers(request: Request):
+    """REST wrapper for list_accessible_customers tool."""
+    try:
+        body = await request.json()
+        print(f"🔧 [GOOGLE] list_accessible_customers called with: {body}")
+        result = await _fetch_accessible_customers(
+            user_id=body.get("user_id", "default")
+        )
+        return JSONResponse(result)
+    except Exception as e:
+        import traceback
+        print(f"❌ [GOOGLE] list_accessible_customers error: {e}")
+        traceback.print_exc()
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@google_mcp.custom_route("/tools/get_campaigns", methods=["POST"])
+async def rest_get_campaigns(request: Request):
+    """REST wrapper for get_campaigns tool."""
+    try:
+        body = await request.json()
+        result = await get_campaigns(
+            customer_id=body.get("customer_id", ""),
+            user_id=body.get("user_id", "default"),
+            status_filter=body.get("status_filter", "all"),
+            date_from=body.get("date_from", ""),
+            date_to=body.get("date_to", "")
+        )
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@google_mcp.custom_route("/tools/get_account_overview", methods=["POST"])
+async def rest_get_account_overview(request: Request):
+    """REST wrapper for get_account_overview tool."""
+    try:
+        body = await request.json()
+        result = await get_account_overview(
+            customer_id=body.get("customer_id", ""),
+            user_id=body.get("user_id", "default"),
+            date_from=body.get("date_from", ""),
+            date_to=body.get("date_to", "")
+        )
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 # =============================================================================

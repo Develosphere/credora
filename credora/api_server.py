@@ -1364,6 +1364,26 @@ async def mark_onboarding_complete(request: Request):
 # Data Sync Endpoints - Platform Data Ingestion
 # ============================================================================
 
+# NOTE: /sync/all MUST be defined BEFORE /sync/{platform} to avoid route conflict
+@app.post("/sync/all")
+async def sync_all_platforms_data(request: Request):
+    """Sync data from all connected platforms.
+    
+    Fetches and stores data from all platforms the user has connected.
+    """
+    user = require_auth(request)
+    
+    try:
+        from credora.services.data_sync import sync_all_platforms as do_sync_all
+        result = await do_sync_all(user.id)
+        return result
+    except Exception as e:
+        print(f"Sync all error: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/sync/{platform}")
 async def sync_platform_data(platform: str, request: Request):
     """Sync data from a connected platform.
@@ -1382,25 +1402,6 @@ async def sync_platform_data(platform: str, request: Request):
         return result
     except Exception as e:
         print(f"Sync error for {platform}: {e}")
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/sync/all")
-async def sync_all_platforms_data(request: Request):
-    """Sync data from all connected platforms.
-    
-    Fetches and stores data from all platforms the user has connected.
-    """
-    user = require_auth(request)
-    
-    try:
-        from credora.services.data_sync import sync_all_platforms as do_sync_all
-        result = await do_sync_all(user.id)
-        return result
-    except Exception as e:
-        print(f"Sync all error: {e}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

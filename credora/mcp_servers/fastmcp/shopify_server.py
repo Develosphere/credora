@@ -327,8 +327,7 @@ async def get_store_dashboard(shop: str, user_id: str = "default") -> Dict[str, 
 # MCP Tools - Orders
 # =============================================================================
 
-@shopify_mcp.tool
-async def get_orders(
+async def _fetch_orders(
     shop: str,
     user_id: str = "default",
     status: str = "any",
@@ -336,19 +335,7 @@ async def get_orders(
     date_from: str = "",
     date_to: str = ""
 ) -> Dict[str, Any]:
-    """Fetch orders with filtering options.
-    
-    Args:
-        shop: Shopify store domain
-        user_id: User identifier
-        status: Order status filter (any, open, closed, cancelled)
-        limit: Maximum orders to return (max 250)
-        date_from: Start date (YYYY-MM-DD)
-        date_to: End date (YYYY-MM-DD)
-        
-    Returns:
-        List of orders with line items and customer info
-    """
+    """Core logic for fetching orders - shared by MCP tool and REST endpoint."""
     token_manager = get_token_manager()
     token_data = await token_manager.get_token(user_id, "shopify")
     
@@ -417,30 +404,43 @@ async def get_orders(
             return {"error": f"API error: {e.response.status_code} - {e.response.text}"}
 
 
+@shopify_mcp.tool
+async def get_orders(
+    shop: str,
+    user_id: str = "default",
+    status: str = "any",
+    limit: int = 50,
+    date_from: str = "",
+    date_to: str = ""
+) -> Dict[str, Any]:
+    """Fetch orders with filtering options.
+    
+    Args:
+        shop: Shopify store domain
+        user_id: User identifier
+        status: Order status filter (any, open, closed, cancelled)
+        limit: Maximum orders to return (max 250)
+        date_from: Start date (YYYY-MM-DD)
+        date_to: End date (YYYY-MM-DD)
+        
+    Returns:
+        List of orders with line items and customer info
+    """
+    return await _fetch_orders(shop, user_id, status, limit, date_from, date_to)
+
+
 # =============================================================================
 # MCP Tools - Products
 # =============================================================================
 
-@shopify_mcp.tool
-async def get_products(
+async def _fetch_products(
     shop: str,
     user_id: str = "default",
     limit: int = 50,
     status: str = "active",
     search_query: str = ""
 ) -> Dict[str, Any]:
-    """Fetch products with inventory information.
-    
-    Args:
-        shop: Shopify store domain
-        user_id: User identifier
-        limit: Maximum products to return (max 250)
-        status: Product status (active, archived, draft)
-        search_query: Search products by title
-        
-    Returns:
-        List of products with variants and inventory
-    """
+    """Core logic for fetching products - shared by MCP tool and REST endpoint."""
     token_manager = get_token_manager()
     token_data = await token_manager.get_token(user_id, "shopify")
     
@@ -505,6 +505,29 @@ async def get_products(
             
         except httpx.HTTPStatusError as e:
             return {"error": f"API error: {e.response.status_code}"}
+
+
+@shopify_mcp.tool
+async def get_products(
+    shop: str,
+    user_id: str = "default",
+    limit: int = 50,
+    status: str = "active",
+    search_query: str = ""
+) -> Dict[str, Any]:
+    """Fetch products with inventory information.
+    
+    Args:
+        shop: Shopify store domain
+        user_id: User identifier
+        limit: Maximum products to return (max 250)
+        status: Product status (active, archived, draft)
+        search_query: Search products by title
+        
+    Returns:
+        List of products with variants and inventory
+    """
+    return await _fetch_products(shop, user_id, limit, status, search_query)
 
 
 @shopify_mcp.tool
@@ -1003,6 +1026,100 @@ def _error_html(error: str) -> HTMLResponse:
 </body>
 </html>
 """, status_code=400)
+
+
+# =============================================================================
+# REST Wrapper Endpoints for MCP Router
+# =============================================================================
+# These endpoints wrap the MCP tools as REST API calls for the data sync service
+
+@shopify_mcp.custom_route("/tools/get_orders", methods=["POST"])
+async def rest_get_orders(request: Request):
+    """REST wrapper for get_orders tool."""
+    try:
+        body = await request.json()
+        print(f"🔧 [SHOPIFY] get_orders called with: {body}")
+        result = await _fetch_orders(
+            shop=body.get("shop", ""),
+            user_id=body.get("user_id", "default"),
+            status=body.get("status", "any"),
+            limit=body.get("limit", 50),
+            date_from=body.get("date_from", ""),
+            date_to=body.get("date_to", "")
+        )
+        return JSONResponse(result)
+    except Exception as e:
+        import traceback
+        print(f"❌ [SHOPIFY] get_orders error: {e}")
+        traceback.print_exc()
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@shopify_mcp.custom_route("/tools/get_products", methods=["POST"])
+async def rest_get_products(request: Request):
+    """REST wrapper for get_products tool."""
+    try:
+        body = await request.json()
+        print(f"🔧 [SHOPIFY] get_products called with: {body}")
+        result = await _fetch_products(
+            shop=body.get("shop", ""),
+            user_id=body.get("user_id", "default"),
+            limit=body.get("limit", 50),
+            status=body.get("status", "active"),
+            search_query=body.get("search_query", "")
+        )
+        return JSONResponse(result)
+    except Exception as e:
+        import traceback
+        print(f"❌ [SHOPIFY] get_products error: {e}")
+        traceback.print_exc()
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@shopify_mcp.custom_route("/tools/get_customers", methods=["POST"])
+async def rest_get_customers(request: Request):
+    """REST wrapper for get_customers tool."""
+    try:
+        body = await request.json()
+        result = await get_customers(
+            shop=body.get("shop", ""),
+            user_id=body.get("user_id", "default"),
+            limit=body.get("limit", 50),
+            segment=body.get("segment", "all")
+        )
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@shopify_mcp.custom_route("/tools/get_sales_analytics", methods=["POST"])
+async def rest_get_sales_analytics(request: Request):
+    """REST wrapper for get_sales_analytics tool."""
+    try:
+        body = await request.json()
+        result = await get_sales_analytics(
+            shop=body.get("shop", ""),
+            user_id=body.get("user_id", "default"),
+            date_from=body.get("date_from", ""),
+            date_to=body.get("date_to", "")
+        )
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@shopify_mcp.custom_route("/tools/get_store_dashboard", methods=["POST"])
+async def rest_get_store_dashboard(request: Request):
+    """REST wrapper for get_store_dashboard tool."""
+    try:
+        body = await request.json()
+        result = await get_store_dashboard(
+            shop=body.get("shop", ""),
+            user_id=body.get("user_id", "default")
+        )
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 # =============================================================================

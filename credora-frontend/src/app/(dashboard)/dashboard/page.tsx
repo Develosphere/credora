@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Wallet, PiggyBank, TrendingUp, MoreHorizontal, Plus, ArrowRight, Search, Filter, ChevronDown } from "lucide-react";
+import { Wallet, PiggyBank, TrendingUp, MoreHorizontal, Plus, ArrowRight, Search, Filter, ChevronDown, RefreshCw, Loader2 } from "lucide-react";
 import { useDashboard } from "@/lib/hooks/useDashboard";
+import { pythonApi } from "@/lib/api/client";
 
 function useAnimatedCounter(end: number, duration: number = 2000) {
   const [count, setCount] = useState(0);
@@ -29,7 +30,7 @@ function MainBalanceCard({ amount, change }: { amount: number; change: string })
       {/* Decorative circles */}
       <div className="absolute top-0 right-0 w-28 h-28 bg-white/10 rounded-full -translate-y-1/3 translate-x-1/3" />
       <div className="absolute bottom-0 right-1/4 w-20 h-20 bg-white/5 rounded-full translate-y-1/2" />
-      
+
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-3">
           <div className="p-2.5 rounded-xl bg-black/20 backdrop-blur-sm">
@@ -39,10 +40,10 @@ function MainBalanceCard({ amount, change }: { amount: number; change: string })
             <MoreHorizontal className="h-4 w-4 text-white/60" />
           </button>
         </div>
-        
+
         <p className="text-white font-semibold text-base">My balance</p>
         <p className="text-white/60 text-xs mb-3">Wallet Overview & Spending</p>
-        
+
         <div className="flex items-center gap-2 mb-4">
           <p className="text-[28px] font-bold text-white tracking-tight">
             ${animatedAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -51,7 +52,7 @@ function MainBalanceCard({ amount, change }: { amount: number; change: string })
             {change} ↑
           </span>
         </div>
-        
+
         <button className="text-white/90 text-sm font-medium hover:text-white transition-colors">
           See details
         </button>
@@ -61,8 +62,8 @@ function MainBalanceCard({ amount, change }: { amount: number; change: string })
 }
 
 // Dark Card (Savings & Investment)
-function DarkBalanceCard({ title, subtitle, amount, change, icon: Icon, actionText, iconBg }: { 
-  title: string; subtitle: string; amount: number; change: string; icon: any; actionText: string; iconBg: string 
+function DarkBalanceCard({ title, subtitle, amount, change, icon: Icon, actionText, iconBg }: {
+  title: string; subtitle: string; amount: number; change: string; icon: any; actionText: string; iconBg: string
 }) {
   const animatedAmount = useAnimatedCounter(amount, 2000);
   return (
@@ -75,10 +76,10 @@ function DarkBalanceCard({ title, subtitle, amount, change, icon: Icon, actionTe
           <MoreHorizontal className="h-4 w-4 text-gray-500" />
         </button>
       </div>
-      
+
       <p className="text-white font-semibold text-base">{title}</p>
       <p className="text-gray-500 text-xs mb-3">{subtitle}</p>
-      
+
       <div className="flex items-center gap-2 mb-4">
         <p className="text-[28px] font-bold text-white tracking-tight">
           ${animatedAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -87,7 +88,7 @@ function DarkBalanceCard({ title, subtitle, amount, change, icon: Icon, actionTe
           {change} ↑
         </span>
       </div>
-      
+
       <button className="text-gray-400 text-sm font-medium hover:text-white transition-colors flex items-center gap-1.5 group">
         {actionText}
         <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
@@ -97,8 +98,8 @@ function DarkBalanceCard({ title, subtitle, amount, change, icon: Icon, actionTe
 }
 
 // Wallet Currency Card
-function WalletCard({ code, amount, limit, flag, isActive = true }: { 
-  code: string; amount: string; limit: string; flag: string; isActive?: boolean 
+function WalletCard({ code, amount, limit, flag, isActive = true }: {
+  code: string; amount: string; limit: string; flag: string; isActive?: boolean
 }) {
   return (
     <div className="p-4 rounded-xl bg-[#1a1a1a] border border-[#282828] hover:border-[#333] transition-all group">
@@ -121,24 +122,24 @@ function WalletCard({ code, amount, limit, flag, isActive = true }: {
 }
 
 // Cash Flow Bar
-function CashFlowBar({ month, value, maxValue, isHighlighted = false, delay = 0 }: { 
-  month: string; value: number; maxValue: number; isHighlighted?: boolean; delay?: number 
+function CashFlowBar({ month, value, maxValue, isHighlighted = false, delay = 0 }: {
+  month: string; value: number; maxValue: number; isHighlighted?: boolean; delay?: number
 }) {
   const [animated, setAnimated] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const height = (value / maxValue) * 100;
-  
-  useEffect(() => { 
-    const timer = setTimeout(() => setAnimated(true), delay); 
-    return () => clearTimeout(timer); 
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimated(true), delay);
+    return () => clearTimeout(timer);
   }, [delay]);
-  
+
   const showTooltip = isHovered || isHighlighted;
-  
+
   return (
-    <div 
-      className="flex flex-col items-center gap-2 flex-1 relative cursor-pointer" 
-      onMouseEnter={() => setIsHovered(true)} 
+    <div
+      className="flex flex-col items-center gap-2 flex-1 relative cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Tooltip */}
@@ -156,31 +157,30 @@ function CashFlowBar({ month, value, maxValue, isHighlighted = false, delay = 0 
           <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#2a2a2a] border-r border-b border-[#3a3a3a] rotate-45" />
         </div>
       )}
-      
+
       <div className="relative h-36 w-full flex items-end justify-center">
         {/* Glow effect for highlighted */}
         {showTooltip && (
           <div className="absolute bottom-0 w-10 h-full bg-gradient-to-t from-credora-orange/20 to-transparent blur-xl rounded-full" />
         )}
-        
-        <div 
+
+        <div
           className={`relative rounded-t-lg overflow-hidden transition-all duration-700 ease-out ${showTooltip ? "w-9" : "w-7"}`}
           style={{ height: animated ? `${height}%` : '0%' }}
         >
           {/* Bar gradient */}
-          <div className={`absolute inset-0 ${
-            showTooltip 
-              ? "bg-gradient-to-t from-[#ff6d06] via-[#ff5500] to-[#ff3d00]" 
+          <div className={`absolute inset-0 ${showTooltip
+              ? "bg-gradient-to-t from-[#ff6d06] via-[#ff5500] to-[#ff3d00]"
               : "bg-gradient-to-t from-[#3a3a3a] to-[#4a4a4a]"
-          }`} />
-          
+            }`} />
+
           {/* Top indicator dot */}
           {showTooltip && animated && (
             <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-credora-orange border-[3px] border-[#121212] shadow-[0_0_10px_rgba(255,109,6,0.5)]" />
           )}
         </div>
       </div>
-      
+
       <span className={`text-xs font-medium ${showTooltip ? "text-white" : "text-gray-500"}`}>
         {month}
       </span>
@@ -189,8 +189,8 @@ function CashFlowBar({ month, value, maxValue, isHighlighted = false, delay = 0 
 }
 
 // Activity Row
-function ActivityRow({ icon, activity, orderId, date, time, price, status }: { 
-  icon: string; activity: string; orderId: string; date: string; time: string; price: string; status: string 
+function ActivityRow({ icon, activity, orderId, date, time, price, status }: {
+  icon: string; activity: string; orderId: string; date: string; time: string; price: string; status: string
 }) {
   return (
     <div className="grid grid-cols-6 gap-4 items-center py-3.5 border-b border-[#252525] hover:bg-[#1a1a1a] transition-colors">
@@ -211,9 +211,23 @@ function ActivityRow({ icon, activity, orderId, date, time, price, status }: {
 }
 
 export default function DashboardPage() {
-  const { data } = useDashboard();
+  const { data, refetch } = useDashboard();
   const [timeFilter, setTimeFilter] = useState("Yearly");
-  
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSync = async () => {
+    setIsSyncing(true);
+    try {
+      await pythonApi.post("/sync/all");
+      // Refetch dashboard data after sync
+      await refetch();
+    } catch (error) {
+      console.error("Failed to sync data:", error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const cashFlowData = [
     { month: "Jan", value: 22 },
     { month: "Feb", value: 28 },
@@ -237,8 +251,17 @@ export default function DashboardPage() {
           <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1e1e1e] border border-[#2a2a2a] text-gray-300 text-sm font-medium hover:border-[#3a3a3a] transition-colors">
             This Month <ChevronDown className="h-4 w-4" />
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1e1e1e] border border-[#2a2a2a] text-gray-300 text-sm font-medium hover:border-[#3a3a3a] transition-colors">
-            <span className="text-credora-orange">↻</span> Reset Data
+          <button
+            onClick={handleSync}
+            disabled={isSyncing}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1e1e1e] border border-[#2a2a2a] text-gray-300 text-sm font-medium hover:border-[#3a3a3a] transition-colors disabled:opacity-50"
+          >
+            {isSyncing ? (
+              <Loader2 className="h-4 w-4 animate-spin text-credora-orange" />
+            ) : (
+              <RefreshCw className="h-4 w-4 text-credora-orange" />
+            )}
+            {isSyncing ? "Syncing..." : "Sync Data"}
           </button>
         </div>
       </div>
@@ -246,21 +269,21 @@ export default function DashboardPage() {
       {/* Balance Cards Row */}
       <div className="grid grid-cols-3 gap-4">
         <MainBalanceCard amount={data?.revenue || 28520.30} change="+15%" />
-        <DarkBalanceCard 
-          title="Savings account" 
-          subtitle="Steady Growth Savings" 
-          amount={data?.netProfit || 24800.45} 
-          change="+3.2%" 
-          icon={PiggyBank} 
+        <DarkBalanceCard
+          title="Savings account"
+          subtitle="Steady Growth Savings"
+          amount={data?.netProfit || 24800.45}
+          change="+3.2%"
+          icon={PiggyBank}
           actionText="View summary"
           iconBg="bg-[#3a3a3a]"
         />
-        <DarkBalanceCard 
-          title="Investment portfolio" 
-          subtitle="Track Your Wealth Growth" 
-          amount={70120.78} 
-          change="+6.7%" 
-          icon={TrendingUp} 
+        <DarkBalanceCard
+          title="Investment portfolio"
+          subtitle="Track Your Wealth Growth"
+          amount={70120.78}
+          change="+6.7%"
+          icon={TrendingUp}
           actionText="Analyze performance"
           iconBg="bg-[#3a3a3a]"
         />
@@ -279,7 +302,7 @@ export default function DashboardPage() {
               <Plus className="h-4 w-4" /> Add New
             </button>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             <WalletCard code="USD" amount="$24,678.00" limit="Limit is $10k a month" flag="🇺🇸" isActive={true} />
             <WalletCard code="EUR" amount="€28,345.00" limit="Limit is €8k a month" flag="🇪🇺" isActive={true} />
@@ -296,29 +319,27 @@ export default function DashboardPage() {
               <p className="text-3xl font-bold text-white mt-1">$540,323.45</p>
             </div>
             <div className="flex items-center gap-1 bg-[#282828] rounded-full p-1">
-              <button 
-                onClick={() => setTimeFilter("Monthly")} 
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  timeFilter === "Monthly" 
-                    ? "bg-[#1e1e1e] text-white" 
+              <button
+                onClick={() => setTimeFilter("Monthly")}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${timeFilter === "Monthly"
+                    ? "bg-[#1e1e1e] text-white"
                     : "text-gray-400 hover:text-white"
-                }`}
+                  }`}
               >
                 Monthly
               </button>
-              <button 
-                onClick={() => setTimeFilter("Yearly")} 
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  timeFilter === "Yearly" 
-                    ? "bg-credora-orange text-white" 
+              <button
+                onClick={() => setTimeFilter("Yearly")}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${timeFilter === "Yearly"
+                    ? "bg-credora-orange text-white"
                     : "text-gray-400 hover:text-white"
-                }`}
+                  }`}
               >
                 Yearly
               </button>
             </div>
           </div>
-          
+
           {/* Chart */}
           <div className="flex mt-6">
             <div className="flex flex-col justify-between h-36 pr-3 text-right">
@@ -336,13 +357,13 @@ export default function DashboardPage() {
               {/* Bars */}
               <div className="relative flex justify-between h-36 items-end px-1">
                 {cashFlowData.map((item, i) => (
-                  <CashFlowBar 
-                    key={item.month} 
-                    month={item.month} 
-                    value={item.value} 
-                    maxValue={maxCashFlow} 
-                    isHighlighted={item.isHighlighted} 
-                    delay={i * 100} 
+                  <CashFlowBar
+                    key={item.month}
+                    month={item.month}
+                    value={item.value}
+                    maxValue={maxCashFlow}
+                    isHighlighted={item.isHighlighted}
+                    delay={i * 100}
                   />
                 ))}
               </div>
@@ -358,10 +379,10 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <input 
-                type="text" 
-                placeholder="Search" 
-                className="w-44 bg-[#282828] border border-[#333] rounded-xl py-2 pl-9 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-credora-orange/50 transition-colors" 
+              <input
+                type="text"
+                placeholder="Search"
+                className="w-44 bg-[#282828] border border-[#333] rounded-xl py-2 pl-9 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-credora-orange/50 transition-colors"
               />
             </div>
             <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#282828] border border-[#333] text-gray-400 text-sm font-medium hover:border-[#444] transition-colors">
@@ -369,14 +390,14 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
-        
+
         {/* Table Header */}
         <div className="grid grid-cols-6 gap-4 py-3 border-b border-[#282828]">
           {['Activity', 'Order ID', 'Date', 'Time', 'Price', 'Status'].map(header => (
             <span key={header} className="text-gray-500 text-xs font-medium uppercase tracking-wide">{header}</span>
           ))}
         </div>
-        
+
         {/* Table Rows */}
         <ActivityRow icon="◎" activity="Software License" orderId="INV_000076" date="17 Apr, 2026" time="03:45 PM" price="$25,500" status="Completed" />
         <ActivityRow icon="✈" activity="Flight Ticket" orderId="INV_000075" date="16 Apr, 2026" time="11:20 AM" price="$1,250" status="Completed" />

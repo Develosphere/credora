@@ -22,6 +22,8 @@ import {
   Facebook,
   Chrome,
   AlertTriangle,
+  X,
+  Store,
 } from "lucide-react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { platformsApi } from "@/lib/api/platforms";
@@ -78,12 +80,12 @@ interface UserPreferences {
 export default function SettingsPage() {
   const router = useRouter();
   const { user, isLoading: isAuthLoading, logout, isLoggingOut } = useAuth();
-  
+
   // Platform connection state
   const [platformStatuses, setPlatformStatuses] = useState<PlatformStatus[]>([]);
   const [isLoadingPlatforms, setIsLoadingPlatforms] = useState(true);
   const [reconnectingPlatform, setReconnectingPlatform] = useState<PlatformType | null>(null);
-  
+
   // Preferences state
   const [preferences, setPreferences] = useState<UserPreferences>({
     currency: "USD",
@@ -91,11 +93,16 @@ export default function SettingsPage() {
   });
   const [isSavingPreferences, setIsSavingPreferences] = useState(false);
   const [preferencesSaved, setPreferencesSaved] = useState(false);
-  
+
   // Account deletion state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+
+  // Shopify modal state
+  const [showShopifyModal, setShowShopifyModal] = useState(false);
+  const [shopDomain, setShopDomain] = useState("");
+  const [shopDomainError, setShopDomainError] = useState("");
 
   // Fetch platform statuses on mount
   useEffect(() => {
@@ -127,12 +134,55 @@ export default function SettingsPage() {
   };
 
   const handleReconnect = async (platform: PlatformType) => {
+    // For Shopify, show modal to get store domain
+    if (platform === "shopify") {
+      setShowShopifyModal(true);
+      setShopDomain("");
+      setShopDomainError("");
+      return;
+    }
+
     setReconnectingPlatform(platform);
     try {
       const { redirectUrl } = await platformsApi.initiateOAuth(platform);
       window.location.href = redirectUrl;
     } catch (error) {
       console.error(`Failed to reconnect ${platform}:`, error);
+      setReconnectingPlatform(null);
+    }
+  };
+
+  const handleShopifyConnect = async () => {
+    // Validate shop domain
+    let domain = shopDomain.trim().toLowerCase();
+
+    // Remove https:// or http:// if present
+    domain = domain.replace(/^https?:\/\//, "");
+
+    // Remove trailing slash
+    domain = domain.replace(/\/$/, "");
+
+    // Add .myshopify.com if not present
+    if (!domain.includes(".myshopify.com")) {
+      domain = `${domain}.myshopify.com`;
+    }
+
+    // Validate format
+    const shopifyDomainRegex = /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/;
+    if (!shopifyDomainRegex.test(domain)) {
+      setShopDomainError("Please enter a valid Shopify store URL (e.g., your-store.myshopify.com)");
+      return;
+    }
+
+    setShopDomainError("");
+    setShowShopifyModal(false);
+    setReconnectingPlatform("shopify");
+
+    try {
+      const { redirectUrl } = await platformsApi.initiateOAuth("shopify", domain);
+      window.location.href = redirectUrl;
+    } catch (error) {
+      console.error("Failed to connect Shopify:", error);
       setReconnectingPlatform(null);
     }
   };
@@ -167,7 +217,7 @@ export default function SettingsPage() {
 
   const handleDeleteAccount = async () => {
     if (deleteConfirmation !== "DELETE") return;
-    
+
     setIsDeleting(true);
     try {
       // Account deletion endpoint not yet implemented on backend
@@ -204,7 +254,7 @@ export default function SettingsPage() {
           <User className="h-5 w-5 text-credora-orange" />
           <h2 className="text-lg font-semibold text-white">Profile</h2>
         </div>
-        
+
         <div className="flex items-center gap-4">
           {user?.picture ? (
             <img
@@ -233,7 +283,7 @@ export default function SettingsPage() {
           <Link2 className="h-5 w-5 text-credora-orange" />
           <h2 className="text-lg font-semibold text-white">Connected Platforms</h2>
         </div>
-        
+
         {isLoadingPlatforms ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -348,7 +398,7 @@ export default function SettingsPage() {
           <Globe className="h-5 w-5 text-credora-orange" />
           <h2 className="text-lg font-semibold text-white">Preferences</h2>
         </div>
-        
+
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -409,13 +459,13 @@ export default function SettingsPage() {
           <Trash2 className="h-5 w-5 text-red-400" />
           <h2 className="text-lg font-semibold text-red-400">Danger Zone</h2>
         </div>
-        
+
         <p className="text-sm text-gray-400 mb-4">
           Once you delete your account, there is no going back. All your data,
           including connected platforms, chat history, and preferences will be
           permanently deleted.
         </p>
-        
+
         <button
           onClick={() => setShowDeleteModal(true)}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500 text-red-400 hover:bg-red-500/10 transition-all duration-200 font-medium"
@@ -435,12 +485,12 @@ export default function SettingsPage() {
               </div>
               <h3 className="text-lg font-semibold text-white">Delete Account</h3>
             </div>
-            
+
             <p className="text-sm text-gray-400 mb-4">
               This action cannot be undone. This will permanently delete your
               account and remove all associated data from our servers.
             </p>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Type <span className="font-mono text-red-400">DELETE</span> to confirm
@@ -453,7 +503,7 @@ export default function SettingsPage() {
                 placeholder="DELETE"
               />
             </div>
-            
+
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => {
@@ -476,6 +526,73 @@ export default function SettingsPage() {
                 )}
                 Delete Account
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shopify Store Domain Modal */}
+      {showShopifyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl animate-scale-in">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10">
+                  <Store className="h-5 w-5 text-green-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">Connect Shopify Store</h3>
+              </div>
+              <button
+                onClick={() => setShowShopifyModal(false)}
+                className="p-2 hover:bg-[#333] rounded-lg transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-400 mb-4">
+              Enter your Shopify store URL to connect your store data.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Store URL
+                </label>
+                <div className="flex">
+                  <input
+                    type="text"
+                    value={shopDomain}
+                    onChange={(e) => setShopDomain(e.target.value)}
+                    placeholder="your-store"
+                    className="flex-1 px-4 py-2.5 border border-[#333] rounded-l-xl bg-[#282828] text-white text-sm focus:outline-none focus:ring-2 focus:ring-credora-orange/20 focus:border-credora-orange/50 transition-all duration-200"
+                  />
+                  <span className="px-4 py-2.5 bg-[#333] border border-l-0 border-[#333] rounded-r-xl text-gray-500 text-sm flex items-center">
+                    .myshopify.com
+                  </span>
+                </div>
+                {shopDomainError && (
+                  <p className="mt-1 text-sm text-red-400">{shopDomainError}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Example: my-awesome-store or my-awesome-store.myshopify.com
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setShowShopifyModal(false)}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-[#333] text-gray-300 hover:bg-[#282828] transition-all duration-200 font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleShopifyConnect}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-credora-orange to-credora-red text-white hover:shadow-lg hover:shadow-credora-orange/25 transition-all duration-300 font-medium"
+                >
+                  Connect Store
+                </button>
+              </div>
             </div>
           </div>
         </div>

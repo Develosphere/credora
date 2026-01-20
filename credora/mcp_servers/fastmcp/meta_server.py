@@ -257,16 +257,8 @@ async def oauth_callback(request: Request):
 # MCP Tools - Ad Accounts
 # =============================================================================
 
-@meta_mcp.tool
-async def list_ad_accounts(user_id: str = "default") -> Dict[str, Any]:
-    """List all Meta ad accounts accessible to the user.
-    
-    Args:
-        user_id: User identifier for authentication
-        
-    Returns:
-        List of ad accounts with basic info
-    """
+async def _fetch_ad_accounts(user_id: str = "default") -> Dict[str, Any]:
+    """Core logic for fetching ad accounts - shared by MCP tool and REST endpoint."""
     token_manager = get_token_manager()
     token_data = await token_manager.get_token(user_id, "meta")
     
@@ -295,10 +287,23 @@ async def list_ad_accounts(user_id: str = "default") -> Dict[str, Any]:
                     "balance": float(account.get("balance", 0)) / 100,
                 })
             
-            return {"ad_accounts": accounts, "count": len(accounts)}
+            return {"accounts": accounts, "count": len(accounts)}
             
         except httpx.HTTPStatusError as e:
             return {"error": f"Meta API error: {e.response.status_code} - {e.response.text}"}
+
+
+@meta_mcp.tool
+async def list_ad_accounts(user_id: str = "default") -> Dict[str, Any]:
+    """List all Meta ad accounts accessible to the user.
+    
+    Args:
+        user_id: User identifier for authentication
+        
+    Returns:
+        List of ad accounts with basic info
+    """
+    return await _fetch_ad_accounts(user_id)
 
 
 @meta_mcp.tool
@@ -388,24 +393,13 @@ async def get_account_overview(
 # MCP Tools - Campaigns
 # =============================================================================
 
-@meta_mcp.tool
-async def get_campaigns(
+async def _fetch_campaigns(
     account_id: str,
     user_id: str = "default",
     status_filter: str = "all",
     date_preset: str = "last_30d"
 ) -> Dict[str, Any]:
-    """Get campaigns with performance metrics.
-    
-    Args:
-        account_id: Ad account ID
-        user_id: User identifier
-        status_filter: Filter by status (all, active, paused)
-        date_preset: Date range for metrics
-        
-    Returns:
-        List of campaigns with performance data
-    """
+    """Core logic for fetching campaigns - shared by MCP tool and REST endpoint."""
     token_manager = get_token_manager()
     token_data = await token_manager.get_token(user_id, "meta")
     
@@ -482,6 +476,27 @@ async def get_campaigns(
             
         except httpx.HTTPStatusError as e:
             return {"error": f"Meta API error: {e.response.status_code}"}
+
+
+@meta_mcp.tool
+async def get_campaigns(
+    account_id: str,
+    user_id: str = "default",
+    status_filter: str = "all",
+    date_preset: str = "last_30d"
+) -> Dict[str, Any]:
+    """Get campaigns with performance metrics.
+    
+    Args:
+        account_id: Ad account ID
+        user_id: User identifier
+        status_filter: Filter by status (all, active, paused)
+        date_preset: Date range for metrics
+        
+    Returns:
+        List of campaigns with performance data
+    """
+    return await _fetch_campaigns(account_id, user_id, status_filter, date_preset)
 
 
 # =============================================================================
@@ -1092,6 +1107,63 @@ def _error_html(error: str) -> HTMLResponse:
 </body>
 </html>
 """, status_code=400)
+
+
+# =============================================================================
+# REST Wrapper Endpoints for MCP Router
+# =============================================================================
+# These endpoints wrap the MCP tools as REST API calls for the data sync service
+
+@meta_mcp.custom_route("/tools/list_ad_accounts", methods=["POST"])
+async def rest_list_ad_accounts(request: Request):
+    """REST wrapper for list_ad_accounts tool."""
+    try:
+        body = await request.json()
+        print(f"🔧 [META] list_ad_accounts called with: {body}")
+        result = await _fetch_ad_accounts(
+            user_id=body.get("user_id", "default")
+        )
+        return JSONResponse(result)
+    except Exception as e:
+        import traceback
+        print(f"❌ [META] list_ad_accounts error: {e}")
+        traceback.print_exc()
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@meta_mcp.custom_route("/tools/get_campaigns", methods=["POST"])
+async def rest_get_campaigns(request: Request):
+    """REST wrapper for get_campaigns tool."""
+    try:
+        body = await request.json()
+        print(f"🔧 [META] get_campaigns called with: {body}")
+        result = await _fetch_campaigns(
+            account_id=body.get("account_id", ""),
+            user_id=body.get("user_id", "default"),
+            status_filter=body.get("status_filter", "all"),
+            date_preset=body.get("date_preset", "last_30d")
+        )
+        return JSONResponse(result)
+    except Exception as e:
+        import traceback
+        print(f"❌ [META] get_campaigns error: {e}")
+        traceback.print_exc()
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@meta_mcp.custom_route("/tools/get_account_overview", methods=["POST"])
+async def rest_get_account_overview(request: Request):
+    """REST wrapper for get_account_overview tool."""
+    try:
+        body = await request.json()
+        result = await get_account_overview(
+            account_id=body.get("account_id", ""),
+            user_id=body.get("user_id", "default"),
+            date_preset=body.get("date_preset", "last_30d")
+        )
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 # =============================================================================

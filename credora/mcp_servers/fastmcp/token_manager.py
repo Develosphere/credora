@@ -9,7 +9,7 @@ Uses PostgreSQL (Supabase) for token storage instead of local files.
 
 import os
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Any, List
 from dataclasses import dataclass, asdict
 
@@ -33,7 +33,13 @@ class TokenData:
         """Check if token is expired or will expire soon."""
         if not self.expires_at:
             return False
-        return datetime.now() >= (self.expires_at - timedelta(seconds=buffer_seconds))
+        # Use timezone-aware comparison for database compatibility
+        now = datetime.now(timezone.utc)
+        expires_at = self.expires_at
+        # If expires_at is naive, assume UTC
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        return now >= (expires_at - timedelta(seconds=buffer_seconds))
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage."""
@@ -308,7 +314,7 @@ class TokenManager:
             return TokenData(
                 access_token=data.get("access_token", ""),
                 refresh_token=data.get("refresh_token", token_data.refresh_token),
-                expires_at=datetime.now() + timedelta(seconds=data.get("expires_in", 3600)),
+                expires_at=datetime.now(timezone.utc) + timedelta(seconds=data.get("expires_in", 3600)),
                 platform_user_id=token_data.platform_user_id,
                 scopes=token_data.scopes,
                 metadata=token_data.metadata,
