@@ -9,6 +9,7 @@ Credora is a comprehensive financial planning and analysis (FP&A) platform that 
 - **Cash Flow Forecast** - Multi-scenario projections (conservative, expected, optimistic)
 - **SKU Analytics** - Unit economics and profitability analysis per product
 - **Campaign Performance** - Ad campaign ranking and ROAS analysis
+- **Competitor Analysis** - 🆕 AI-powered competitor intelligence with automated web scraping
 - **AI Chat Assistant** - Natural language queries about your financial data
 - **Platform Integrations** - Connect Shopify, Google Ads, and Meta Ads
 
@@ -43,6 +44,8 @@ The system consists of 4 main components:
 - **Node.js 18+** with npm
 - **Java 17+** with Maven
 - **PostgreSQL** database (Supabase recommended)
+- **Playwright** (for competitor analysis web scraping)
+- **OpenAI API Key** (for AI-powered analysis)
 
 ## Project Structure
 
@@ -95,6 +98,9 @@ cd credora
 # Install Python dependencies
 uv sync
 
+# Install Playwright browsers (for competitor analysis)
+uv run playwright install chromium
+
 # Install frontend dependencies
 cd credora-frontend
 npm install
@@ -119,6 +125,9 @@ Required environment variables:
 ```env
 # Database
 DATABASE_URL=postgresql://user:password@host:5432/database
+
+# OpenAI API (for AI features including competitor analysis)
+OPENAI_API_KEY=your_openai_api_key
 
 # OpenRouter API (for AI features)
 OPENROUTER_API_KEY=your_openrouter_api_key
@@ -222,6 +231,38 @@ The frontend runs on **http://localhost:3000**
 3. Connect your platforms (Shopify, Google Ads, Meta Ads) in Settings
 4. View your dashboard, P&L, forecasts, and more
 
+### 🆕 Using Competitor Analysis
+
+The competitor analysis feature helps you understand your market competition:
+
+1. Navigate to **http://localhost:3000/competitor**
+2. Fill in the analysis form:
+   - **Business Type**: e.g., "perfume", "restaurant", "clothing"
+   - **City**: Target location (e.g., "Karachi", "Lahore")
+   - **Max Competitors**: Number of competitors to analyze (3-10 recommended)
+   - **Visible Browser**: Check to watch the analysis in real-time
+3. Click **"Analyze Competitors"**
+4. View results and download the generated report
+
+**Quick Test (Backend Only):**
+```bash
+# Terminal 1: Start API
+python start_api.py
+
+# Terminal 2: Run test
+python test_competitor_auto.py
+```
+
+**API Usage:**
+```bash
+curl -X POST http://localhost:8000/competitor/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"business_type":"perfume","city":"Karachi","max_competitors":3,"visible_browser":true}'
+```
+
+📖 **Detailed Guide**: See `COMPETITOR_ANALYSIS_SETUP.md` for complete setup instructions  
+⚡ **Quick Reference**: See `QUICK_START.md` for essential commands
+
 ## API Endpoints
 
 ### Python API (Port 8000)
@@ -236,6 +277,7 @@ The frontend runs on **http://localhost:3000**
 | `/fpa/forecast` | GET | Get cash flow forecast |
 | `/fpa/sku-analysis` | GET | Get SKU analytics |
 | `/fpa/campaigns` | GET | Get campaign rankings |
+| `/competitor/analyze` | POST | 🆕 Analyze competitors with AI |
 | `/platforms/status` | GET | Get platform connection status |
 | `/platforms/{platform}/oauth` | GET | Initiate platform OAuth |
 | `/health` | GET | Health check |
