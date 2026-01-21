@@ -1,12 +1,13 @@
 "use client";
 
 /**
- * Chat Message Component
+ * Chat Message Component - Modern Design
  * Renders individual chat messages with markdown support and source attribution
  * Requirements: 12.4, 12.6
  */
 
-import { User, MessageSquare, ExternalLink, FileText } from "lucide-react";
+import Image from "next/image";
+import { User, Bot, ExternalLink, FileText, Sparkles } from "lucide-react";
 import type { ChatMessage as ChatMessageType, DataSource } from "@/lib/api/types";
 
 interface ChatMessageProps {
@@ -18,30 +19,44 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
   return (
     <div
-      className={`flex items-start gap-3 animate-fade-in ${isUser ? "flex-row-reverse" : ""}`}
+      className={`flex items-start gap-4 animate-fade-in ${isUser ? "flex-row-reverse" : ""}`}
     >
       {/* Avatar */}
       <div
-        className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm transition-transform duration-300 hover:scale-110 ${
-          isUser ? "bg-gray-100" : "bg-gradient-to-br from-primary to-secondary"
+        className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg transition-all duration-300 hover:scale-110 ${
+          isUser 
+            ? "bg-white/10 border border-white/20" 
+            : "bg-gradient-to-br from-primary to-secondary shadow-primary/30 p-2"
         }`}
       >
         {isUser ? (
-          <User className="h-4 w-4 text-gray-600" />
+          <User className="h-5 w-5 text-white" />
         ) : (
-          <MessageSquare className="h-4 w-4 text-white" />
+          <div className="relative w-full h-full">
+            <Image
+              src="/images/circlelogo.png"
+              alt="AI"
+              fill
+              className="object-contain"
+            />
+          </div>
         )}
       </div>
 
       {/* Message Content */}
       <div
-        className={`flex flex-col max-w-[80%] ${isUser ? "items-end" : "items-start"}`}
+        className={`flex flex-col max-w-[75%] ${isUser ? "items-end" : "items-start"}`}
       >
+        {/* Role Label */}
+        <span className="text-xs font-medium text-gray-500 mb-2">
+          {isUser ? "You" : "AI Assistant"}
+        </span>
+
         <div
-          className={`rounded-2xl px-4 py-3 shadow-sm transition-all duration-300 hover:shadow-md ${
+          className={`rounded-2xl px-5 py-4 shadow-lg transition-all duration-300 hover:shadow-xl ${
             isUser
-              ? "bg-gradient-to-r from-primary to-secondary text-white"
-              : "bg-white/80 backdrop-blur-sm border border-gray-100 text-gray-900"
+              ? "bg-gradient-to-br from-primary to-secondary text-white"
+              : "bg-[#2a2a2a]/80 backdrop-blur-xl border border-white/10 text-white"
           }`}
         >
           <MessageContent content={message.content} isUser={isUser} />
@@ -53,7 +68,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         )}
 
         {/* Timestamp */}
-        <span className="text-xs text-gray-400 mt-1.5">
+        <span className="text-xs text-gray-500 mt-2">
           {formatTimestamp(message.timestamp)}
         </span>
       </div>
@@ -73,7 +88,7 @@ function MessageContent({
 }) {
   // Simple markdown-like rendering for assistant messages
   if (isUser) {
-    return <p className="text-sm whitespace-pre-wrap">{content}</p>;
+    return <p className="text-sm whitespace-pre-wrap leading-relaxed">{content}</p>;
   }
 
   // Parse and render markdown-like content
@@ -95,7 +110,7 @@ function MessageContent({
         elements.push(
           <pre
             key={`code-${index}`}
-            className="bg-gray-800 text-gray-100 rounded p-3 my-2 overflow-x-auto text-xs"
+            className="bg-black/40 border border-white/10 text-gray-100 rounded-xl p-4 my-3 overflow-x-auto text-xs font-mono"
           >
             <code>{codeContent.join("\n")}</code>
           </pre>
@@ -114,7 +129,7 @@ function MessageContent({
     // Headers
     if (line.startsWith("### ")) {
       elements.push(
-        <h4 key={index} className="font-semibold text-sm mt-3 mb-1">
+        <h4 key={index} className="font-semibold text-sm mt-4 mb-2 text-primary">
           {line.slice(4)}
         </h4>
       );
@@ -122,7 +137,7 @@ function MessageContent({
     }
     if (line.startsWith("## ")) {
       elements.push(
-        <h3 key={index} className="font-semibold text-base mt-3 mb-1">
+        <h3 key={index} className="font-semibold text-base mt-4 mb-2 text-primary">
           {line.slice(3)}
         </h3>
       );
@@ -130,7 +145,7 @@ function MessageContent({
     }
     if (line.startsWith("# ")) {
       elements.push(
-        <h2 key={index} className="font-bold text-lg mt-3 mb-1">
+        <h2 key={index} className="font-bold text-lg mt-4 mb-2 text-primary">
           {line.slice(2)}
         </h2>
       );
@@ -140,7 +155,7 @@ function MessageContent({
     // Bullet points
     if (line.startsWith("- ") || line.startsWith("* ")) {
       elements.push(
-        <li key={index} className="text-sm ml-4 list-disc">
+        <li key={index} className="text-sm ml-4 list-disc text-gray-300 leading-relaxed">
           {renderInlineFormatting(line.slice(2))}
         </li>
       );
@@ -151,7 +166,7 @@ function MessageContent({
     const numberedMatch = line.match(/^(\d+)\.\s/);
     if (numberedMatch) {
       elements.push(
-        <li key={index} className="text-sm ml-4 list-decimal">
+        <li key={index} className="text-sm ml-4 list-decimal text-gray-300 leading-relaxed">
           {renderInlineFormatting(line.slice(numberedMatch[0].length))}
         </li>
       );
@@ -166,13 +181,13 @@ function MessageContent({
 
     // Regular paragraphs
     elements.push(
-      <p key={index} className="text-sm">
+      <p key={index} className="text-sm text-gray-300 leading-relaxed">
         {renderInlineFormatting(line)}
       </p>
     );
   });
 
-  return <div className="space-y-1">{elements}</div>;
+  return <div className="space-y-2">{elements}</div>;
 }
 
 /**
@@ -187,7 +202,7 @@ function renderInlineFormatting(text: string): React.ReactNode {
       return (
         <code
           key={index}
-          className="bg-gray-200 text-gray-800 px-1 py-0.5 rounded text-xs"
+          className="bg-primary/20 text-primary px-2 py-0.5 rounded-lg text-xs font-mono border border-primary/30"
         >
           {part.slice(1, -1)}
         </code>
@@ -199,7 +214,7 @@ function renderInlineFormatting(text: string): React.ReactNode {
     return boldParts.map((boldPart, boldIndex) => {
       if (boldPart.startsWith("**") && boldPart.endsWith("**")) {
         return (
-          <strong key={`${index}-${boldIndex}`}>
+          <strong key={`${index}-${boldIndex}`} className="font-semibold text-white">
             {boldPart.slice(2, -2)}
           </strong>
         );
@@ -244,21 +259,21 @@ function SourceAttribution({ sources }: { sources: DataSource[] }) {
   };
 
   return (
-    <div className="mt-2 p-3 bg-primary/5 rounded-xl border border-primary/10 backdrop-blur-sm">
-      <div className="flex items-center gap-1.5 text-xs text-primary mb-2">
-        <FileText className="h-3 w-3" />
-        <span className="font-medium">Sources</span>
+    <div className="mt-3 p-4 bg-primary/10 backdrop-blur-xl rounded-xl border border-primary/20">
+      <div className="flex items-center gap-2 text-xs text-primary mb-3">
+        <FileText className="h-3.5 w-3.5" />
+        <span className="font-semibold">Data Sources</span>
       </div>
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         {sources.map((source, index) => (
           <a
             key={index}
             href={getSourceLink(source.type)}
-            className="flex items-center gap-2 text-xs text-gray-600 hover:text-primary transition-colors duration-200 group"
+            className="flex items-center gap-2.5 text-xs text-gray-300 hover:text-primary transition-all duration-200 group p-2 rounded-lg hover:bg-white/5"
           >
-            <span>{getSourceIcon(source.type)}</span>
-            <span className="group-hover:underline">{source.summary || source.reference}</span>
-            <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+            <span className="text-base">{getSourceIcon(source.type)}</span>
+            <span className="group-hover:underline flex-1">{source.summary || source.reference}</span>
+            <ExternalLink className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
           </a>
         ))}
       </div>

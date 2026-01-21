@@ -234,7 +234,11 @@ QUERY_INTENTS = {
     "rag_search": [
         "search", "find", "what products", "show orders", "list",
         "campaign performance", "best selling", "top products",
-        "recent orders", "ad campaigns"
+        "recent orders", "ad campaigns", "products", "orders",
+        "campaigns", "inventory", "catalog", "which products",
+        "which campaigns", "which orders", "show me products",
+        "show me orders", "show me campaigns", "what are our",
+        "do we sell", "do we have"
     ],
     "analytics": [
         "analyze", "analysis", "trend", "pattern", "why did",
