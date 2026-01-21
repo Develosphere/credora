@@ -1,12 +1,13 @@
 "use client";
 
 /**
- * Chat Window Component
+ * Chat Window Component - Modern Design
  * Displays message history with auto-scroll to latest message
  */
 
 import { useEffect, useRef } from "react";
-import { MessageSquare, Loader2, Sparkles } from "lucide-react";
+import Image from "next/image";
+import { MessageSquare, Loader2, Sparkles, Zap, TrendingUp, DollarSign } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { useChatStore } from "@/lib/store/chatStore";
 import { cn } from "@/lib/utils";
@@ -29,10 +30,10 @@ export function ChatWindow({ className = "" }: ChatWindowProps) {
   if (!isHistoryLoaded) {
     return (
       <div className={`flex flex-col items-center justify-center h-full ${className}`}>
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-credora-orange to-credora-red text-white shadow-glow animate-pulse">
-          <Loader2 className="h-6 w-6 animate-spin" />
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary text-white shadow-lg shadow-primary/30 animate-pulse">
+          <Loader2 className="h-8 w-8 animate-spin" />
         </div>
-        <p className="text-sm text-gray-500 mt-4">Loading conversation...</p>
+        <p className="text-sm text-gray-400 mt-4">Loading conversation...</p>
       </div>
     );
   }
@@ -40,18 +41,46 @@ export function ChatWindow({ className = "" }: ChatWindowProps) {
   if (messages.length === 0) {
     return (
       <div className={`flex flex-col items-center justify-center h-full px-4 ${className}`}>
-        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-credora-orange to-credora-red flex items-center justify-center mb-6 shadow-glow animate-float">
-          <Sparkles className="h-10 w-10 text-white" />
+        {/* AI Icon with Logo */}
+        <div className="relative">
+          <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-6 shadow-2xl shadow-primary/30 animate-float p-4">
+            <div className="relative w-full h-full">
+              <Image
+                src="/images/circlelogo.png"
+                alt="Credora AI"
+                fill
+                className="object-contain"
+              />
+            </div>
+          </div>
+          {/* Glow effect */}
+          <div className="absolute inset-0 w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-secondary blur-2xl opacity-50 animate-pulse"></div>
         </div>
-        <h3 className="text-xl font-semibold text-gray-900">Start a conversation</h3>
-        <p className="text-sm text-gray-500 mt-2 text-center max-w-md">
-          Ask me anything about your business finances. I can help with P&L analysis,
-          cash flow forecasting, SKU performance, and more.
+
+        {/* Welcome Text */}
+        <h3 className="text-2xl font-bold text-white mb-2">Welcome to AI CFO</h3>
+        <p className="text-sm text-gray-400 text-center max-w-md mb-8">
+          I'm your AI-powered financial assistant. Ask me anything about your business finances, and I'll provide insights backed by real data.
         </p>
-        <div className="mt-8 flex flex-wrap gap-3 justify-center max-w-lg">
-          <SuggestionChip text="How is my business performing?" />
-          <SuggestionChip text="What's my cash runway?" />
-          <SuggestionChip text="Which SKUs are most profitable?" />
+
+        {/* Suggestion Chips */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl w-full">
+          <SuggestionChip 
+            icon={<TrendingUp className="h-4 w-4" />}
+            text="How is my business performing?" 
+          />
+          <SuggestionChip 
+            icon={<DollarSign className="h-4 w-4" />}
+            text="What's my cash runway?" 
+          />
+          <SuggestionChip 
+            icon={<Zap className="h-4 w-4" />}
+            text="Which SKUs are most profitable?" 
+          />
+          <SuggestionChip 
+            icon={<MessageSquare className="h-4 w-4" />}
+            text="Analyze my ad campaign performance" 
+          />
         </div>
       </div>
     );
@@ -62,7 +91,7 @@ export function ChatWindow({ className = "" }: ChatWindowProps) {
       ref={containerRef}
       className={`flex flex-col overflow-y-auto ${className}`}
     >
-      <div className="flex-1 space-y-4 p-4">
+      <div className="flex-1 space-y-6 p-6">
         {messages.map((message, index) => (
           <div
             key={message.id}
@@ -74,17 +103,24 @@ export function ChatWindow({ className = "" }: ChatWindowProps) {
         ))}
         
         {isLoading && (
-          <div className="flex items-start gap-3 animate-fade-in">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-credora-orange to-credora-red flex items-center justify-center flex-shrink-0 shadow-glow">
-              <Sparkles className="h-5 w-5 text-white" />
-            </div>
-            <div className="glass-card rounded-xl px-4 py-3 flex items-center gap-2">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 rounded-full bg-credora-orange animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 rounded-full bg-credora-orange animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 rounded-full bg-credora-orange animate-bounce" style={{ animationDelay: '300ms' }} />
+          <div className="flex items-start gap-4 animate-fade-in">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30 p-2">
+              <div className="relative w-full h-full">
+                <Image
+                  src="/images/circlelogo.png"
+                  alt="AI"
+                  fill
+                  className="object-contain"
+                />
               </div>
-              <span className="text-sm text-gray-500 ml-2">Thinking...</span>
+            </div>
+            <div className="bg-[#2a2a2a]/80 backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-4 flex items-center gap-3">
+              <div className="flex gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+              <span className="text-sm text-gray-400 ml-2">AI is thinking...</span>
             </div>
           </div>
         )}
@@ -95,7 +131,7 @@ export function ChatWindow({ className = "" }: ChatWindowProps) {
   );
 }
 
-function SuggestionChip({ text }: { text: string }) {
+function SuggestionChip({ text, icon }: { text: string; icon: React.ReactNode }) {
   const { addMessage } = useChatStore();
 
   const handleClick = () => {
@@ -111,14 +147,23 @@ function SuggestionChip({ text }: { text: string }) {
     <button
       onClick={handleClick}
       className={cn(
-        "px-4 py-2 text-sm font-medium rounded-xl",
-        "bg-white border border-gray-200",
-        "text-gray-700 hover:text-credora-orange",
-        "hover:border-credora-orange/30 hover:bg-primary-light",
-        "transition-all duration-200 hover:translate-y-[-2px] hover:shadow-card"
+        "group relative px-5 py-4 text-sm font-medium rounded-xl overflow-hidden",
+        "bg-white/5 backdrop-blur-sm border border-white/10",
+        "text-gray-300 hover:text-white",
+        "hover:border-primary/50 hover:bg-white/10",
+        "transition-all duration-300 hover:translate-y-[-2px] hover:shadow-lg hover:shadow-primary/20",
+        "text-left"
       )}
     >
-      {text}
+      {/* Glow effect on hover */}
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      
+      <div className="relative z-10 flex items-center gap-3">
+        <div className="p-2 rounded-lg bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+          {icon}
+        </div>
+        <span>{text}</span>
+      </div>
     </button>
   );
 }

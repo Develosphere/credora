@@ -275,26 +275,33 @@ export default function CompetitorAnalysisPage() {
                 <button
                   type="submit"
                   disabled={isLoading || !isFormValid}
-                  className="flex-1 px-6 py-3.5 bg-gradient-to-r from-credora-orange to-credora-red text-white rounded-xl font-medium hover:shadow-lg hover:shadow-credora-orange/25 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 flex items-center justify-center gap-2"
+                  className="group relative flex-1 px-6 py-3.5 bg-gradient-to-r from-credora-orange to-credora-red text-white rounded-xl font-medium overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-2xl hover:shadow-credora-orange/30 hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100 disabled:hover:shadow-none"
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      {formData.visibleBrowser ? "Analyzing (Browser Open)..." : "Analyzing Competitors..."}
-                    </>
-                  ) : (
-                    <>
-                      <TrendingUp className="h-5 w-5" />
-                      Start Analysis
-                    </>
+                  {/* Shine effect */}
+                  {!isLoading && isFormValid && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                   )}
+                  
+                  <div className="relative z-10 flex items-center gap-2">
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        {formData.visibleBrowser ? "Analyzing (Browser Open)..." : "Analyzing Competitors..."}
+                      </>
+                    ) : (
+                      <>
+                        <TrendingUp className="h-5 w-5" />
+                        Start Analysis
+                      </>
+                    )}
+                  </div>
                 </button>
                 
                 <button
                   type="button"
                   onClick={handleReset}
                   disabled={isLoading}
-                  className="px-6 py-3.5 bg-[#282828] border border-[#333] text-gray-300 rounded-xl font-medium hover:border-credora-orange/30 hover:text-credora-orange transition-all duration-200 disabled:opacity-50"
+                  className="px-6 py-3.5 bg-[#282828] border-2 border-[#333] text-gray-300 rounded-xl font-medium hover:border-credora-orange/50 hover:text-white hover:bg-[#2a2a2a] transition-all duration-200 disabled:opacity-50 hover:scale-105 active:scale-95"
                 >
                   Reset
                 </button>
