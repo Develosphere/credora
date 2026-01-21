@@ -1,15 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { useState, useEffect } from "react";
 import { 
   Users, 
   Search, 
@@ -19,9 +10,11 @@ import {
   CheckCircle, 
   Loader2,
   Eye,
-  Download,
-  ExternalLink,
-  Clock
+  EyeOff,
+  Clock,
+  Sparkles,
+  Target,
+  Zap
 } from "lucide-react";
 import { 
   BUSINESS_CATEGORIES, 
@@ -50,7 +43,12 @@ export default function CompetitorAnalysisPage() {
     visibleBrowser: false,
   });
 
+  const [isAnimating, setIsAnimating] = useState(false);
   const { isLoading, error, result, analyze, reset: resetAnalysis } = useCompetitorAnalysis();
+
+  useEffect(() => {
+    setIsAnimating(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +57,6 @@ export default function CompetitorAnalysisPage() {
       return;
     }
 
-    // Convert form data to API request
     const request: CompetitorAnalysisRequest = {
       business_type: formatBusinessType(formData.businessType),
       city: formData.city,
@@ -67,20 +64,6 @@ export default function CompetitorAnalysisPage() {
       generate_report: formData.generateReport,
       visible_browser: formData.visibleBrowser,
     };
-
-    // Debug logging
-    console.log("🔍 Frontend Debug - Form Data:", formData);
-    console.log("🔍 Frontend Debug - API Request:", request);
-    console.log("🔍 Frontend Debug - Visible Browser:", formData.visibleBrowser, "->", request.visible_browser);
-    
-    // Alert for immediate feedback
-    if (formData.visibleBrowser) {
-      console.log("🎯 VISIBLE BROWSER MODE - Browser should open during analysis!");
-      alert("🎯 Visible Browser Mode Enabled!\nA browser window should open during analysis.\nWatch your screen!");
-    } else {
-      console.log("🔇 Headless mode - no browser will be visible");
-      alert("🔇 Headless Mode\nAnalysis will run in background without visible browser.");
-    }
 
     await analyze(request);
   };
@@ -101,326 +84,291 @@ export default function CompetitorAnalysisPage() {
   const isFormValid = formData.businessName.trim() && formData.businessType;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Competitor Analysis</h1>
-          <p className="text-muted-foreground">
-            Analyze your competitors and discover strategies to outperform them
+        <div className={`${isAnimating ? 'animate-slide-in-left' : 'opacity-0'}`}>
+          <h1 className="text-2xl font-bold text-white">Competitor Analysis</h1>
+          <p className="text-gray-400 mt-1">
+            Discover and analyze your competitors with AI-powered insights
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Users className="h-8 w-8 text-primary" />
+        <div className={`flex items-center gap-2 ${isAnimating ? 'animate-scale-in' : 'opacity-0'}`}>
+          <div className="p-3 rounded-xl bg-gradient-to-br from-credora-orange to-credora-red">
+            <Users className="h-6 w-6 text-white" />
+          </div>
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Analysis Form */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Search className="h-5 w-5" />
-                Business Information
-              </CardTitle>
-              <CardDescription>
-                Enter your business details to find and analyze competitors
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Business Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="businessName">
-                    Business Name <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="businessName"
-                    placeholder="e.g., Scents & Stories"
-                    value={formData.businessName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
-                    disabled={isLoading}
-                  />
-                </div>
+        <div className="lg:col-span-2 space-y-6">
+          {/* Main Form Card */}
+          <div className="rounded-2xl bg-[#1e1e1e] border border-[#2a2a2a] p-6 transition-all duration-300 hover:border-credora-orange/30">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-lg bg-credora-orange/10">
+                <Search className="h-5 w-5 text-credora-orange" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-white">Business Information</h2>
+                <p className="text-sm text-gray-500">Enter your business details to find competitors</p>
+              </div>
+            </div>
 
-                {/* Business Category */}
-                <div className="space-y-2">
-                  <Label htmlFor="businessType">
-                    Business Category <span className="text-red-500">*</span>
-                  </Label>
-                  <Select
-                    value={formData.businessType}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, businessType: value }))}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your business category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BUSINESS_CATEGORIES.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Business Name */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Business Name <span className="text-credora-orange">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., Scents & Stories"
+                  value={formData.businessName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 bg-[#282828] border border-[#333] text-white rounded-xl placeholder-gray-500 focus:outline-none focus:border-credora-orange/50 focus:ring-2 focus:ring-credora-orange/20 transition-all duration-200 disabled:opacity-50"
+                />
+              </div>
 
-                {/* City */}
+              {/* Business Category */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Business Category <span className="text-credora-orange">*</span>
+                </label>
+                <select
+                  value={formData.businessType}
+                  onChange={(e) => setFormData(prev => ({ ...prev, businessType: e.target.value }))}
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 bg-[#282828] border border-[#333] text-white rounded-xl focus:outline-none focus:border-credora-orange/50 focus:ring-2 focus:ring-credora-orange/20 transition-all duration-200 disabled:opacity-50"
+                >
+                  <option value="">Select your business category</option>
+                  {BUSINESS_CATEGORIES.map((category) => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* City & Max Competitors Row */}
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="city">Target City</Label>
-                  <Select
+                  <label className="text-sm font-medium text-gray-300">Target City</label>
+                  <select
                     value={formData.city}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
+                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
                     disabled={isLoading}
+                    className="w-full px-4 py-3 bg-[#282828] border border-[#333] text-white rounded-xl focus:outline-none focus:border-credora-orange/50 focus:ring-2 focus:ring-credora-orange/20 transition-all duration-200 disabled:opacity-50"
                   >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PAKISTANI_CITIES.map((city) => (
-                        <SelectItem key={city} value={city}>
-                          {city}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    {PAKISTANI_CITIES.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
                 </div>
 
-                {/* Max Competitors */}
                 <div className="space-y-2">
-                  <Label htmlFor="maxCompetitors">Number of Competitors to Analyze</Label>
-                  <Select
+                  <label className="text-sm font-medium text-gray-300">Competitors to Analyze</label>
+                  <select
                     value={formData.maxCompetitors.toString()}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, maxCompetitors: parseInt(value) }))}
+                    onChange={(e) => setFormData(prev => ({ ...prev, maxCompetitors: parseInt(e.target.value) }))}
                     disabled={isLoading}
+                    className="w-full px-4 py-3 bg-[#282828] border border-[#333] text-white rounded-xl focus:outline-none focus:border-credora-orange/50 focus:ring-2 focus:ring-credora-orange/20 transition-all duration-200 disabled:opacity-50"
                   >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[3, 5, 7, 10].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num} competitors
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    {[3, 5, 7, 10].map((num) => (
+                      <option key={num} value={num}>{num} competitors</option>
+                    ))}
+                  </select>
                 </div>
+              </div>
 
-                <Separator />
+              {/* Divider */}
+              <div className="border-t border-[#2a2a2a] my-6"></div>
 
-                {/* Options */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Analysis Options</h3>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="generateReport"
-                      checked={formData.generateReport}
-                      onCheckedChange={(checked) => 
-                        setFormData(prev => ({ ...prev, generateReport: checked as boolean }))
-                      }
-                      disabled={isLoading}
-                    />
-                    <Label htmlFor="generateReport" className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
+              {/* Options */}
+              <div className="space-y-4">
+                <h3 className="text-base font-semibold text-white flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-credora-orange" />
+                  Analysis Options
+                </h3>
+                
+                {/* Generate Report */}
+                <label className="flex items-center gap-3 p-4 rounded-xl bg-[#282828] border border-[#333] cursor-pointer hover:border-credora-orange/30 transition-all duration-200 group">
+                  <input
+                    type="checkbox"
+                    checked={formData.generateReport}
+                    onChange={(e) => setFormData(prev => ({ ...prev, generateReport: e.target.checked }))}
+                    disabled={isLoading}
+                    className="w-5 h-5 rounded border-[#444] bg-[#1e1e1e] text-credora-orange focus:ring-2 focus:ring-credora-orange/20 transition-all"
+                  />
+                  <div className="flex items-center gap-2 flex-1">
+                    <FileText className="h-4 w-4 text-gray-400 group-hover:text-credora-orange transition-colors" />
+                    <span className="text-sm text-gray-300 group-hover:text-white transition-colors">
                       Generate comprehensive report
-                    </Label>
+                    </span>
                   </div>
+                </label>
 
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id="visibleBrowser"
-                      checked={formData.visibleBrowser}
-                      onChange={(e) => {
-                        console.log("🔍 Native checkbox changed:", e.target.checked);
-                        setFormData(prev => {
-                          const newData = { ...prev, visibleBrowser: e.target.checked };
-                          console.log("🔍 New form data:", newData);
-                          return newData;
-                        });
-                      }}
-                      disabled={isLoading}
-                      className="h-4 w-4"
-                    />
-                    <Label htmlFor="visibleBrowser" className="flex items-center gap-2">
-                      <Eye className="h-4 w-4" />
-                      Show browser during analysis (demo mode)
-                    </Label>
-                  </div>
-                  
-                  {formData.visibleBrowser && (
-                    <Alert>
-                      <Eye className="h-4 w-4" />
-                      <AlertDescription>
-                        🎯 <strong>Visible Browser Mode ENABLED:</strong> A browser window will open and you can watch the analysis happen in real-time as it visits competitor websites.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  
-                  {/* Debug Info */}
-                  <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
-                    🔍 Debug: visibleBrowser = {formData.visibleBrowser ? "TRUE" : "FALSE"}
-                  </div>
-                </div>
-
-                {/* Error Alert */}
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Estimated Duration */}
-                {isFormValid && (
-                  <Alert>
-                    <Clock className="h-4 w-4" />
-                    <AlertDescription>
-                      Estimated analysis time: {estimatedDuration}
-                      {formData.visibleBrowser && " (slower with visible browser)"}
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex gap-3">
-                  <Button 
-                    type="submit" 
-                    disabled={isLoading || !isFormValid}
-                    className="flex-1"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {formData.visibleBrowser ? "Analyzing (Browser Open)..." : "Analyzing Competitors..."}
-                      </>
+                {/* Visible Browser */}
+                <label className="flex items-center gap-3 p-4 rounded-xl bg-[#282828] border border-[#333] cursor-pointer hover:border-credora-orange/30 transition-all duration-200 group">
+                  <input
+                    type="checkbox"
+                    checked={formData.visibleBrowser}
+                    onChange={(e) => setFormData(prev => ({ ...prev, visibleBrowser: e.target.checked }))}
+                    disabled={isLoading}
+                    className="w-5 h-5 rounded border-[#444] bg-[#1e1e1e] text-credora-orange focus:ring-2 focus:ring-credora-orange/20 transition-all"
+                  />
+                  <div className="flex items-center gap-2 flex-1">
+                    {formData.visibleBrowser ? (
+                      <Eye className="h-4 w-4 text-credora-orange transition-colors" />
                     ) : (
-                      <>
-                        <TrendingUp className="mr-2 h-4 w-4" />
-                        Start Analysis
-                      </>
+                      <EyeOff className="h-4 w-4 text-gray-400 group-hover:text-credora-orange transition-colors" />
                     )}
-                  </Button>
-                  
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={handleReset}
-                    disabled={isLoading}
-                  >
-                    Reset
-                  </Button>
-                  
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    onClick={() => {
-                      console.log("🔍 Current form data:", formData);
-                      alert(`Debug Info:\nVisible Browser: ${formData.visibleBrowser}\nBusiness Type: ${formData.businessType}\nCity: ${formData.city}`);
-                    }}
-                    disabled={isLoading}
-                  >
-                    🔍 Debug
-                  </Button>
+                    <span className="text-sm text-gray-300 group-hover:text-white transition-colors">
+                      Show browser during analysis (demo mode)
+                    </span>
+                  </div>
+                </label>
+                
+                {/* Visible Browser Alert */}
+                {formData.visibleBrowser && (
+                  <div className="p-4 rounded-xl bg-credora-orange/10 border border-credora-orange/30 animate-slide-up">
+                    <div className="flex items-start gap-3">
+                      <Eye className="h-5 w-5 text-credora-orange mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-credora-orange">Visible Browser Mode Enabled</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          A browser window will open and you can watch the analysis happen in real-time
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Error Alert */}
+              {error && (
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 animate-slide-up">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-red-400">Analysis Failed</p>
+                      <p className="text-xs text-gray-400 mt-1">{error}</p>
+                    </div>
+                  </div>
                 </div>
-              </form>
-            </CardContent>
-          </Card>
+              )}
+
+              {/* Estimated Duration */}
+              {isFormValid && !isLoading && (
+                <div className="p-4 rounded-xl bg-[#282828] border border-[#333] animate-slide-up">
+                  <div className="flex items-center gap-3">
+                    <Clock className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-400">
+                      Estimated time: <span className="text-white font-medium">{estimatedDuration}</span>
+                      {formData.visibleBrowser && <span className="text-gray-500"> (slower with visible browser)</span>}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={isLoading || !isFormValid}
+                  className="flex-1 px-6 py-3.5 bg-gradient-to-r from-credora-orange to-credora-red text-white rounded-xl font-medium hover:shadow-lg hover:shadow-credora-orange/25 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      {formData.visibleBrowser ? "Analyzing (Browser Open)..." : "Analyzing Competitors..."}
+                    </>
+                  ) : (
+                    <>
+                      <TrendingUp className="h-5 w-5" />
+                      Start Analysis
+                    </>
+                  )}
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  disabled={isLoading}
+                  className="px-6 py-3.5 bg-[#282828] border border-[#333] text-gray-300 rounded-xl font-medium hover:border-credora-orange/30 hover:text-credora-orange transition-all duration-200 disabled:opacity-50"
+                >
+                  Reset
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
 
-        {/* Info Panel */}
+        {/* Info Panels */}
         <div className="space-y-6">
           {/* What We Analyze */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">What We Analyze</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-2 text-sm">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                Pricing strategies
+          <div className="rounded-2xl bg-[#1e1e1e] border border-[#2a2a2a] p-5 transition-all duration-300 hover:border-credora-orange/30 hover:-translate-y-1">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 rounded-lg bg-emerald-500/10">
+                <Target className="h-4 w-4 text-emerald-400" />
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                Discount & promotion tactics
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                Delivery & shipping options
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                Customer reviews & ratings
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                WhatsApp & contact methods
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                Website content & messaging
-              </div>
-            </CardContent>
-          </Card>
+              <h3 className="text-base font-semibold text-white">What We Analyze</h3>
+            </div>
+            <div className="space-y-3">
+              {[
+                "Pricing strategies",
+                "Discount & promotion tactics",
+                "Delivery & shipping options",
+                "Customer reviews & ratings",
+                "WhatsApp & contact methods",
+                "Website content & messaging"
+              ].map((item, index) => (
+                <div key={index} className="flex items-center gap-2.5 text-sm text-gray-400 hover:text-white transition-colors">
+                  <CheckCircle className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* Analysis Process */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Analysis Process</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                  1
-                </div>
-                <div className="text-sm">
-                  <div className="font-medium">Search Competitors</div>
-                  <div className="text-muted-foreground">Find businesses in your category and city</div>
-                </div>
+          <div className="rounded-2xl bg-[#1e1e1e] border border-[#2a2a2a] p-5 transition-all duration-300 hover:border-credora-orange/30 hover:-translate-y-1">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 rounded-lg bg-credora-orange/10">
+                <Zap className="h-4 w-4 text-credora-orange" />
               </div>
-              <div className="flex items-start gap-3">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                  2
+              <h3 className="text-base font-semibold text-white">Analysis Process</h3>
+            </div>
+            <div className="space-y-4">
+              {[
+                { step: 1, title: "Search Competitors", desc: "Find businesses in your category and city" },
+                { step: 2, title: "Scrape Websites", desc: "Extract content and analyze strategies" },
+                { step: 3, title: "AI Analysis", desc: "Generate strategic insights and recommendations" },
+                { step: 4, title: "Generate Report", desc: "Create comprehensive analysis document" }
+              ].map((item) => (
+                <div key={item.step} className="flex items-start gap-3 group">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-credora-orange to-credora-red text-xs font-bold text-white flex-shrink-0 group-hover:scale-110 transition-transform">
+                    {item.step}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-white group-hover:text-credora-orange transition-colors">{item.title}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{item.desc}</div>
+                  </div>
                 </div>
-                <div className="text-sm">
-                  <div className="font-medium">Scrape Websites</div>
-                  <div className="text-muted-foreground">Extract content and analyze strategies</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                  3
-                </div>
-                <div className="text-sm">
-                  <div className="font-medium">AI Analysis</div>
-                  <div className="text-muted-foreground">Generate strategic insights and recommendations</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                  4
-                </div>
-                <div className="text-sm">
-                  <div className="font-medium">Generate Report</div>
-                  <div className="text-muted-foreground">Create comprehensive analysis document</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Results Section */}
       {result && (
-        <CompetitorResults 
-          result={result} 
-          onReset={handleReset}
-          businessName={formData.businessName}
-        />
+        <div className="animate-slide-up">
+          <CompetitorResults 
+            result={result} 
+            onReset={handleReset}
+            businessName={formData.businessName}
+          />
+        </div>
       )}
     </div>
   );
