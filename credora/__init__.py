@@ -10,7 +10,7 @@ from credora.errors import (
     safe_tool_execution,
 )
 
-from credora.logging import (
+from credora.tool_logging import (
     ToolLogger,
     get_tool_logger,
     set_tool_logger,

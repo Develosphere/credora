@@ -2,7 +2,7 @@
 """
 Combined MCP Server for Credora.
 
-Mounts all three FastMCP servers (Shopify, Meta, Google) under a single FastAPI app.
+Mounts all four FastMCP servers (Shopify, Meta, Google, Competitor) under a single FastAPI app.
 This is the recommended approach for production deployment.
 
 Usage:
@@ -16,6 +16,7 @@ Endpoints:
     /shopify/*      - Shopify MCP server endpoints
     /meta/*         - Meta Ads MCP server endpoints  
     /google/*       - Google Ads MCP server endpoints
+    /competitor/*   - Competitor Analysis MCP server endpoints
 """
 
 import os
@@ -41,6 +42,7 @@ logger = logging.getLogger("credora.mcp")
 from credora.mcp_servers.fastmcp.shopify_server import shopify_mcp
 from credora.mcp_servers.fastmcp.meta_server import meta_mcp
 from credora.mcp_servers.fastmcp.google_server import google_mcp
+from credora.mcp_servers.fastmcp.competitor_server import competitor_mcp
 
 # =============================================================================
 # Create Combined FastAPI App
@@ -55,10 +57,11 @@ Provides data integration with:
 - **Shopify** - E-commerce store data (orders, products, customers, analytics)
 - **Meta Ads** - Facebook/Instagram advertising (campaigns, ad sets, ads, insights)
 - **Google Ads** - Google advertising (campaigns, ad groups, keywords, search terms)
+- **Competitor Analysis** - Real-time competitor research and pricing analysis
 
 Each platform has its own OAuth flow and set of tools for data retrieval.
     """,
-    version="1.0.0",
+    version="1.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -92,6 +95,8 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             platform = "META"
         elif path.startswith("/google"):
             platform = "GOOGLE"
+        elif path.startswith("/competitor"):
+            platform = "COMPETITOR"
         
         # Log OAuth-related requests prominently
         if "oauth" in path.lower() or "callback" in path.lower() or "install" in path.lower():
@@ -142,6 +147,10 @@ async def root():
                 "path": "/google",
                 "install": "/google/google/install",
                 "status": "active"
+            },
+            "competitor": {
+                "path": "/competitor",
+                "status": "active"
             }
         },
         "documentation": "/docs"
@@ -154,7 +163,7 @@ async def health():
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
-        "servers": ["shopify", "meta", "google"]
+        "servers": ["shopify", "meta", "google", "competitor"]
     }
 
 
@@ -189,6 +198,13 @@ try:
 except Exception as e:
     print(f"⚠ Could not mount Google server: {e}")
 
+try:
+    # Mount Competitor server
+    app.mount("/competitor", competitor_mcp.http_app())
+    print("✓ Competitor Analysis MCP server mounted at /competitor")
+except Exception as e:
+    print(f"⚠ Could not mount Competitor server: {e}")
+
 
 # =============================================================================
 # Server Entry Point
@@ -205,6 +221,7 @@ def run_server(host: str = "0.0.0.0", port: int = 8001):
     print(f"  - Shopify:     http://{host}:{port}/shopify")
     print(f"  - Meta Ads:    http://{host}:{port}/meta")
     print(f"  - Google Ads:  http://{host}:{port}/google")
+    print(f"  - Competitor:  http://{host}:{port}/competitor")
     print(f"  - API Docs:    http://{host}:{port}/docs")
     print(f"{'='*60}\n")
     uvicorn.run(app, host=host, port=port)

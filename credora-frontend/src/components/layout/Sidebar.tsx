@@ -15,6 +15,7 @@ import {
   Lightbulb,
   Settings,
   Activity,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ const navigation = [
   { name: "SKU Analytics", href: "/sku-analysis", icon: Package },
   { name: "Campaigns", href: "/campaigns", icon: Megaphone },
   { name: "What-If", href: "/whatif", icon: Calculator },
+  { name: "Competitor Analysis", href: "/competitor", icon: Users },
   { name: "AI Chat", href: "/chat", icon: MessageSquare },
   { name: "Insights", href: "/insights", icon: Lightbulb },
 ];

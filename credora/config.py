@@ -13,7 +13,7 @@ from typing import Optional
 class ModelConfig:
     """Configuration for LLM model."""
     
-    model_name: str = "nex-agi/deepseek-v3.1-nex-n1:free"
+    model_name: str = "google/gemma-3-27b-it:free"
     base_url: str = "https://openrouter.ai/api/v1"
     temperature: float = 0.7
     max_tokens: int = 4096

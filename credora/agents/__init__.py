@@ -20,11 +20,9 @@ from credora.agents.analytics import (
     get_analytics_agent,
     ANALYTICS_AGENT_INSTRUCTIONS,
 )
-from credora.agents.competitor import (
-    create_competitor_agent,
-    get_competitor_agent,
-    COMPETITOR_AGENT_INSTRUCTIONS,
-)
+# Competitor Analysis Agent System - Import directly from credora.agents.competitor
+# to avoid circular imports. These are not exported via __init__.py
+# Example: from credora.agents.competitor import CompetitorAnalysisAgentSystem
 from credora.agents.insight import (
     create_insight_agent,
     get_insight_agent,
@@ -55,10 +53,8 @@ __all__ = [
     "create_analytics_agent",
     "get_analytics_agent",
     "ANALYTICS_AGENT_INSTRUCTIONS",
-    # Competitor agent
-    "create_competitor_agent",
-    "get_competitor_agent",
-    "COMPETITOR_AGENT_INSTRUCTIONS",
+    # Competitor Agent System - Import directly from credora.agents.competitor
+    # to avoid circular imports. See module docstring for details.
     # Insight agent
     "create_insight_agent",
     "get_insight_agent",

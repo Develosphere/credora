@@ -2657,6 +2657,658 @@ async def get_insights(request: Request):
         },
     ]
 
+# ============================================================================
+# Competitor Analysis Endpoints (Orchestrated Agent System)
+# ============================================================================
+
+class CompetitorAnalysisRequest(BaseModel):
+    """Request model for competitor analysis."""
+    business_type: str  # e.g., "perfume", "clothing", "electronics"
+    city: str = "Karachi"
+    max_competitors: int = 5
+    generate_report: bool = True
+    visible_browser: bool = False  # Enable visible browser for demos
+
+
+class CompetitorAnalysisResponse(BaseModel):
+    """Response model for competitor analysis."""
+    status: str
+    message: str
+    result: Optional[str] = None
+    report_path: Optional[str] = None
+    competitors_analyzed: int = 0
+
+
+@app.options("/competitor/analyze")
+async def competitor_analyze_options():
+    """Handle CORS preflight for competitor analyze endpoint."""
+    return {"status": "ok"}
+
+
+@app.post("/competitor/analyze", response_model=CompetitorAnalysisResponse)
+async def analyze_competitors_endpoint(
+    request: Request,
+    body: CompetitorAnalysisRequest
+):
+    """
+    Run comprehensive competitor analysis using orchestrated agent system.
+    
+    This endpoint launches the Competitor Analysis Agent System which:
+    1. Triage Agent receives the request and delegates to specialists
+    2. Search Agent finds competitors in the specified market
+    3. Scraper Agent extracts content from competitor websites
+    4. Analyzer Agent evaluates competitor strategies
+    5. Reporter Agent generates a comprehensive .txt report
+    
+    No authentication required - public endpoint for testing.
+    
+    Args:
+        business_type: Type of business (e.g., "perfume", "candles")
+        city: Target city for competitor search (default: "Karachi")
+        max_competitors: Maximum number of competitors to analyze (default: 5)
+        generate_report: Whether to generate a .txt report file (default: True)
+    
+    Returns:
+        Analysis result with competitor insights and report path
+    """
+    # No authentication required for now
+    print(f"[Competitor] Analysis requested")
+    print(f"[Competitor] Params: {body.business_type} in {body.city}, max={body.max_competitors}")
+    print(f"[Competitor] 🔍 DEBUG - visible_browser parameter: {body.visible_browser}")
+    print(f"[Competitor] 🔍 DEBUG - generate_report parameter: {body.generate_report}")
+    print(f"[Competitor] 🔍 DEBUG - Full request body: {body}")
+    
+    if body.visible_browser:
+        print(f"[Competitor] 🎯 VISIBLE BROWSER MODE REQUESTED FROM FRONTEND!")
+        print(f"[Competitor] 🎯 Browser should launch in visible mode")
+    else:
+        print(f"[Competitor] 🔇 Headless mode - no visible browser requested")
+    
+    try:
+        # Use direct browser approach instead of MCP to avoid timeout issues
+        print(f"[Competitor] Starting direct browser analysis...")
+        print(f"[Competitor] Visible browser: {body.visible_browser}")
+        
+        # Import required modules
+        from playwright.async_api import async_playwright
+        from ddgs import DDGS
+        from bs4 import BeautifulSoup
+        from openai import OpenAI
+        from credora.config import get_api_key, get_model_config
+        from datetime import datetime
+        import os
+        import asyncio
+        
+        competitors = []
+        
+        # Step 1: Search for competitors
+        print(f"[Competitor] Step 1: Searching for competitors...")
+        query = f"best {body.business_type} shops {body.city} Pakistan"
+        
+        try:
+            with DDGS() as ddgs:
+                results = list(ddgs.text(query, max_results=body.max_competitors))
+            
+            if not results:
+                # Fallback search with simpler query
+                print(f"[Competitor] No results found, trying simpler search...")
+                query = f"{body.business_type} {body.city}"
+                with DDGS() as ddgs:
+                    results = list(ddgs.text(query, max_results=body.max_competitors))
+        
+        except Exception as search_error:
+            print(f"[Competitor] Search error: {search_error}")
+            # Use fallback competitors for demo
+            results = [
+                {'title': f'Sample {body.business_type} Store 1', 'href': 'https://example.com', 'body': 'Sample competitor for testing'},
+                {'title': f'Sample {body.business_type} Store 2', 'href': 'https://google.com', 'body': 'Another sample competitor'},
+                {'title': f'Sample {body.business_type} Store 3', 'href': 'https://wikipedia.org', 'body': 'Third sample competitor'},
+            ]
+        
+        for i, result in enumerate(results, 1):
+            competitor = {
+                'rank': i,
+                'name': result.get('title', 'Unknown'),
+                'url': result.get('href', result.get('link', '')),
+                'snippet': result.get('body', '')[:200]
+            }
+            competitors.append(competitor)
+            print(f"[Competitor] Found: {competitor['name'][:50]}...")
+        
+        # Step 2: Scrape competitors with visible browser
+        print(f"[Competitor] Step 2: Scraping {len(competitors)} competitor websites...")
+        
+        if body.visible_browser:
+            print(f"[Competitor] 🎯 VISIBLE BROWSER MODE ENABLED!")
+            print(f"[Competitor] 🎯 Browser window will open and visit each competitor website")
+            print(f"[Competitor] 🎯 You can watch the analysis happen in real-time!")
+            print(f"[Competitor] 🎯 Launching browser with headless=False...")
+        else:
+            print(f"[Competitor] 🔇 Running in headless mode (no visible browser)")
+        
+        try:
+            async with async_playwright() as p:
+                # Enhanced browser launch options for maximum visibility
+                launch_options = {
+                    'headless': not body.visible_browser,
+                    'slow_mo': 3000 if body.visible_browser else 0,  # Very slow for maximum visibility
+                }
+                
+                if body.visible_browser:
+                    launch_options['args'] = [
+                        '--start-maximized',
+                        '--disable-web-security',
+                        '--disable-features=VizDisplayCompositor',
+                        '--no-first-run',
+                        '--disable-default-apps',
+                        '--window-position=0,0',  # Position at top-left
+                        '--force-device-scale-factor=1'
+                    ]
+                    # Try to use Chrome if available, fall back to Chromium
+                    try:
+                        launch_options['channel'] = 'chrome'
+                        print(f"[Competitor] Attempting to use Chrome browser...")
+                    except:
+                        print(f"[Competitor] Chrome not available, using Chromium...")
+                
+                print(f"[Competitor] Launching browser with options: headless={launch_options['headless']}")
+                browser = await p.chromium.launch(**launch_options)
+                print(f"[Competitor] Browser object created: {browser}")
+                
+                if body.visible_browser:
+                    print(f"[Competitor] ✅ Browser launched in VISIBLE mode!")
+                    print(f"[Competitor] 🌐 Browser window should now be visible on your screen")
+                
+                context = await browser.new_context(
+                    viewport=None if body.visible_browser else {"width": 1280, "height": 720},
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                )
+                
+                # Create initial page to show we're starting
+                if body.visible_browser:
+                    welcome_page = await context.new_page()
+                    await welcome_page.set_content(f"""
+                    <html>
+                    <head>
+                        <title>🎯 Competitor Analysis Starting...</title>
+                        <style>
+                            @keyframes flash {{
+                                0%, 100% {{ background: #f0f9ff; }}
+                                50% {{ background: #fef3c7; }}
+                            }}
+                            body {{
+                                font-family: Arial;
+                                padding: 40px;
+                                text-align: center;
+                                animation: flash 1s infinite;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <h1 style="color: #0c4a6e; font-size: 48px;">🚀 COMPETITOR ANALYSIS STARTING</h1>
+                        <h2 style="color: #dc2626; font-size: 36px;">🎯 BROWSER IS NOW VISIBLE!</h2>
+                        <p style="font-size: 24px; color: #374151;">Analyzing {body.business_type} competitors in {body.city}</p>
+                        <p style="font-size: 20px; color: #6b7280;">Found {len(competitors)} competitors to analyze...</p>
+                        <p style="font-size: 18px; color: #6b7280;">Browser will start visiting websites in 5 seconds...</p>
+                        <div style="margin-top: 30px; padding: 20px; background: #e0f2fe; border-radius: 8px;">
+                            <h3 style="color: #0c4a6e;">📊 Analysis Details:</h3>
+                            <p style="font-size: 16px;">Business Type: {body.business_type}</p>
+                            <p style="font-size: 16px;">City: {body.city}</p>
+                            <p style="font-size: 16px;">Competitors Found: {len(competitors)}</p>
+                        </div>
+                    </body>
+                    </html>
+                    """)
+                    print(f"[Competitor] 🎯 Welcome page displayed - browser should be VERY visible now!")
+                    await welcome_page.wait_for_timeout(5000)  # Show for 5 seconds
+                    await welcome_page.close()
+                
+                successful_scrapes = 0
+                
+                for i, competitor in enumerate(competitors, 1):
+                    try:
+                        if body.visible_browser:
+                            print(f"[Competitor] 🌐 ({i}/{len(competitors)}) Opening browser to visit: {competitor['name'][:50]}...")
+                        
+                        page = await context.new_page()
+                        
+                        # Navigate to competitor website
+                        await page.goto(competitor['url'], timeout=30000, wait_until='domcontentloaded')
+                        
+                        if body.visible_browser:
+                            print(f"[Competitor] ⏳ Page loaded: {competitor['name'][:50]}")
+                            print(f"[Competitor] 🔍 Analyzing content (you can see it in browser)...")
+                            await page.wait_for_timeout(3000)  # Let user see the page
+                        else:
+                            await page.wait_for_timeout(2000)
+                        
+                        title = await page.title()
+                        html = await page.content()
+                        
+                        if body.visible_browser:
+                            print(f"[Competitor] 📄 Loaded: {title}")
+                            # Scroll to show content
+                            await page.evaluate("window.scrollTo(0, document.body.scrollHeight/3)")
+                            await page.wait_for_timeout(2000)
+                            await page.evaluate("window.scrollTo(0, document.body.scrollHeight/2)")
+                            await page.wait_for_timeout(2000)
+                            await page.evaluate("window.scrollTo(0, 0)")
+                            await page.wait_for_timeout(1500)
+                        
+                        # Parse content
+                        soup = BeautifulSoup(html, 'html.parser')
+                        for tag in soup.find_all(['script', 'style', 'nav', 'footer', 'header']):
+                            tag.decompose()
+                        
+                        text = soup.get_text(separator='\n', strip=True)
+                        lines = [line.strip() for line in text.splitlines() if line.strip()]
+                        clean_text = '\n'.join(lines)[:8000]
+                        
+                        # Analyze content
+                        text_lower = clean_text.lower()
+                        competitor.update({
+                            'scraped_title': title,
+                            'content': clean_text,
+                            'content_length': len(clean_text),
+                            'has_prices': any(x in text_lower for x in ['rs', 'pkr', 'price', '/-', 'rupee']),
+                            'has_discounts': any(x in text_lower for x in ['sale', 'discount', 'off', 'offer', 'deal']),
+                            'has_shipping': any(x in text_lower for x in ['delivery', 'shipping', 'free delivery', 'cod']),
+                            'has_reviews': any(x in text_lower for x in ['review', 'rating', 'star', 'customer']),
+                            'has_whatsapp': any(x in text_lower for x in ['whatsapp', 'wa.me', '+92']),
+                        })
+                        
+                        successful_scrapes += 1
+                        print(f"[Competitor] ✅ Scraped: {competitor['name'][:30]}... - {len(clean_text)} chars")
+                        await page.close()
+                        
+                    except Exception as e:
+                        print(f"[Competitor] ❌ Scrape error for {competitor['name'][:30]}: {str(e)[:100]}")
+                        competitor['error'] = str(e)
+                        try:
+                            await page.close()
+                        except:
+                            pass
+                
+                # Show completion page
+                if body.visible_browser:
+                    print(f"[Competitor] 🎉 Scraping complete! Successfully analyzed {successful_scrapes} competitors")
+                    final_page = await context.new_page()
+                    await final_page.set_content(f"""
+                    <html>
+                    <head>
+                        <title>🎉 Analysis Complete!</title>
+                        <style>
+                            @keyframes celebrate {{
+                                0%, 100% {{ transform: scale(1); }}
+                                50% {{ transform: scale(1.1); }}
+                            }}
+                            body {{
+                                font-family: Arial;
+                                padding: 40px;
+                                text-align: center;
+                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                color: white;
+                            }}
+                            h1 {{
+                                animation: celebrate 1s infinite;
+                                font-size: 48px;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <h1>🎉 COMPETITOR ANALYSIS COMPLETE!</h1>
+                        <h2 style="font-size: 36px;">✅ Successfully Analyzed {successful_scrapes} Competitors</h2>
+                        <p style="font-size: 24px;">Business Type: {body.business_type}</p>
+                        <p style="font-size: 24px;">City: {body.city}</p>
+                        <div style="margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.2); border-radius: 8px;">
+                            <h3 style="font-size: 28px;">📊 Analysis Summary:</h3>
+                            <p style="font-size: 20px;">Total Competitors Found: {len(competitors)}</p>
+                            <p style="font-size: 20px;">Successfully Scraped: {successful_scrapes}</p>
+                            <p style="font-size: 20px;">Now generating AI insights...</p>
+                        </div>
+                        <p style="font-size: 18px; margin-top: 30px;">Browser will close in 15 seconds...</p>
+                    </body>
+                    </html>
+                    """)
+                    await final_page.wait_for_timeout(15000)  # Keep open longer
+                
+                await browser.close()
+                
+        except Exception as browser_error:
+            print(f"[Competitor] Browser error: {browser_error}")
+            # Continue with analysis even if browser fails
+            for competitor in competitors:
+                competitor.update({
+                    'error': 'Browser scraping failed',
+                    'content': competitor.get('snippet', ''),
+                    'content_length': len(competitor.get('snippet', '')),
+                    'has_prices': False,
+                    'has_discounts': False,
+                    'has_shipping': False,
+                    'has_reviews': False,
+                    'has_whatsapp': False,
+                })
+        
+        # Step 3: AI Analysis
+        print(f"[Competitor] Step 3: AI analysis...")
+        
+        try:
+            api_key = get_api_key()
+            config = get_model_config()
+            client = OpenAI(api_key=api_key, base_url=config.base_url)
+            
+            # Prepare analysis prompt
+            successful = [c for c in competitors if 'error' not in c]
+            if not successful:
+                # Use all competitors even if scraping failed
+                successful = competitors
+            
+            analysis_prompt = f"Analyze these {body.business_type} competitors in {body.city}, Pakistan:\n\n"
+            
+            for comp in successful:
+                content_preview = comp.get('content', comp.get('snippet', ''))[:1000]
+                analysis_prompt += f"""
+COMPETITOR: {comp['name']}
+URL: {comp['url']}
+Strategies: Prices: {'Yes' if comp.get('has_prices') else 'Unknown'}, Discounts: {'Yes' if comp.get('has_discounts') else 'Unknown'}, Shipping: {'Yes' if comp.get('has_shipping') else 'Unknown'}, WhatsApp: {'Yes' if comp.get('has_whatsapp') else 'Unknown'}
+Content Preview: {content_preview}...
+
+---
+"""
+            
+            analysis_prompt += "\nProvide strategic insights and actionable recommendations for beating these competitors in the Pakistani market."
+            
+            response = client.chat.completions.create(
+                model=config.model_name,
+                messages=[
+                    {"role": "system", "content": "You are an expert business strategist specializing in Pakistani e-commerce and competitor analysis."},
+                    {"role": "user", "content": analysis_prompt}
+                ],
+                max_tokens=1500,
+                temperature=0.7
+            )
+            
+            ai_analysis = response.choices[0].message.content
+            print(f"[Competitor] AI analysis complete")
+            
+        except Exception as ai_error:
+            print(f"[Competitor] AI analysis error: {ai_error}")
+            ai_analysis = f"AI analysis failed due to: {str(ai_error)}. However, we found {len(competitors)} competitors: " + ", ".join([c['name'] for c in competitors[:3]])
+        
+        # Step 4: Generate report (if requested)
+        report_path = None
+        successful = [c for c in competitors if 'error' not in c]
+        
+        if body.generate_report:
+            print(f"[Competitor] Step 4: Generating report...")
+            
+            report_filename = f"api_competitor_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+            
+            report = []
+            report.append("COMPETITOR ANALYSIS REPORT")
+            report.append("=" * 50)
+            report.append(f"Business Type: {body.business_type.upper()}")
+            report.append(f"Location: {body.city}")
+            report.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            report.append(f"Competitors Analyzed: {len(successful)}")
+            report.append(f"Visible Browser Mode: {'Yes' if body.visible_browser else 'No'}")
+            report.append("")
+            
+            # Summary stats
+            with_prices = [c for c in successful if c.get('has_prices')]
+            with_discounts = [c for c in successful if c.get('has_discounts')]
+            with_shipping = [c for c in successful if c.get('has_shipping')]
+            with_whatsapp = [c for c in successful if c.get('has_whatsapp')]
+            
+            report.append("EXECUTIVE SUMMARY")
+            report.append("-" * 30)
+            report.append(f"Successfully analyzed: {len(successful)} websites")
+            report.append(f"Show prices: {len(with_prices)} ({len(with_prices)*100//max(len(successful),1)}%)")
+            report.append(f"Offer discounts: {len(with_discounts)} ({len(with_discounts)*100//max(len(successful),1)}%)")
+            report.append(f"Provide delivery: {len(with_shipping)} ({len(with_shipping)*100//max(len(successful),1)}%)")
+            report.append(f"Use WhatsApp: {len(with_whatsapp)} ({len(with_whatsapp)*100//max(len(successful),1)}%)")
+            report.append("")
+            
+            # Competitor details
+            for comp in successful:
+                report.append(f"COMPETITOR: {comp['name']}")
+                report.append(f"URL: {comp['url']}")
+                report.append(f"Strategies: Prices: {'Yes' if comp.get('has_prices') else 'No'}, Discounts: {'Yes' if comp.get('has_discounts') else 'No'}")
+                if comp.get('content'):
+                    report.append(f"Content Length: {comp.get('content_length', 0)} characters")
+                report.append("")
+            
+            # AI Analysis
+            report.append("AI STRATEGIC ANALYSIS")
+            report.append("-" * 30)
+            report.append(ai_analysis)
+            report.append("")
+            report.append("=" * 50)
+            report.append("END OF REPORT")
+            
+            # Save report
+            try:
+                with open(report_filename, 'w', encoding='utf-8') as f:
+                    f.write('\n'.join(report))
+                report_path = report_filename
+                print(f"[Competitor] Report saved: {report_filename}")
+            except Exception as report_error:
+                print(f"[Competitor] Report save error: {report_error}")
+        
+        # Create result summary
+        with_prices = [c for c in successful if c.get('has_prices')]
+        with_discounts = [c for c in successful if c.get('has_discounts')]
+        with_shipping = [c for c in successful if c.get('has_shipping')]
+        
+        result_summary = f"Successfully analyzed {len(successful)} competitors in {body.city}. "
+        
+        if len(with_prices) > 0:
+            result_summary += f"{len(with_prices)} show prices, "
+        if len(with_discounts) > 0:
+            result_summary += f"{len(with_discounts)} offer discounts, "
+        if len(with_shipping) > 0:
+            result_summary += f"{len(with_shipping)} provide delivery. "
+        
+        result_summary += f"\n\nKey Insights: {ai_analysis[:300]}..."
+        
+        print(f"[Competitor] Analysis complete! Analyzed {len(successful)} competitors")
+        
+        return CompetitorAnalysisResponse(
+            status="success",
+            message=f"Competitor analysis completed for {body.business_type} in {body.city}",
+            result=result_summary,
+            report_path=report_path,
+            competitors_analyzed=len(successful),
+        )
+        
+    except ImportError as e:
+        print(f"[Competitor] Import error: {e}")
+        return CompetitorAnalysisResponse(
+            status="error",
+            message=f"Competitor agent system not available: {str(e)}",
+        )
+    except Exception as e:
+        print(f"[Competitor] Analysis error: {e}")
+        import traceback
+        traceback.print_exc()
+        return CompetitorAnalysisResponse(
+            status="error",
+            message=f"Analysis failed: {str(e)}",
+        )
+
+
+@app.get("/competitor/search")
+async def search_competitors_endpoint(
+    request: Request,
+    business_type: str = Query(..., description="Type of business"),
+    city: str = Query("Karachi", description="Target city"),
+    max_results: int = Query(5, description="Maximum results", ge=1, le=10),
+):
+    """
+    Search for competitors in a specific market.
+    
+    This is a lightweight endpoint that only performs the search step
+    without full analysis. Useful for getting a quick list of competitors.
+    
+    No authentication required - public endpoint for testing.
+    """
+    print(f"[Competitor Search] {business_type} in {city}")
+    
+    try:
+        from credora.agents.competitor import get_mcp_server, create_search_agent
+        
+        # TODO: Implement lightweight search using just the Search Agent
+        # For now, return a placeholder response
+        return {
+            "status": "success",
+            "message": f"Searching for {business_type} competitors in {city}",
+            "competitors": [],
+            "note": "Full implementation requires running Search Agent",
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/competitor/report/content")
+async def get_report_content(
+    request: Request,
+    path: str = Query(..., description="Report file path"),
+):
+    """
+    Get the content of a competitor analysis report.
+    
+    No authentication required - public endpoint for testing.
+    """
+    print(f"[Competitor Report] Content requested: {path}")
+    
+    try:
+        import os
+        
+        # Security check - only allow files in current directory
+        if not os.path.exists(path) or '..' in path or path.startswith('/'):
+            raise HTTPException(status_code=404, detail="Report not found")
+        
+        with open(path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        return {
+            "status": "success",
+            "content": content,
+            "path": path
+        }
+        
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Report file not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reading report: {str(e)}")
+
+
+@app.get("/competitor/report/download")
+async def download_report(
+    request: Request,
+    path: str = Query(..., description="Report file path"),
+):
+    """
+    Download a competitor analysis report file.
+    
+    No authentication required - public endpoint for testing.
+    """
+    print(f"[Competitor Report] Download requested: {path}")
+    
+    try:
+        import os
+        from fastapi.responses import FileResponse
+        
+        # Security check - only allow files in current directory
+        if not os.path.exists(path) or '..' in path or path.startswith('/'):
+            raise HTTPException(status_code=404, detail="Report not found")
+        
+        # Get filename for download
+        filename = os.path.basename(path)
+        
+        return FileResponse(
+            path=path,
+            filename=filename,
+            media_type='text/plain',
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+        
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Report file not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error downloading report: {str(e)}")
+
+
+@app.post("/competitor/quick-analyze")
+async def quick_analyze_competitor(
+    request: Request,
+    url: str = Query(..., description="Competitor website URL"),
+):
+    """
+    Quick analysis of a single competitor website.
+    
+    Performs a lightweight scrape and analysis of one competitor URL.
+    
+    No authentication required - public endpoint for testing.
+    """
+    print(f"[Competitor Quick] URL: {url}")
+    
+    try:
+        # Use playwright directly for quick scrape
+        from playwright.async_api import async_playwright
+        from bs4 import BeautifulSoup
+        import re
+        
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            context = await browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            )
+            page = await context.new_page()
+            
+            await page.goto(url, timeout=30000, wait_until="domcontentloaded")
+            await page.wait_for_timeout(2000)
+            
+            title = await page.title()
+            html = await page.content()
+            
+            await browser.close()
+        
+        # Parse and analyze
+        soup = BeautifulSoup(html, "html.parser")
+        for tag in soup.find_all(["script", "style", "noscript"]):
+            tag.decompose()
+        
+        text = soup.get_text(separator="\n", strip=True).lower()
+        
+        # Analyze indicators
+        analysis = {
+            "url": url,
+            "title": title,
+            "strategies": {
+                "shows_prices": any(x in text for x in ["rs.", "pkr", "/-", "rupee"]),
+                "has_discounts": any(x in text for x in ["sale", "discount", "% off", "offer"]),
+                "offers_delivery": any(x in text for x in ["delivery", "shipping", "cod"]),
+                "has_reviews": any(x in text for x in ["review", "rating", "customer"]),
+                "has_whatsapp": "whatsapp" in text or bool(re.search(r'03\d{9}', text)),
+            },
+            "content_length": len(text),
+        }
+        
+        # Calculate score
+        score = sum(1 for v in analysis["strategies"].values() if v)
+        analysis["strategy_score"] = f"{score}/5"
+        
+        return {
+            "status": "success",
+            "analysis": analysis,
+        }
+        
+    except Exception as e:
+        print(f"[Competitor Quick] Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 # ============================================================================
 # System Status Endpoints

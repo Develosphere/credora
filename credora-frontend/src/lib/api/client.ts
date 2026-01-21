@@ -138,7 +138,7 @@ function buildUrl(
 /**
  * Create a fetch wrapper for a specific base URL
  */
-function createFetcher(baseUrl: string) {
+function createFetcher(baseUrl: string, requireAuth: boolean = true) {
   return async function fetcher<T>(
     path: string,
     options: RequestOptions = {}
@@ -152,18 +152,19 @@ function createFetcher(baseUrl: string) {
       ...customHeaders,
     };
 
-    // Add session token if available (for non-HTTP-only cookies)
-    // HTTP-only cookies are sent automatically with credentials: "include"
-    const token = getSessionToken();
-    if (token) {
-      (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
+    // Add session token if available and required
+    if (requireAuth) {
+      const token = getSessionToken();
+      if (token) {
+        (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
+      }
     }
 
     const response = await fetch(url, {
       ...restOptions,
       headers,
       body: body ? JSON.stringify(body) : undefined,
-      credentials: "include", // Include cookies for cross-origin requests
+      credentials: requireAuth ? "include" : "omit", // Only include cookies if auth required
     });
 
     return handleResponse<T>(response);
@@ -175,6 +176,29 @@ function createFetcher(baseUrl: string) {
  */
 export const pythonApi = {
   fetch: createFetcher(getPythonApiUrl()),
+  
+  get<T>(path: string, options?: RequestOptions): Promise<T> {
+    return this.fetch<T>(path, { ...options, method: "GET" });
+  },
+  
+  post<T>(path: string, body?: unknown, options?: RequestOptions): Promise<T> {
+    return this.fetch<T>(path, { ...options, method: "POST", body });
+  },
+  
+  put<T>(path: string, body?: unknown, options?: RequestOptions): Promise<T> {
+    return this.fetch<T>(path, { ...options, method: "PUT", body });
+  },
+  
+  delete<T>(path: string, options?: RequestOptions): Promise<T> {
+    return this.fetch<T>(path, { ...options, method: "DELETE" });
+  },
+};
+
+/**
+ * Public Python API client (no authentication required)
+ */
+export const publicPythonApi = {
+  fetch: createFetcher(getPythonApiUrl(), false),
   
   get<T>(path: string, options?: RequestOptions): Promise<T> {
     return this.fetch<T>(path, { ...options, method: "GET" });
