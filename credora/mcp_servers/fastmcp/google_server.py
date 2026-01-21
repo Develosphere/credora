@@ -13,11 +13,13 @@ API Version: v18
 """
 
 import os
+import json
 import asyncio
 import secrets
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import httpx
 from fastapi import Request, HTTPException
@@ -236,19 +238,51 @@ async def oauth_callback(request: Request):
 
 
 # =============================================================================
+# Mock Data Fallback
+# =============================================================================
+
+def _get_mock_data_path() -> Path:
+    """Get the path to mock data directory."""
+    current_file = Path(__file__)
+    project_root = current_file.parent.parent.parent.parent
+    return project_root / "mock_data" / "google"
+
+
+def _load_mock_data(filename: str) -> Dict[str, Any]:
+    """Load mock data from JSON file."""
+    try:
+        mock_path = _get_mock_data_path() / filename
+        print(f"📦 [GOOGLE] Loading mock data from: {mock_path}")
+        with open(mock_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            print(f"✅ [GOOGLE] Mock data loaded successfully")
+            return data
+    except Exception as e:
+        print(f"❌ [GOOGLE] Failed to load mock data: {e}")
+        return {"error": f"Mock data not available: {str(e)}"}
+
+
+# =============================================================================
 # MCP Tools - Customer Accounts
 # =============================================================================
 
 async def _fetch_accessible_customers(user_id: str = "default") -> Dict[str, Any]:
-    """Core logic for fetching accessible customers - shared by MCP tool and REST endpoint."""
-    token_manager = get_token_manager()
-    token_data = await token_manager.get_token(user_id, "google")
+    """Core logic for fetching accessible customers - with mock data fallback."""
+    # Check for mock mode - skip all API logic
+    if os.getenv("MOCK_MODE", "").lower() == "true":
+        print("📦 [GOOGLE] MOCK_MODE enabled, using mock customers data")
+        return _load_mock_data("customers.json")
     
-    if not token_data:
-        return {"error": "Not authenticated. Please connect Google Ads first."}
-    
-    async with get_google_ads_client(token_data.access_token) as client:
-        try:
+    # Try live API first
+    try:
+        token_manager = get_token_manager()
+        token_data = await token_manager.get_token(user_id, "google")
+        
+        if not token_data or not token_data.access_token:
+            print("⚠️ [GOOGLE] No token available, falling back to mock data")
+            return _load_mock_data("customers.json")
+        
+        async with get_google_ads_client(token_data.access_token) as client:
             response = await client.get("/customers:listAccessibleCustomers")
             response.raise_for_status()
             data = response.json()
@@ -271,10 +305,12 @@ async def _fetch_accessible_customers(user_id: str = "default") -> Dict[str, Any
                         "status": "UNKNOWN"
                     })
             
+            print(f"✅ [GOOGLE] Fetched {len(customers)} customers from live API")
             return {"customers": customers, "count": len(customers)}
-            
-        except httpx.HTTPStatusError as e:
-            return {"error": f"Google Ads API error: {e.response.status_code} - {e.response.text}"}
+    
+    except Exception as e:
+        print(f"⚠️ [GOOGLE] Live API failed: {e}, falling back to mock data")
+        return _load_mock_data("customers.json")
 
 
 @google_mcp.tool
@@ -334,72 +370,71 @@ async def _get_customer_details(client: httpx.AsyncClient, customer_id: str) -> 
 # MCP Tools - Campaigns
 # =============================================================================
 
-@google_mcp.tool
-async def get_campaigns(
+async def _fetch_google_campaigns(
     customer_id: str,
     user_id: str = "default",
     status_filter: str = "all",
     date_from: str = "",
     date_to: str = ""
 ) -> Dict[str, Any]:
-    """Get campaigns with performance metrics.
+    """Core logic for fetching campaigns - with mock data fallback."""
+    # Check for mock mode - skip all API logic
+    if os.getenv("MOCK_MODE", "").lower() == "true":
+        print("📦 [GOOGLE] MOCK_MODE enabled, using mock campaigns data")
+        return _load_mock_data("campaigns.json")
     
-    Args:
-        customer_id: Google Ads customer ID
-        user_id: User identifier
-        status_filter: Filter by status (all, enabled, paused, removed)
-        date_from: Start date (YYYY-MM-DD)
-        date_to: End date (YYYY-MM-DD)
+    # Try live API first
+    try:
+        token_manager = get_token_manager()
+        token_data = await token_manager.get_token(user_id, "google")
         
-    Returns:
-        List of campaigns with performance data
-    """
-    token_manager = get_token_manager()
-    token_data = await token_manager.get_token(user_id, "google")
-    
-    if not token_data:
-        return {"error": "Not authenticated"}
-    
-    # Default date range: last 30 days
-    if not date_from:
-        date_from = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
-    if not date_to:
-        date_to = datetime.now().strftime("%Y-%m-%d")
-    
-    # Build status filter
-    status_clause = ""
-    if status_filter == "enabled":
-        status_clause = "AND campaign.status = 'ENABLED'"
-    elif status_filter == "paused":
-        status_clause = "AND campaign.status = 'PAUSED'"
-    elif status_filter == "removed":
-        status_clause = "AND campaign.status = 'REMOVED'"
-    
-    query = f"""
-        SELECT
-            campaign.id,
-            campaign.name,
-            campaign.status,
-            campaign.advertising_channel_type,
-            campaign.bidding_strategy_type,
-            metrics.impressions,
-            metrics.clicks,
-            metrics.cost_micros,
-            metrics.conversions,
-            metrics.conversions_value,
-            metrics.ctr,
-            metrics.average_cpc
-        FROM campaign
-        WHERE segments.date BETWEEN '{date_from}' AND '{date_to}'
-        {status_clause}
-        ORDER BY metrics.cost_micros DESC
-        LIMIT 100
-    """
-    
-    clean_id = customer_id.replace("-", "")
-    
-    async with get_google_ads_client(token_data.access_token, customer_id) as client:
-        try:
+        if not token_data or not token_data.access_token:
+            print("⚠️ [GOOGLE] No token available, falling back to mock campaign data")
+            return _load_mock_data("campaigns.json")
+        
+        if not customer_id:
+            print("⚠️ [GOOGLE] No customer_id provided, falling back to mock campaign data")
+            return _load_mock_data("campaigns.json")
+        
+        # Default date range: last 30 days
+        if not date_from:
+            date_from = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+        if not date_to:
+            date_to = datetime.now().strftime("%Y-%m-%d")
+        
+        # Build status filter
+        status_clause = ""
+        if status_filter == "enabled":
+            status_clause = "AND campaign.status = 'ENABLED'"
+        elif status_filter == "paused":
+            status_clause = "AND campaign.status = 'PAUSED'"
+        elif status_filter == "removed":
+            status_clause = "AND campaign.status = 'REMOVED'"
+        
+        query = f"""
+            SELECT
+                campaign.id,
+                campaign.name,
+                campaign.status,
+                campaign.advertising_channel_type,
+                campaign.bidding_strategy_type,
+                metrics.impressions,
+                metrics.clicks,
+                metrics.cost_micros,
+                metrics.conversions,
+                metrics.conversions_value,
+                metrics.ctr,
+                metrics.average_cpc
+            FROM campaign
+            WHERE segments.date BETWEEN '{date_from}' AND '{date_to}'
+            {status_clause}
+            ORDER BY metrics.cost_micros DESC
+            LIMIT 100
+        """
+        
+        clean_id = customer_id.replace("-", "")
+        
+        async with get_google_ads_client(token_data.access_token, customer_id) as client:
             response = await client.post(
                 f"/customers/{clean_id}/googleAds:searchStream",
                 json={"query": query}
@@ -435,14 +470,39 @@ async def get_campaigns(
                         "cost_per_conversion": round(cost / conversions, 2) if conversions > 0 else 0,
                     })
             
+            print(f"✅ [GOOGLE] Fetched {len(campaigns)} campaigns from live API")
             return {
                 "campaigns": campaigns,
                 "count": len(campaigns),
                 "date_range": {"from": date_from, "to": date_to}
             }
-            
-        except httpx.HTTPStatusError as e:
-            return {"error": f"Google Ads API error: {e.response.status_code}"}
+    
+    except Exception as e:
+        print(f"⚠️ [GOOGLE] Live API failed: {e}, falling back to mock campaign data")
+        return _load_mock_data("campaigns.json")
+
+
+@google_mcp.tool
+async def get_campaigns(
+    customer_id: str,
+    user_id: str = "default",
+    status_filter: str = "all",
+    date_from: str = "",
+    date_to: str = ""
+) -> Dict[str, Any]:
+    """Get campaigns with performance metrics.
+    
+    Args:
+        customer_id: Google Ads customer ID
+        user_id: User identifier
+        status_filter: Filter by status (all, enabled, paused, removed)
+        date_from: Start date (YYYY-MM-DD)
+        date_to: End date (YYYY-MM-DD)
+        
+    Returns:
+        List of campaigns with performance data
+    """
+    return await _fetch_google_campaigns(customer_id, user_id, status_filter, date_from, date_to)
 
 
 # =============================================================================

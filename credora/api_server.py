@@ -1561,6 +1561,29 @@ async def get_dashboard_kpis(request: Request):
     """Get dashboard KPIs - aggregates data from multiple sources."""
     user = require_auth(request)
     
+    # Check for mock mode - return demo KPIs without hitting Java engine
+    if os.getenv("MOCK_MODE", "").lower() == "true":
+        print(f"📦 [DASHBOARD] MOCK_MODE enabled, returning demo KPIs")
+        return {
+            "revenue": 125840.50,
+            "netProfit": 42520.30,
+            "cashRunway": 185,
+            "topSku": {
+                "sku": "SKU-WATCH-001",
+                "name": "Premium Smart Watch",
+                "contribution_margin": 45.2,
+                "units_sold": 342
+            },
+            "worstCampaign": {
+                "id": "camp_2385123456789",
+                "name": "Winter Promo 2025",
+                "roas": 0.85,
+                "spend": 1250.00
+            },
+            "hasConnectedPlatforms": True,
+            "isMockData": True
+        }
+    
     # Get the actual database UUID for the user
     user_uuid = await db_get_user_uuid(user.id)
     print(f"[Dashboard] user.id={user.id}, resolved user_uuid={user_uuid}")

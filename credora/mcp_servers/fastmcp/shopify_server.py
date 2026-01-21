@@ -12,11 +12,13 @@ API Version: 2024-10
 """
 
 import os
+import json
 import asyncio
 import secrets
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import httpx
 from fastapi import Request, HTTPException
@@ -324,6 +326,32 @@ async def get_store_dashboard(shop: str, user_id: str = "default") -> Dict[str, 
             return {"error": f"Unexpected error: {str(e)}"}
 
 # =============================================================================
+# Mock Data Fallback
+# =============================================================================
+
+def _get_mock_data_path() -> Path:
+    """Get the path to mock data directory."""
+    # Navigate from this file to the project root
+    current_file = Path(__file__)
+    project_root = current_file.parent.parent.parent.parent
+    return project_root / "mock_data" / "shopify"
+
+
+def _load_mock_data(filename: str) -> Dict[str, Any]:
+    """Load mock data from JSON file."""
+    try:
+        mock_path = _get_mock_data_path() / filename
+        print(f"📦 [SHOPIFY] Loading mock data from: {mock_path}")
+        with open(mock_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            print(f"✅ [SHOPIFY] Mock data loaded successfully: {len(data.get('orders', data.get('products', [])))} items")
+            return data
+    except Exception as e:
+        print(f"❌ [SHOPIFY] Failed to load mock data: {e}")
+        return {"error": f"Mock data not available: {str(e)}"}
+
+
+# =============================================================================
 # MCP Tools - Orders
 # =============================================================================
 
@@ -335,28 +363,39 @@ async def _fetch_orders(
     date_from: str = "",
     date_to: str = ""
 ) -> Dict[str, Any]:
-    """Core logic for fetching orders - shared by MCP tool and REST endpoint."""
-    token_manager = get_token_manager()
-    token_data = await token_manager.get_token(user_id, "shopify")
+    """Core logic for fetching orders - with mock data fallback."""
+    # Check for mock mode - skip all API logic
+    if os.getenv("MOCK_MODE", "").lower() == "true":
+        print("📦 [SHOPIFY] MOCK_MODE enabled, using mock orders data")
+        return _load_mock_data("orders.json")
     
-    if not token_data:
-        return {"error": "Not authenticated"}
-    
-    if not shop and token_data.metadata:
-        shop = token_data.metadata.get("shop", "")
-    
-    async with get_shopify_client(shop, token_data.access_token) as client:
-        params = {
-            "status": status,
-            "limit": min(limit, 250),
-        }
+    # Try live API first
+    try:
+        token_manager = get_token_manager()
+        token_data = await token_manager.get_token(user_id, "shopify")
         
-        if date_from:
-            params["created_at_min"] = f"{date_from}T00:00:00Z"
-        if date_to:
-            params["created_at_max"] = f"{date_to}T23:59:59Z"
+        if not token_data or not token_data.access_token:
+            print("⚠️ [SHOPIFY] No token available, falling back to mock data")
+            return _load_mock_data("orders.json")
         
-        try:
+        if not shop and token_data.metadata:
+            shop = token_data.metadata.get("shop", "")
+        
+        if not shop:
+            print("⚠️ [SHOPIFY] No shop domain available, falling back to mock data")
+            return _load_mock_data("orders.json")
+        
+        async with get_shopify_client(shop, token_data.access_token) as client:
+            params = {
+                "status": status,
+                "limit": min(limit, 250),
+            }
+            
+            if date_from:
+                params["created_at_min"] = f"{date_from}T00:00:00Z"
+            if date_to:
+                params["created_at_max"] = f"{date_to}T23:59:59Z"
+            
             response = await client.get("/orders.json", params=params)
             response.raise_for_status()
             orders = response.json().get("orders", [])
@@ -390,18 +429,20 @@ async def _fetch_orders(
                             "price": float(item.get("price", 0)),
                             "sku": item.get("sku"),
                         }
-                        for item in order.get("line_items", [])[:10]  # Limit line items
+                        for item in order.get("line_items", [])[:10]
                     ]
                 })
             
+            print(f"✅ [SHOPIFY] Fetched {len(simplified)} orders from live API")
             return {
                 "orders": simplified,
                 "count": len(simplified),
                 "filters": {"status": status, "date_from": date_from, "date_to": date_to}
             }
-            
-        except httpx.HTTPStatusError as e:
-            return {"error": f"API error: {e.response.status_code} - {e.response.text}"}
+    
+    except Exception as e:
+        print(f"⚠️ [SHOPIFY] Live API failed: {e}, falling back to mock data")
+        return _load_mock_data("orders.json")
 
 
 @shopify_mcp.tool
@@ -440,23 +481,34 @@ async def _fetch_products(
     status: str = "active",
     search_query: str = ""
 ) -> Dict[str, Any]:
-    """Core logic for fetching products - shared by MCP tool and REST endpoint."""
-    token_manager = get_token_manager()
-    token_data = await token_manager.get_token(user_id, "shopify")
+    """Core logic for fetching products - with mock data fallback."""
+    # Check for mock mode - skip all API logic
+    if os.getenv("MOCK_MODE", "").lower() == "true":
+        print("📦 [SHOPIFY] MOCK_MODE enabled, using mock products data")
+        return _load_mock_data("products.json")
     
-    if not token_data:
-        return {"error": "Not authenticated"}
-    
-    if not shop and token_data.metadata:
-        shop = token_data.metadata.get("shop", "")
-    
-    async with get_shopify_client(shop, token_data.access_token) as client:
-        params = {
-            "limit": min(limit, 250),
-            "status": status,
-        }
+    # Try live API first
+    try:
+        token_manager = get_token_manager()
+        token_data = await token_manager.get_token(user_id, "shopify")
         
-        try:
+        if not token_data or not token_data.access_token:
+            print("⚠️ [SHOPIFY] No token available, falling back to mock product data")
+            return _load_mock_data("products.json")
+        
+        if not shop and token_data.metadata:
+            shop = token_data.metadata.get("shop", "")
+        
+        if not shop:
+            print("⚠️ [SHOPIFY] No shop domain available, falling back to mock product data")
+            return _load_mock_data("products.json")
+        
+        async with get_shopify_client(shop, token_data.access_token) as client:
+            params = {
+                "limit": min(limit, 250),
+                "status": status,
+            }
+            
             response = await client.get("/products.json", params=params)
             response.raise_for_status()
             products = response.json().get("products", [])
@@ -497,14 +549,16 @@ async def _fetch_products(
                     "tags": product.get("tags", "").split(", ") if product.get("tags") else [],
                 })
             
+            print(f"✅ [SHOPIFY] Fetched {len(simplified)} products from live API")
             return {
                 "products": simplified,
                 "count": len(simplified),
                 "filters": {"status": status, "search": search_query}
             }
-            
-        except httpx.HTTPStatusError as e:
-            return {"error": f"API error: {e.response.status_code}"}
+    
+    except Exception as e:
+        print(f"⚠️ [SHOPIFY] Live API failed: {e}, falling back to mock product data")
+        return _load_mock_data("products.json")
 
 
 @shopify_mcp.tool

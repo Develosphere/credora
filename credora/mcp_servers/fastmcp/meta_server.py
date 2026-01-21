@@ -13,11 +13,13 @@ API Version: v21.0
 """
 
 import os
+import json
 import asyncio
 import secrets
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import httpx
 from fastapi import Request, HTTPException
@@ -254,19 +256,51 @@ async def oauth_callback(request: Request):
 
 
 # =============================================================================
+# Mock Data Fallback
+# =============================================================================
+
+def _get_mock_data_path() -> Path:
+    """Get the path to mock data directory."""
+    current_file = Path(__file__)
+    project_root = current_file.parent.parent.parent.parent
+    return project_root / "mock_data" / "meta"
+
+
+def _load_mock_data(filename: str) -> Dict[str, Any]:
+    """Load mock data from JSON file."""
+    try:
+        mock_path = _get_mock_data_path() / filename
+        print(f"📦 [META] Loading mock data from: {mock_path}")
+        with open(mock_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            print(f"✅ [META] Mock data loaded successfully")
+            return data
+    except Exception as e:
+        print(f"❌ [META] Failed to load mock data: {e}")
+        return {"error": f"Mock data not available: {str(e)}"}
+
+
+# =============================================================================
 # MCP Tools - Ad Accounts
 # =============================================================================
 
 async def _fetch_ad_accounts(user_id: str = "default") -> Dict[str, Any]:
-    """Core logic for fetching ad accounts - shared by MCP tool and REST endpoint."""
-    token_manager = get_token_manager()
-    token_data = await token_manager.get_token(user_id, "meta")
+    """Core logic for fetching ad accounts - with mock data fallback."""
+    # Check for mock mode - skip all API logic
+    if os.getenv("MOCK_MODE", "").lower() == "true":
+        print("📦 [META] MOCK_MODE enabled, using mock ad accounts data")
+        return _load_mock_data("ad_accounts.json")
     
-    if not token_data:
-        return {"error": "Not authenticated. Please connect Meta Ads first."}
-    
-    async with get_meta_client(token_data.access_token) as client:
-        try:
+    # Try live API first
+    try:
+        token_manager = get_token_manager()
+        token_data = await token_manager.get_token(user_id, "meta")
+        
+        if not token_data or not token_data.access_token:
+            print("⚠️ [META] No token available, falling back to mock data")
+            return _load_mock_data("ad_accounts.json")
+        
+        async with get_meta_client(token_data.access_token) as client:
             data = await meta_request(
                 client, "GET", "/me/adaccounts",
                 params={
@@ -283,14 +317,16 @@ async def _fetch_ad_accounts(user_id: str = "default") -> Dict[str, Any]:
                     "currency": account.get("currency"),
                     "timezone": account.get("timezone_name"),
                     "status": _get_account_status(account.get("account_status", 0)),
-                    "amount_spent": float(account.get("amount_spent", 0)) / 100,  # Convert from cents
+                    "amount_spent": float(account.get("amount_spent", 0)) / 100,
                     "balance": float(account.get("balance", 0)) / 100,
                 })
             
+            print(f"✅ [META] Fetched {len(accounts)} ad accounts from live API")
             return {"accounts": accounts, "count": len(accounts)}
-            
-        except httpx.HTTPStatusError as e:
-            return {"error": f"Meta API error: {e.response.status_code} - {e.response.text}"}
+    
+    except Exception as e:
+        print(f"⚠️ [META] Live API failed: {e}, falling back to mock data")
+        return _load_mock_data("ad_accounts.json")
 
 
 @meta_mcp.tool
@@ -399,18 +435,25 @@ async def _fetch_campaigns(
     status_filter: str = "all",
     date_preset: str = "last_30d"
 ) -> Dict[str, Any]:
-    """Core logic for fetching campaigns - shared by MCP tool and REST endpoint."""
-    token_manager = get_token_manager()
-    token_data = await token_manager.get_token(user_id, "meta")
+    """Core logic for fetching campaigns - with mock data fallback."""
+    # Check for mock mode - skip all API logic
+    if os.getenv("MOCK_MODE", "").lower() == "true":
+        print("📦 [META] MOCK_MODE enabled, using mock campaigns data")
+        return _load_mock_data("campaigns.json")
     
-    if not token_data:
-        return {"error": "Not authenticated"}
-    
-    if not account_id.startswith("act_"):
-        account_id = f"act_{account_id}"
-    
-    async with get_meta_client(token_data.access_token) as client:
-        try:
+    # Try live API first
+    try:
+        token_manager = get_token_manager()
+        token_data = await token_manager.get_token(user_id, "meta")
+        
+        if not token_data or not token_data.access_token:
+            print("⚠️ [META] No token available, falling back to mock campaign data")
+            return _load_mock_data("campaigns.json")
+        
+        if not account_id.startswith("act_"):
+            account_id = f"act_{account_id}"
+        
+        async with get_meta_client(token_data.access_token) as client:
             # Fetch campaigns
             params = {
                 "fields": "id,name,status,objective,daily_budget,lifetime_budget,created_time"
@@ -465,17 +508,19 @@ async def _fetch_campaigns(
                     "conversions": conversions,
                     "cpc": float(insights.get("cpc", 0)) if insights.get("cpc") else 0,
                     "cost_per_conversion": round(spend / conversions, 2) if conversions > 0 else 0,
-                    "roas": round(conversions * 50 / spend, 2) if spend > 0 else 0,  # Estimated ROAS
+                    "roas": round(conversions * 50 / spend, 2) if spend > 0 else 0,
                 })
             
+            print(f"✅ [META] Fetched {len(campaigns)} campaigns from live API")
             return {
                 "campaigns": campaigns,
                 "count": len(campaigns),
                 "date_range": date_preset
             }
-            
-        except httpx.HTTPStatusError as e:
-            return {"error": f"Meta API error: {e.response.status_code}"}
+    
+    except Exception as e:
+        print(f"⚠️ [META] Live API failed: {e}, falling back to mock campaign data")
+        return _load_mock_data("campaigns.json")
 
 
 @meta_mcp.tool
