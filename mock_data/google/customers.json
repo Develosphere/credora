@@ -1,0 +1,19 @@
+{
+    "customers": [
+        {
+            "customer_id": "1234567890",
+            "name": "Credora Demo Account",
+            "currency": "USD",
+            "timezone": "America/New_York",
+            "status": "ENABLED"
+        },
+        {
+            "customer_id": "9876543210",
+            "name": "E-Commerce Growth",
+            "currency": "USD",
+            "timezone": "America/Los_Angeles",
+            "status": "ENABLED"
+        }
+    ],
+    "count": 2
+}

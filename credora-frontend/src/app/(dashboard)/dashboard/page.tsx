@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Wallet, PiggyBank, TrendingUp, MoreHorizontal, Plus, ArrowRight, Search, Filter, ChevronDown, RefreshCw, Loader2 } from "lucide-react";
+import { Wallet, PiggyBank, TrendingUp, MoreHorizontal, Plus, ArrowRight, Filter, ChevronDown, RefreshCw, Loader2 } from "lucide-react";
 import { useDashboard } from "@/lib/hooks/useDashboard";
 import { pythonApi } from "@/lib/api/client";
 
@@ -377,14 +377,6 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-white font-semibold text-lg">Recent Activities</h2>
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Search"
-                className="w-44 bg-[#282828] border border-[#333] rounded-xl py-2 pl-9 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-credora-orange/50 transition-colors"
-              />
-            </div>
             <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#282828] border border-[#333] text-gray-400 text-sm font-medium hover:border-[#444] transition-colors">
               <Filter className="h-4 w-4" /> Filter
             </button>

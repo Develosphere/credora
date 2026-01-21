@@ -3,20 +3,27 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { LayoutDashboard, BarChart3, ArrowLeftRight, FileText, RefreshCw, CreditCard, MessageSquare, Search, Sparkles, Command, X, Zap } from "lucide-react";
+import { useState, useEffect } from "react";
+import { LayoutDashboard, TrendingUp, FileText, DollarSign, Package, Megaphone, MessageSquare, Search, Sparkles, Command, X, Zap, Users, PlaySquare, Settings, Activity } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Analytics", href: "/insights", icon: BarChart3, badge: "05" },
-  { name: "Transactions", href: "/pnl", icon: ArrowLeftRight },
-  { name: "Invoices", href: "/forecast", icon: FileText },
+  { name: "Insights", href: "/insights", icon: TrendingUp },
+  { name: "P&L Statement", href: "/pnl", icon: FileText },
+  { name: "Cash Forecast", href: "/forecast", icon: DollarSign },
 ];
 
 const features = [
-  { name: "Recurring", href: "/sku-analysis", icon: RefreshCw, badge: "16" },
-  { name: "Subscriptions", href: "/campaigns", icon: CreditCard },
-  { name: "Feedback", href: "/chat", icon: MessageSquare },
+  { name: "SKU Analysis", href: "/sku-analysis", icon: Package },
+  { name: "Campaigns", href: "/campaigns", icon: Megaphone },
+  { name: "AI CFO Chat", href: "/chat", icon: MessageSquare },
+  { name: "Competitor", href: "/competitor", icon: Users },
+  { name: "What-If", href: "/whatif", icon: PlaySquare },
+];
+
+const system = [
+  { name: "Settings", href: "/settings", icon: Settings },
+  { name: "Status", href: "/status", icon: Activity },
 ];
 
 export function DashboardSidebar() {
@@ -33,6 +40,38 @@ export function DashboardSidebar() {
   const handleLearnMoreClick = () => {
     router.push("/#pricing");
   };
+
+  // Combine all navigation items for search
+  const allItems = [...navigation, ...features, ...system];
+
+  // Filter items based on search query
+  const filteredNavigation = searchQuery 
+    ? navigation.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : navigation;
+
+  const filteredFeatures = searchQuery
+    ? features.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : features;
+
+  const filteredSystem = searchQuery
+    ? system.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : system;
+
+  // Handle keyboard shortcut (Cmd+K or Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        const searchInput = document.getElementById('sidebar-search') as HTMLInputElement;
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <aside className="flex h-full w-64 flex-col bg-[#1a1a1a] border-r border-[#2a2a2a]">
@@ -55,6 +94,7 @@ export function DashboardSidebar() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
           <input
+            id="sidebar-search"
             type="text"
             placeholder="Search"
             value={searchQuery}
@@ -65,58 +105,84 @@ export function DashboardSidebar() {
             <Command className="h-3 w-3" /><span className="text-[10px]">K</span>
           </div>
         </div>
+        {searchQuery && (
+          <div className="mt-2 text-xs text-gray-500">
+            Found {filteredNavigation.length + filteredFeatures.length + filteredSystem.length} results
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-2 overflow-y-auto">
         <div className="space-y-0.5">
-          {navigation.map((item) => {
+          {filteredNavigation.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   isActive ? "bg-[#252525] text-white" : "text-gray-400 hover:text-white hover:bg-[#222]"
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <item.icon className={`h-4 w-4 ${isActive ? "text-credora-orange" : ""}`} />
-                  <span>{item.name}</span>
-                </div>
-                {item.badge && (
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${isActive ? "bg-credora-orange/20 text-credora-orange" : "bg-[#333] text-gray-400"}`}>
-                    {item.badge}
-                  </span>
-                )}
+                <item.icon className={`h-4 w-4 ${isActive ? "text-credora-orange" : ""}`} />
+                <span>{item.name}</span>
               </Link>
             );
           })}
         </div>
 
-        <div className="mt-6">
-          <p className="px-3 mb-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Features</p>
-          <div className="space-y-0.5">
-            {features.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive ? "bg-[#252525] text-white" : "text-gray-400 hover:text-white hover:bg-[#222]"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
+        {filteredFeatures.length > 0 && (
+          <div className="mt-6">
+            <p className="px-3 mb-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Features</p>
+            <div className="space-y-0.5">
+              {filteredFeatures.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive ? "bg-[#252525] text-white" : "text-gray-400 hover:text-white hover:bg-[#222]"
+                    }`}
+                  >
                     <item.icon className={`h-4 w-4 ${isActive ? "text-credora-orange" : ""}`} />
                     <span>{item.name}</span>
-                  </div>
-                  {item.badge && <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#333] text-gray-400">{item.badge}</span>}
-                </Link>
-              );
-            })}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
+
+        {filteredSystem.length > 0 && (
+          <div className="mt-6">
+            <p className="px-3 mb-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">System</p>
+            <div className="space-y-0.5">
+              {filteredSystem.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive ? "bg-[#252525] text-white" : "text-gray-400 hover:text-white hover:bg-[#222]"
+                    }`}
+                  >
+                    <item.icon className={`h-4 w-4 ${isActive ? "text-credora-orange" : ""}`} />
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {searchQuery && filteredNavigation.length === 0 && filteredFeatures.length === 0 && filteredSystem.length === 0 && (
+          <div className="px-3 py-8 text-center text-sm text-gray-500">
+            No results found for "{searchQuery}"
+          </div>
+        )}
       </nav>
 
       {/* Upgrade Card */}

@@ -1,12 +1,6 @@
 "use client";
 
-/**
- * Settings Page
- * Displays user profile, platform connections, preferences, and account management
- * Requirements: 14.1, 14.2, 14.3, 14.4, 14.5
- */
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   User,
@@ -24,6 +18,8 @@ import {
   AlertTriangle,
   X,
   Store,
+  Camera,
+  Upload,
 } from "lucide-react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { platformsApi } from "@/lib/api/platforms";
@@ -79,12 +75,19 @@ interface UserPreferences {
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, isLoading: isAuthLoading, logout, isLoggingOut } = useAuth();
+  const { user, isLoading: isAuthLoading, logout, isLoggingOut, refetchUser } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Platform connection state
   const [platformStatuses, setPlatformStatuses] = useState<PlatformStatus[]>([]);
   const [isLoadingPlatforms, setIsLoadingPlatforms] = useState(true);
   const [reconnectingPlatform, setReconnectingPlatform] = useState<PlatformType | null>(null);
+
+  // Profile picture state
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [isUploadingPicture, setIsUploadingPicture] = useState(false);
+  const [pendingPictureFile, setPendingPictureFile] = useState<File | null>(null);
+  const [hasUnsavedPicture, setHasUnsavedPicture] = useState(false);
 
   // Preferences state
   const [preferences, setPreferences] = useState<UserPreferences>({
@@ -108,7 +111,108 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchPlatformStatuses();
     fetchPreferences();
-  }, []);
+    // Initialize profile picture from user
+    if (user?.picture) {
+      setProfilePicture(user.picture);
+    }
+  }, [user]);
+
+  const handleProfilePictureClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleProfilePictureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+
+    // Convert to base64 for preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProfilePicture(reader.result as string);
+      setPendingPictureFile(file);
+      setHasUnsavedPicture(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveProfilePicture = async () => {
+    if (!pendingPictureFile) return;
+
+    setIsUploadingPicture(true);
+
+    try {
+      // Get session token from cookies
+      const getSessionToken = (): string | null => {
+        const cookies = document.cookie.split(";");
+        for (const cookie of cookies) {
+          const [name, value] = cookie.trim().split("=");
+          if (name === "auth_token" || name === "session_token") {
+            return value;
+          }
+        }
+        return null;
+      };
+
+      const token = getSessionToken();
+      if (!token) {
+        throw new Error("Not authenticated");
+      }
+
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('profile_picture', pendingPictureFile);
+
+      // Upload to server using fetch directly (not pythonApi to avoid JSON content-type)
+      const apiUrl = process.env.NEXT_PUBLIC_PYTHON_API_URL || "http://localhost:8000";
+      const response = await fetch(`${apiUrl}/user/profile-picture`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Upload failed');
+      }
+
+      // Success - refetch user to update state
+      await refetchUser();
+      setHasUnsavedPicture(false);
+      setPendingPictureFile(null);
+      
+      // Show success message
+      alert('Profile picture updated successfully!');
+    } catch (error) {
+      console.error('Failed to upload profile picture:', error);
+      alert(`Failed to upload profile picture: ${error instanceof Error ? error.message : 'Please try again.'}`);
+      // Revert to original picture on error
+      setProfilePicture(user?.picture || null);
+    } finally {
+      setIsUploadingPicture(false);
+    }
+  };
+
+  const handleCancelPictureChange = () => {
+    // Revert to original picture
+    setProfilePicture(user?.picture || null);
+    setPendingPictureFile(null);
+    setHasUnsavedPicture(false);
+  };
 
   const fetchPlatformStatuses = async () => {
     try {
@@ -256,23 +360,79 @@ export default function SettingsPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          {user?.picture ? (
-            <img
-              src={user.picture}
-              alt={user.name}
-              className="h-16 w-16 rounded-2xl shadow-md"
+          <div className="relative group">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleProfilePictureChange}
+              className="hidden"
             />
-          ) : (
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-credora-orange to-credora-red flex items-center justify-center shadow-lg shadow-credora-orange/25">
-              <User className="h-8 w-8 text-white" />
-            </div>
-          )}
-          <div>
+            {profilePicture || user?.picture ? (
+              <img
+                src={profilePicture || user?.picture}
+                alt={user?.name || 'Profile'}
+                className="h-20 w-20 rounded-2xl shadow-md object-cover"
+              />
+            ) : (
+              <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-credora-orange to-credora-red flex items-center justify-center shadow-lg shadow-credora-orange/25">
+                <User className="h-10 w-10 text-white" />
+              </div>
+            )}
+            <button
+              onClick={handleProfilePictureClick}
+              disabled={isUploadingPicture}
+              className="absolute inset-0 rounded-2xl bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+            >
+              {isUploadingPicture ? (
+                <Loader2 className="h-6 w-6 text-white animate-spin" />
+              ) : (
+                <div className="flex flex-col items-center gap-1">
+                  <Camera className="h-6 w-6 text-white" />
+                  <span className="text-xs text-white font-medium">Change</span>
+                </div>
+              )}
+            </button>
+          </div>
+          <div className="flex-1">
             <h3 className="font-semibold text-lg text-white">{user?.name}</h3>
             <p className="text-gray-400">{user?.email}</p>
             <p className="text-sm text-gray-500 mt-1">
               Member since {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
             </p>
+            <div className="flex items-center gap-3 mt-3">
+              <button
+                onClick={handleProfilePictureClick}
+                disabled={isUploadingPicture}
+                className="flex items-center gap-2 text-sm text-credora-orange hover:text-credora-red transition-colors"
+              >
+                <Upload className="h-4 w-4" />
+                Upload new picture
+              </button>
+              {hasUnsavedPicture && (
+                <>
+                  <button
+                    onClick={handleSaveProfilePicture}
+                    disabled={isUploadingPicture}
+                    className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-credora-orange to-credora-red text-white text-sm font-medium hover:shadow-lg hover:shadow-credora-orange/25 transition-all disabled:opacity-50"
+                  >
+                    {isUploadingPicture ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4" />
+                    )}
+                    Save
+                  </button>
+                  <button
+                    onClick={handleCancelPictureChange}
+                    disabled={isUploadingPicture}
+                    className="px-4 py-1.5 rounded-lg border border-[#333] text-gray-300 text-sm font-medium hover:bg-[#282828] transition-all disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </section>

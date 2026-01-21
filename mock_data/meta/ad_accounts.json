@@ -1,0 +1,35 @@
+{
+    "accounts": [
+        {
+            "id": "act_1449334012055625",
+            "account_id": "1449334012055625",
+            "name": "Credora Demo Business",
+            "currency": "USD",
+            "timezone": "America/New_York",
+            "status": "ACTIVE",
+            "amount_spent": 15420.50,
+            "balance": 2500.00
+        },
+        {
+            "id": "act_645360573922617",
+            "account_id": "645360573922617",
+            "name": "E-Commerce Store Ads",
+            "currency": "USD",
+            "timezone": "America/Los_Angeles",
+            "status": "ACTIVE",
+            "amount_spent": 8750.25,
+            "balance": 1200.00
+        },
+        {
+            "id": "act_1758875837819400",
+            "account_id": "1758875837819400",
+            "name": "Brand Awareness Campaign",
+            "currency": "USD",
+            "timezone": "America/Chicago",
+            "status": "ACTIVE",
+            "amount_spent": 5230.00,
+            "balance": 800.00
+        }
+    ],
+    "count": 3
+}

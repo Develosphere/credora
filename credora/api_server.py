@@ -21,9 +21,10 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException, Query, Request, Response, Depends
+from fastapi import FastAPI, HTTPException, Query, Request, Response, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import httpx
 import uvicorn
@@ -99,7 +100,7 @@ async def db_get_user(user_id: str) -> Optional[Dict[str, Any]]:
                 "id": row["external_id"],
                 "email": row["email"] or row["external_id"],
                 "name": row["name"] or row["external_id"].split("@")[0],
-                "picture": None,  # Not stored in DB yet
+                "picture": row.get("picture"),  # Include picture field
                 "createdAt": row["created_at"].isoformat() if row["created_at"] else datetime.now().isoformat(),
                 "onboardingComplete": True,  # TODO: Add to DB schema
             }
@@ -621,6 +622,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files for uploaded profile pictures
+import pathlib
+uploads_dir = pathlib.Path("uploads")
+uploads_dir.mkdir(exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 # ============================================================================
@@ -1358,6 +1365,78 @@ async def mark_onboarding_complete(request: Request):
         _users[user.id]["onboardingComplete"] = True
     
     return {"success": True}
+
+
+@app.post("/user/profile-picture")
+async def upload_profile_picture(
+    request: Request,
+    profile_picture: UploadFile = File(...)
+):
+    """Upload and save user profile picture.
+    
+    Accepts an image file, validates it, saves it to disk, and updates the user record.
+    """
+    user = require_auth(request)
+    
+    # Validate file type
+    if not profile_picture.content_type or not profile_picture.content_type.startswith('image/'):
+        raise HTTPException(status_code=400, detail="File must be an image")
+    
+    # Validate file size (max 5MB)
+    contents = await profile_picture.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Image size must be less than 5MB")
+    
+    try:
+        # Create uploads directory if it doesn't exist
+        import pathlib
+        uploads_dir = pathlib.Path("uploads/profile-pictures")
+        uploads_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Generate unique filename
+        import uuid
+        file_extension = profile_picture.filename.split('.')[-1] if '.' in profile_picture.filename else 'jpg'
+        unique_filename = f"{user.id}_{uuid.uuid4().hex[:8]}.{file_extension}"
+        file_path = uploads_dir / unique_filename
+        
+        # Save file
+        with open(file_path, 'wb') as f:
+            f.write(contents)
+        
+        # Generate URL for the file (relative to API server)
+        picture_url = f"/uploads/profile-pictures/{unique_filename}"
+        
+        # Update user in memory
+        if user.id in _users:
+            _users[user.id]["picture"] = picture_url
+        
+        # Update user in database
+        db = await get_db()
+        if db:
+            try:
+                await db.execute(
+                    """
+                    UPDATE users SET picture = $2, updated_at = NOW()
+                    WHERE external_id = $1
+                    """,
+                    user.id,
+                    picture_url
+                )
+                print(f"Profile picture updated in DB for user: {user.id}")
+            except Exception as e:
+                print(f"Failed to update profile picture in DB: {e}")
+        
+        return {
+            "success": True,
+            "picture": picture_url,
+            "user": _users.get(user.id)
+        }
+        
+    except Exception as e:
+        print(f"Profile picture upload error: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to upload profile picture: {str(e)}")
 
 
 # ============================================================================

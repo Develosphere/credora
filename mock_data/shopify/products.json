@@ -1,0 +1,219 @@
+{
+    "products": [
+        {
+            "id": 8847123456789,
+            "title": "Wireless Bluetooth Headphones",
+            "handle": "wireless-bluetooth-headphones",
+            "status": "active",
+            "product_type": "Electronics",
+            "vendor": "TechBrand",
+            "created_at": "2025-06-15T10:00:00Z",
+            "updated_at": "2026-01-10T14:30:00Z",
+            "price": 149.99,
+            "compare_at_price": 199.99,
+            "sku": "WBH-001",
+            "total_inventory": 45,
+            "variants_count": 3,
+            "tags": [
+                "electronics",
+                "audio",
+                "wireless",
+                "bestseller"
+            ]
+        },
+        {
+            "id": 8847123456790,
+            "title": "Smart Watch Pro Series",
+            "handle": "smart-watch-pro-series",
+            "status": "active",
+            "product_type": "Wearables",
+            "vendor": "TechBrand",
+            "created_at": "2025-08-20T09:00:00Z",
+            "updated_at": "2026-01-15T11:00:00Z",
+            "price": 499.99,
+            "compare_at_price": 599.99,
+            "sku": "SWP-001",
+            "total_inventory": 22,
+            "variants_count": 4,
+            "tags": [
+                "wearables",
+                "smartwatch",
+                "fitness",
+                "premium"
+            ]
+        },
+        {
+            "id": 8847123456791,
+            "title": "Phone Case Premium",
+            "handle": "phone-case-premium",
+            "status": "active",
+            "product_type": "Accessories",
+            "vendor": "CaseCraft",
+            "created_at": "2025-04-10T08:00:00Z",
+            "updated_at": "2026-01-12T09:30:00Z",
+            "price": 32.50,
+            "compare_at_price": 45.00,
+            "sku": "PC-PRE-002",
+            "total_inventory": 150,
+            "variants_count": 8,
+            "tags": [
+                "accessories",
+                "phone",
+                "protective",
+                "popular"
+            ]
+        },
+        {
+            "id": 8847123456792,
+            "title": "USB-C Cable 3-Pack",
+            "handle": "usb-c-cable-3-pack",
+            "status": "active",
+            "product_type": "Cables",
+            "vendor": "ConnectPro",
+            "created_at": "2025-03-05T12:00:00Z",
+            "updated_at": "2026-01-08T16:00:00Z",
+            "price": 29.99,
+            "compare_at_price": 39.99,
+            "sku": "USB-C-3P",
+            "total_inventory": 200,
+            "variants_count": 2,
+            "tags": [
+                "cables",
+                "usb-c",
+                "charging",
+                "essentials"
+            ]
+        },
+        {
+            "id": 8847123456793,
+            "title": "Mechanical Keyboard RGB",
+            "handle": "mechanical-keyboard-rgb",
+            "status": "active",
+            "product_type": "Computer Peripherals",
+            "vendor": "KeyMaster",
+            "created_at": "2025-09-01T10:00:00Z",
+            "updated_at": "2026-01-18T13:00:00Z",
+            "price": 199.99,
+            "compare_at_price": 249.99,
+            "sku": "MKR-001",
+            "total_inventory": 35,
+            "variants_count": 3,
+            "tags": [
+                "keyboard",
+                "gaming",
+                "rgb",
+                "mechanical"
+            ]
+        },
+        {
+            "id": 8847123456794,
+            "title": "Portable Charger 20000mAh",
+            "handle": "portable-charger-20000mah",
+            "status": "active",
+            "product_type": "Power",
+            "vendor": "PowerMax",
+            "created_at": "2025-05-15T11:00:00Z",
+            "updated_at": "2026-01-05T10:00:00Z",
+            "price": 79.99,
+            "compare_at_price": 99.99,
+            "sku": "PC-20K",
+            "total_inventory": 80,
+            "variants_count": 2,
+            "tags": [
+                "charger",
+                "portable",
+                "power",
+                "travel"
+            ]
+        },
+        {
+            "id": 8847123456795,
+            "title": "Webcam HD 1080p",
+            "handle": "webcam-hd-1080p",
+            "status": "active",
+            "product_type": "Computer Peripherals",
+            "vendor": "VisionTech",
+            "created_at": "2025-07-20T09:00:00Z",
+            "updated_at": "2026-01-14T15:00:00Z",
+            "price": 89.99,
+            "compare_at_price": 119.99,
+            "sku": "WC-1080",
+            "total_inventory": 55,
+            "variants_count": 1,
+            "tags": [
+                "webcam",
+                "video",
+                "streaming",
+                "work-from-home"
+            ]
+        },
+        {
+            "id": 8847123456796,
+            "title": "Gaming Headset 7.1 Surround",
+            "handle": "gaming-headset-71-surround",
+            "status": "active",
+            "product_type": "Gaming",
+            "vendor": "GameSound",
+            "created_at": "2025-10-10T10:00:00Z",
+            "updated_at": "2026-01-20T12:00:00Z",
+            "price": 179.99,
+            "compare_at_price": 229.99,
+            "sku": "GH-71S",
+            "total_inventory": 28,
+            "variants_count": 2,
+            "tags": [
+                "gaming",
+                "headset",
+                "audio",
+                "7.1-surround"
+            ]
+        },
+        {
+            "id": 8847123456797,
+            "title": "Wireless Mouse",
+            "handle": "wireless-mouse",
+            "status": "active",
+            "product_type": "Computer Peripherals",
+            "vendor": "TechBrand",
+            "created_at": "2025-02-28T14:00:00Z",
+            "updated_at": "2026-01-11T08:00:00Z",
+            "price": 49.99,
+            "compare_at_price": 69.99,
+            "sku": "WM-001",
+            "total_inventory": 120,
+            "variants_count": 3,
+            "tags": [
+                "mouse",
+                "wireless",
+                "ergonomic",
+                "office"
+            ]
+        },
+        {
+            "id": 8847123456798,
+            "title": "Laptop Stand Premium",
+            "handle": "laptop-stand-premium",
+            "status": "active",
+            "product_type": "Office",
+            "vendor": "DeskPro",
+            "created_at": "2025-11-05T09:00:00Z",
+            "updated_at": "2026-01-19T11:00:00Z",
+            "price": 129.99,
+            "compare_at_price": 159.99,
+            "sku": "LSP-001",
+            "total_inventory": 40,
+            "variants_count": 2,
+            "tags": [
+                "laptop",
+                "stand",
+                "ergonomic",
+                "aluminum"
+            ]
+        }
+    ],
+    "count": 10,
+    "filters": {
+        "status": "active",
+        "search": ""
+    }
+}
