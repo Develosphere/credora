@@ -28,6 +28,16 @@ from credora.agents.insight import (
     get_insight_agent,
     INSIGHT_AGENT_INSTRUCTIONS,
 )
+from credora.agents.rag import (
+    create_rag_agent,
+    get_rag_agent,
+    create_faiss_index,
+    retrieve_business_data,
+    search_products,
+    search_orders,
+    search_campaigns,
+    get_business_context,
+)
 from credora.agents.cfo import (
     create_cfo_agent,
     get_cfo_agent,
@@ -59,6 +69,15 @@ __all__ = [
     "create_insight_agent",
     "get_insight_agent",
     "INSIGHT_AGENT_INSTRUCTIONS",
+    # RAG agent
+    "create_rag_agent",
+    "get_rag_agent",
+    "create_faiss_index",
+    "retrieve_business_data",
+    "search_products",
+    "search_orders",
+    "search_campaigns",
+    "get_business_context",
     # CFO orchestrator agent
     "create_cfo_agent",
     "get_cfo_agent",

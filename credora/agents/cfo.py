@@ -14,6 +14,7 @@ from credora.agents.data_fetcher import create_data_fetcher_agent
 from credora.agents.analytics import create_analytics_agent
 from credora.agents.competitor import create_competitor_agent
 from credora.agents.insight import create_insight_agent
+from credora.agents.rag import create_rag_agent
 from credora.tools.cfo import get_session_state, update_session_state
 from credora.tools.connection import (
     list_connected_platforms,
@@ -88,13 +89,18 @@ You coordinate specialized agents based on query intent:
    - Triggers: "show me", "get my", "fetch", "retrieve", sales/orders/products/customers data
    - Only works for connected platforms
    
-3. **Analytics Agent**: For trend analysis and pattern identification
+3. **RAG Data Agent**: For querying business data from vector database
+   - Triggers: "search", "find", "what products", "show orders", "campaign performance"
+   - Uses FAISS vector database with embedded mock data
+   - Best for exploratory queries and data discovery
+   
+4. **Analytics Agent**: For trend analysis and pattern identification
    - Triggers: "analyze", "trends", "patterns", "why did", "compare", "bottlenecks"
    
-4. **Competitor Agent**: For competitor and market information
+5. **Competitor Agent**: For competitor and market information
    - Triggers: "competitor", "competition", "market", "industry benchmark", "compare to others"
    
-5. **Insight Agent**: For recommendations and actionable advice
+6. **Insight Agent**: For recommendations and actionable advice
    - Triggers: "recommend", "what should I", "advice", "suggestions", "how can I improve"
 
 ## State Management
@@ -174,6 +180,7 @@ def create_cfo_agent() -> Agent:
     # Create all specialized agents for handoffs
     onboarding_agent = create_onboarding_agent()
     data_fetcher_agent = create_data_fetcher_agent()
+    rag_agent = create_rag_agent()
     analytics_agent = create_analytics_agent()
     competitor_agent = create_competitor_agent()
     insight_agent = create_insight_agent()
@@ -196,6 +203,7 @@ def create_cfo_agent() -> Agent:
         handoffs=[
             onboarding_agent,
             data_fetcher_agent,
+            rag_agent,
             analytics_agent,
             competitor_agent,
             insight_agent,
@@ -222,6 +230,11 @@ QUERY_INTENTS = {
     "data_fetch": [
         "show me", "get my", "fetch", "retrieve", "display",
         "sales data", "orders", "products", "customers", "revenue"
+    ],
+    "rag_search": [
+        "search", "find", "what products", "show orders", "list",
+        "campaign performance", "best selling", "top products",
+        "recent orders", "ad campaigns"
     ],
     "analytics": [
         "analyze", "analysis", "trend", "pattern", "why did",
