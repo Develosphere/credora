@@ -1,350 +1,419 @@
-# Credora - AI-Powered CFO Platform
+# Credora - AI-Powered CFO Agent Platform
 
-Credora is a comprehensive financial planning and analysis (FP&A) platform that integrates with e-commerce and advertising platforms to provide real-time financial insights, P&L analysis, cash flow forecasting, and AI-powered recommendations.
+An intelligent CFO agent system that provides financial analysis, insights, and recommendations for e-commerce businesses using AI agents, RAG (Retrieval-Augmented Generation), and real-time data integration.
 
-## Features
+## 🚀 Features
 
-- **Dashboard** - Real-time KPIs including revenue, profit, and cash runway
-- **P&L Analysis** - Detailed profit & loss statements with date range selection
-- **Cash Flow Forecast** - Multi-scenario projections (conservative, expected, optimistic)
-- **SKU Analytics** - Unit economics and profitability analysis per product
-- **Campaign Performance** - Ad campaign ranking and ROAS analysis
-- **Competitor Analysis** - 🆕 AI-powered competitor intelligence with automated web scraping
-- **AI Chat Assistant** - Natural language queries about your financial data
-- **Platform Integrations** - Connect Shopify, Google Ads, and Meta Ads
+### ✅ Implemented Features
 
-## Architecture
+#### 1. **AI CFO Chat Agent**
+- Multi-agent orchestration system with specialized agents
+- Natural language interface for business queries
+- Context-aware conversations with session management
+- Automatic agent handoffs based on query intent
 
-The system consists of 4 main components:
+#### 2. **RAG-Based Data Retrieval**
+- FAISS vector database with 35+ embedded business documents
+- Local sentence-transformers embeddings (no API costs)
+- Semantic search across products, orders, and campaigns
+- Fast retrieval with 384-dimensional embeddings
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Frontend      │────▶│   Python API    │────▶│   Java Engine   │
-│   (Next.js)     │     │   (FastAPI)     │     │  (Spring Boot)  │
-│   Port: 3000    │     │   Port: 8000    │     │   Port: 8081    │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                               │
-                               ▼
-                        ┌─────────────────┐
-                        │   MCP Servers   │
-                        │   (FastMCP)     │
-                        │   Port: 8001    │
-                        └─────────────────┘
-                               │
-                               ▼
-                        ┌─────────────────┐
-                        │   PostgreSQL    │
-                        │   (Supabase)    │
-                        └─────────────────┘
-```
+#### 3. **Specialized AI Agents**
+- **CFO Agent**: Main orchestrator for all queries
+- **RAG Data Agent**: Vector database search and retrieval
+- **Data Fetcher Agent**: Live API data from connected platforms
+- **Analytics Agent**: Trend analysis and pattern identification
+- **Competitor Agent**: Market research and competitor analysis
+- **Insight Agent**: Actionable recommendations
+- **Onboarding Agent**: User setup and platform connections
 
-## Prerequisites
+#### 4. **Platform Integrations**
+- **Shopify**: Products, orders, customers, inventory
+- **Google Ads**: Campaigns, keywords, ad groups, performance
+- **Meta Ads**: Facebook/Instagram campaigns and metrics
+- OAuth 2.0 authentication for secure connections
+- Token encryption and secure storage
 
-- **Python 3.12+** with `uv` package manager
-- **Node.js 18+** with npm
-- **Java 17+** with Maven
-- **PostgreSQL** database (Supabase recommended)
-- **Playwright** (for competitor analysis web scraping)
-- **OpenAI API Key** (for AI-powered analysis)
+#### 5. **Financial Analysis Engine (Java)**
+- P&L statement generation
+- Cash flow forecasting with dynamic programming
+- Campaign ranking with heap data structures
+- SKU analysis and profitability tracking
+- What-if scenario simulations
+- Optimal pricing calculations
 
-## Project Structure
+#### 6. **Modern UI/UX**
+- Dark theme with glassmorphism design
+- Real-time chat interface with streaming responses
+- Dashboard with key metrics and visualizations
+- Settings page with platform connection management
+- Profile picture upload with image preview
+- Responsive design for all screen sizes
 
-```
-credora/
-├── credora/                    # Python backend
-│   ├── api_server.py          # Main FastAPI server
-│   ├── config.py              # Configuration
-│   ├── database/              # Database connection & models
-│   ├── services/              # Business logic services
-│   │   └── fpa_cache.py       # FPA caching service
-│   ├── mcp_servers/           # MCP server implementations
-│   │   └── fastmcp/           # FastMCP servers
-│   │       ├── combined_server.py
-│   │       ├── google_server.py
-│   │       ├── meta_server.py
-│   │       ├── shopify_server.py
-│   │       └── token_manager.py
-│   └── tools/                 # Agent tools
-├── credora-engine/            # Java FPA engine
-│   ├── pom.xml
-│   └── src/
-│       └── main/java/com/credora/engine/
-│           ├── EngineApplication.java
-│           ├── controllers/   # REST controllers
-│           ├── services/      # Business logic
-│           ├── models/        # JPA entities
-│           └── repositories/  # Data access
-├── credora-frontend/          # Next.js frontend
-│   ├── package.json
-│   └── src/
-│       ├── app/              # App router pages
-│       ├── components/       # React components
-│       └── lib/              # Utilities & API clients
-├── .env                       # Environment variables
-├── .env.example              # Example environment file
-├── pyproject.toml            # Python dependencies
-└── README.md
-```
+#### 7. **Data Management**
+- PostgreSQL database (Supabase)
+- Automated data synchronization
+- Currency normalization
+- Transaction tracking
+- Session and chat history storage
 
-## Setup Instructions
+#### 8. **Security Features**
+- Token encryption for OAuth credentials
+- Secure session management
+- Environment-based configuration
+- Database connection pooling
 
-### 1. Clone and Install Dependencies
+### 🔧 Technical Stack
 
+**Backend:**
+- Python 3.13 with FastAPI
+- LangChain for RAG implementation
+- FAISS for vector storage
+- OpenRouter API for LLM access
+- AsyncPG for database operations
+
+**Frontend:**
+- Next.js 15 with TypeScript
+- React 19 with Server Components
+- TailwindCSS for styling
+- Framer Motion for animations
+- React Query for state management
+
+**FP&A Engine:**
+- Java 17 with Spring Boot
+- Custom DSA implementations
+- RESTful API endpoints
+
+**AI/ML:**
+- Sentence-transformers (all-MiniLM-L6-v2)
+- OpenRouter-compatible LLMs
+- Multi-agent orchestration
+
+## 📋 Prerequisites
+
+- Python 3.13+
+- Node.js 18+
+- Java 17+
+- PostgreSQL (or Supabase account)
+- OpenRouter API key
+
+## 🛠️ Installation
+
+### 1. Clone Repository
 ```bash
-# Clone the repository
-git clone <repository-url>
+git clone https://github.com/Develosphere/credora.git
 cd credora
+```
 
-# Install Python dependencies
+### 2. Setup Python Environment
+```bash
+# Install uv (Python package manager)
+pip install uv
+
+# Sync dependencies
 uv sync
+```
 
-# Install Playwright browsers (for competitor analysis)
-uv run playwright install chromium
-
-# Install frontend dependencies
+### 3. Setup Frontend
+```bash
 cd credora-frontend
 npm install
 cd ..
-
-# Install Java dependencies
-cd credora-engine
-mvn install -DskipTests
-cd ..
 ```
 
-### 2. Configure Environment Variables
-
-Copy `.env.example` to `.env` and fill in your values:
-
+### 4. Configure Environment
 ```bash
+# Copy example env file
 cp .env.example .env
+
+# Edit .env and add your credentials:
+# - OPENROUTER_API_KEY (required)
+# - DATABASE_URL (required)
+# - Platform credentials (optional)
 ```
 
-Required environment variables:
-
-```env
-# Database
-DATABASE_URL=postgresql://user:password@host:5432/database
-
-# OpenAI API (for AI features including competitor analysis)
-OPENAI_API_KEY=your_openai_api_key
-
-# OpenRouter API (for AI features)
-OPENROUTER_API_KEY=your_openrouter_api_key
-
-# Google OAuth (for user authentication)
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_AUTH_REDIRECT_URI=http://localhost:3000/api/auth/callback
-
-# Google Ads API (for Google Ads integration)
-GOOGLE_REDIRECT_URI=http://localhost:8000/oauth/callback/google
-GOOGLE_DEVELOPER_TOKEN=your_developer_token
-
-# Meta Ads (for Facebook/Instagram Ads integration)
-META_CLIENT_ID=your_meta_app_id
-META_CLIENT_SECRET=your_meta_app_secret
-META_REDIRECT_URI=http://localhost:8000/oauth/callback/meta
-
-# Shopify (for Shopify integration)
-SHOPIFY_CLIENT_ID=your_shopify_api_key
-SHOPIFY_CLIENT_SECRET=your_shopify_api_secret
-SHOPIFY_REDIRECT_URI=http://localhost:8000/oauth/callback/shopify
-```
-
-### 3. Configure Frontend Environment
-
-Create `credora-frontend/.env.local`:
-
-```env
-PYTHON_API_URL=http://localhost:8000
-JAVA_ENGINE_URL=http://localhost:8081
-NEXTAUTH_SECRET=your-secret-key-at-least-32-characters
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
-```
-
-### 4. Database Setup
-
-The system uses PostgreSQL. Required tables are created automatically, but ensure your database has the following tables:
-
-- `users` - User accounts
-- `transactions` - Financial transactions
-- `products` - Product catalog
-- `campaigns` - Ad campaigns
-- `platform_connections` - OAuth connections
-- `tokens` - OAuth tokens
-- `pnl_reports` - Cached P&L reports
-- `forecasts` - Cached forecasts
-
-## Running the Application
-
-You need **4 terminal windows** to run all services:
-
-### Terminal 1: Java FPA Engine (Start First)
-
+### 5. Setup Database
 ```bash
-cd credora-engine
-mvn spring-boot:run
+# Run migrations
+uv run python run_migration.py
 ```
 
-Wait for: `Started EngineApplication in X seconds`
-
-The Java engine runs on **http://localhost:8081**
-
-### Terminal 2: Python API Server
-
+### 6. Build FAISS Index
 ```bash
-cd credora
-uv run python -m uvicorn credora.api_server:app --reload --port 8000
+# Build vector database from mock data
+uv run python build_faiss_index.py
 ```
 
-Wait for: `Application startup complete`
+## 🚀 Running the Application
 
-The API server runs on **http://localhost:8000**
-
-### Terminal 3: MCP Servers (Optional - for platform data sync)
-
+### Start Backend API Server
 ```bash
-cd credora
-uv run python -m credora.mcp_servers.fastmcp.combined_server
+uv run python start_api.py
 ```
+Server runs on: http://localhost:8000
 
-Wait for: `Uvicorn running on http://0.0.0.0:8001`
-
-The MCP servers run on **http://localhost:8001**
-
-### Terminal 4: Frontend
-
+### Start Frontend (in another terminal)
 ```bash
 cd credora-frontend
 npm run dev
 ```
+Frontend runs on: http://localhost:3000
 
-Wait for: `Ready in X.Xs`
-
-The frontend runs on **http://localhost:3000**
-
-## Usage
-
-1. Open **http://localhost:3000** in your browser
-2. Sign in with Google
-3. Connect your platforms (Shopify, Google Ads, Meta Ads) in Settings
-4. View your dashboard, P&L, forecasts, and more
-
-### 🆕 Using Competitor Analysis
-
-The competitor analysis feature helps you understand your market competition:
-
-1. Navigate to **http://localhost:3000/competitor**
-2. Fill in the analysis form:
-   - **Business Type**: e.g., "perfume", "restaurant", "clothing"
-   - **City**: Target location (e.g., "Karachi", "Lahore")
-   - **Max Competitors**: Number of competitors to analyze (3-10 recommended)
-   - **Visible Browser**: Check to watch the analysis in real-time
-3. Click **"Analyze Competitors"**
-4. View results and download the generated report
-
-**Quick Test (Backend Only):**
+### Start Java FP&A Engine (optional)
 ```bash
-# Terminal 1: Start API
-python start_api.py
-
-# Terminal 2: Run test
-python test_competitor_auto.py
-```
-
-**API Usage:**
-```bash
-curl -X POST http://localhost:8000/competitor/analyze \
-  -H "Content-Type: application/json" \
-  -d '{"business_type":"perfume","city":"Karachi","max_competitors":3,"visible_browser":true}'
-```
-
-📖 **Detailed Guide**: See `COMPETITOR_ANALYSIS_SETUP.md` for complete setup instructions  
-⚡ **Quick Reference**: See `QUICK_START.md` for essential commands
-
-## API Endpoints
-
-### Python API (Port 8000)
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/auth/google/login` | GET | Initiate Google OAuth |
-| `/auth/google/callback` | POST | Handle OAuth callback |
-| `/auth/session` | GET | Get current session |
-| `/fpa/dashboard` | GET | Get dashboard KPIs |
-| `/fpa/pnl` | GET | Get P&L statement |
-| `/fpa/forecast` | GET | Get cash flow forecast |
-| `/fpa/sku-analysis` | GET | Get SKU analytics |
-| `/fpa/campaigns` | GET | Get campaign rankings |
-| `/competitor/analyze` | POST | 🆕 Analyze competitors with AI |
-| `/platforms/status` | GET | Get platform connection status |
-| `/platforms/{platform}/oauth` | GET | Initiate platform OAuth |
-| `/health` | GET | Health check |
-
-### Java Engine (Port 8081)
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/pnl/calculate` | POST | Calculate P&L |
-| `/api/forecast/cash` | POST | Generate forecast |
-| `/api/sku/analyze/all` | GET | Analyze all SKUs |
-| `/api/campaigns/ranked` | GET | Get ranked campaigns |
-| `/api/health` | GET | Health check |
-
-## Development
-
-### Running Tests
-
-```bash
-# Python tests
-uv run pytest
-
-# Java tests
 cd credora-engine
-mvn test
+mvn spring-boot:run
+```
+Engine runs on: http://localhost:8081
 
-# Frontend tests
-cd credora-frontend
-npm test
+## 📖 Usage
+
+### 1. Access the Application
+Open http://localhost:3000 in your browser
+
+### 2. Sign In
+- Click "Sign In" and authenticate with Google
+- Complete onboarding if first time
+
+### 3. Connect Platforms (Optional)
+- Go to Settings → Connected Platforms
+- Click "Connect" for Shopify, Google Ads, or Meta Ads
+- Follow OAuth flow to authorize
+
+### 4. Chat with AI CFO
+- Navigate to "AI CFO Chat" page
+- Ask questions like:
+  - "What products do we sell?"
+  - "Show me recent orders"
+  - "Which campaigns have the best ROAS?"
+  - "Give me a business overview"
+  - "What should I focus on to grow?"
+
+### 5. Explore Features
+- **Dashboard**: View key metrics and trends
+- **Insights**: Get AI-powered recommendations
+- **P&L Statement**: Financial performance analysis
+- **Cash Forecast**: Future cash flow predictions
+- **SKU Analysis**: Product profitability breakdown
+- **Campaigns**: Ad performance tracking
+- **Competitor**: Market research and analysis
+
+## 🎯 RAG Query Examples
+
+The RAG agent automatically retrieves data from the vector database:
+
+**Product Queries:**
+- "What wireless products do we have?"
+- "Show me electronics in our catalog"
+- "Find products with low inventory"
+
+**Order Queries:**
+- "Show me recent high-value orders"
+- "What are our top customers?"
+- "Find orders from this month"
+
+**Campaign Queries:**
+- "Which Google Ads campaigns have the best ROAS?"
+- "Show me Meta Ads performance"
+- "What are our most profitable campaigns?"
+
+## ⚠️ Known Issues & Limitations
+
+### 1. **OpenRouter Privacy Settings Required**
+**Issue:** Free models require privacy settings enabled
+**Error:** `No endpoints found matching your data policy`
+**Fix:** 
+- Go to https://openrouter.ai/settings/privacy
+- Enable "Allow free model publication"
+- OR use a paid model (update `credora/config.py`)
+
+### 2. **RAG Agent Not Auto-Triggering**
+**Issue:** CFO agent doesn't automatically handoff to RAG agent
+**Workaround:** The agent has RAG capabilities but may need explicit routing
+**Status:** Intent classification needs tuning
+
+### 3. **Mock Data Only**
+**Issue:** RAG database contains only mock data (35 documents)
+**Impact:** Responses are based on sample data, not real business data
+**Fix:** Connect real platforms or add more mock data to `mock_data/`
+
+### 4. **Profile Picture Not Persisting**
+**Issue:** Uploaded profile pictures require database migration
+**Fix:** Run `uv run python run_migration.py` to add picture column
+
+### 5. **Java Engine Optional**
+**Issue:** FP&A engine features require Java service running
+**Impact:** P&L, forecasting, and what-if features won't work without it
+**Workaround:** Start Java engine separately or use Python-only features
+
+### 6. **Platform Connection Requires OAuth**
+**Issue:** Real platform data requires OAuth setup and credentials
+**Impact:** Can't fetch live data without proper API credentials
+**Workaround:** Use mock data for testing
+
+### 7. **Session Management**
+**Issue:** Sessions stored in memory, lost on server restart
+**Impact:** Users need to re-authenticate after server restart
+**Fix:** Implement Redis or database-backed sessions
+
+### 8. **No Real-Time Sync**
+**Issue:** Platform data sync is manual, not automatic
+**Impact:** Data may be stale
+**Workaround:** Manually trigger sync from Settings page
+
+### 9. **Limited Error Handling**
+**Issue:** Some errors not gracefully handled in UI
+**Impact:** Generic error messages shown to users
+**Status:** Needs improvement
+
+### 10. **Embedding Model Download**
+**Issue:** First run downloads ~90MB model
+**Impact:** Initial FAISS index build takes 2-3 minutes
+**Workaround:** Pre-build index with `build_faiss_index.py`
+
+## 🔧 Configuration
+
+### Model Configuration
+Edit `credora/config.py` to change LLM model:
+
+```python
+# Free models (requires privacy settings)
+model_name: str = "meta-llama/llama-3.2-3b-instruct:free"
+
+# Paid models (requires credits)
+# model_name: str = "google/gemini-flash-1.5"
+# model_name: str = "anthropic/claude-3.5-sonnet"
 ```
 
-### Code Quality
-
+### Database Configuration
+Update `.env` with your database URL:
 ```bash
-# Python linting
-uv run ruff check .
-
-# Frontend linting
-cd credora-frontend
-npm run lint
+DATABASE_URL=postgresql://user:pass@host:5432/dbname
 ```
 
-## Troubleshooting
+### Platform Credentials
+Add to `.env`:
+```bash
+SHOPIFY_CLIENT_ID=your_client_id
+SHOPIFY_CLIENT_SECRET=your_client_secret
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
+META_CLIENT_ID=your_app_id
+META_CLIENT_SECRET=your_app_secret
+```
 
-### Common Issues
+## 📁 Project Structure
 
-1. **"Invalid or expired OAuth state"**
-   - Ensure the redirect URI in `.env` matches your OAuth provider settings
-   - For Google Ads: `http://localhost:8000/oauth/callback/google`
+```
+credora/
+├── credora/                    # Python backend
+│   ├── agents/                 # AI agent implementations
+│   │   ├── cfo.py             # Main CFO orchestrator
+│   │   ├── rag.py             # RAG data retrieval agent
+│   │   ├── analytics.py       # Analytics agent
+│   │   ├── competitor.py      # Competitor analysis
+│   │   └── insight.py         # Insight generation
+│   ├── tools/                  # Agent tools
+│   ├── services/               # Business logic
+│   ├── database/               # Database models & migrations
+│   ├── mcp_servers/            # Platform integrations
+│   └── api_server.py          # FastAPI server
+├── credora-frontend/           # Next.js frontend
+│   ├── src/app/               # App routes
+│   ├── src/components/        # React components
+│   └── src/lib/               # Utilities & hooks
+├── credora-engine/             # Java FP&A engine
+│   └── src/main/java/         # Spring Boot application
+├── mock_data/                  # Sample business data
+│   ├── shopify/               # Products, orders
+│   ├── google/                # Ad campaigns
+│   └── meta/                  # Facebook ads
+├── credora/data/              # Generated data
+│   └── faiss_index/           # Vector database
+├── start_api.py               # API server launcher
+├── build_faiss_index.py       # FAISS index builder
+└── run_migration.py           # Database migration runner
+```
 
-2. **"0 transactions" in Java engine logs**
-   - Check that the user UUID matches between Python API and database
-   - Verify transactions exist in the database for that user
+## 🧪 Testing
 
-3. **Frontend shows "data.map is not a function"**
-   - The API returned data in unexpected format
-   - Check the Python API logs for errors
+### Test RAG Retrieval
+```bash
+uv run python -c "from credora.agents.rag import search_products; print(search_products('wireless', k=2))"
+```
 
-4. **Database connection failed**
-   - Verify `DATABASE_URL` in `.env`
-   - Ensure PostgreSQL is running and accessible
+### Test API Server
+```bash
+curl http://localhost:8000/health
+```
 
-## License
+### Test Frontend
+Open http://localhost:3000 in browser
 
-Proprietary - All rights reserved
+## 🤝 Contributing
 
-## Support
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-For issues and questions, please open a GitHub issue.
-# credora
+## 📝 License
+
+[Add your license here]
+
+## 🆘 Support
+
+For issues and questions:
+- GitHub Issues: https://github.com/Develosphere/credora/issues
+- Documentation: [Add docs link]
+
+## 🎯 Roadmap
+
+### Planned Features
+- [ ] Real-time data synchronization
+- [ ] Advanced analytics dashboards
+- [ ] Multi-currency support
+- [ ] Export reports (PDF, Excel)
+- [ ] Email notifications
+- [ ] Mobile app
+- [ ] API rate limiting
+- [ ] Webhook integrations
+- [ ] Custom agent training
+- [ ] Multi-tenant support
+
+### Improvements Needed
+- [ ] Better error handling in UI
+- [ ] Improved RAG intent classification
+- [ ] Redis-backed sessions
+- [ ] Automated testing suite
+- [ ] Performance optimization
+- [ ] Documentation expansion
+- [ ] Docker containerization
+- [ ] CI/CD pipeline
+
+## 📊 Performance
+
+- **RAG Query Speed**: ~100-200ms
+- **API Response Time**: ~500ms-2s (depending on LLM)
+- **FAISS Index Size**: ~2MB (35 documents)
+- **Memory Usage**: ~500MB (Python) + ~300MB (Node.js)
+
+## 🔐 Security Notes
+
+- Never commit `.env` files
+- Rotate API keys regularly
+- Use HTTPS in production
+- Enable CORS only for trusted domains
+- Implement rate limiting
+- Validate all user inputs
+- Use prepared statements for SQL
+
+## 📞 Contact
+
+- GitHub: https://github.com/Develosphere/credora
+- Email: [Add contact email]
+
+---
+
+**Built with ❤️ using AI agents, RAG, and modern web technologies**
