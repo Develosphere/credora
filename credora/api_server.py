@@ -2505,13 +2505,13 @@ async def send_chat_message(request: Request, message_req: MessageRequest):
                 
                 if platform_rows:
                     platform_connections = [row["platform"] for row in platform_rows]
-                    platform_lines = ["**Connected Platforms:**"]
+                    platform_lines = ["Connected Platforms:"]
                     for row in platform_rows:
                         platform_name = row["platform"].title()
                         account_name = row["platform_account_name"] or ""
                         last_sync = row["last_sync_at"]
                         sync_info = f" (last synced: {last_sync.strftime('%Y-%m-%d %H:%M')})" if last_sync else ""
-                        platform_lines.append(f"- {platform_name}: Connected{sync_info}")
+                        platform_lines.append(f"• {platform_name}: Connected{sync_info}")
                         if account_name:
                             platform_lines[-1] += f" - {account_name}"
                     
@@ -2523,9 +2523,9 @@ async def send_chat_message(request: Request, message_req: MessageRequest):
                     context_summary += platform_context + "\n\n"
                 else:
                     # No platforms connected - important context for AI
-                    platform_context = """**Connected Platforms:**
-- No platforms connected yet.
-- User needs to connect Shopify, Meta Ads, or Google Ads from the Settings page to see real data."""
+                    platform_context = """Connected Platforms:
+• No platforms connected yet.
+• User needs to connect Shopify, Meta Ads, or Google Ads from the Settings page to see real data."""
                     retrieved_documents.append({
                         "type": "platform_connections",
                         "content": platform_context,
@@ -2545,14 +2545,14 @@ async def send_chat_message(request: Request, message_req: MessageRequest):
                 
                 if pnl:
                     pnl_context = f"""
-**Recent P&L Summary:**
-- Revenue: ${pnl.get('revenue', 0):,.2f}
-- Net Revenue: ${pnl.get('net_revenue', 0):,.2f}  
-- COGS: ${pnl.get('cogs', 0):,.2f}
-- Ad Spend: ${pnl.get('ad_spend', 0):,.2f}
-- Net Profit: ${pnl.get('net_profit', 0):,.2f}
-- Gross Margin: {(pnl.get('gross_margin', 0) or 0) * 100:.1f}%
-- Net Margin: {(pnl.get('net_margin', 0) or 0) * 100:.1f}%
+Recent P&L Summary:
+• Revenue: ${pnl.get('revenue', 0):,.2f}
+• Net Revenue: ${pnl.get('net_revenue', 0):,.2f}  
+• COGS: ${pnl.get('cogs', 0):,.2f}
+• Ad Spend: ${pnl.get('ad_spend', 0):,.2f}
+• Net Profit: ${pnl.get('net_profit', 0):,.2f}
+• Gross Margin: {(pnl.get('gross_margin', 0) or 0) * 100:.1f}%
+• Net Margin: {(pnl.get('net_margin', 0) or 0) * 100:.1f}%
 """
                     retrieved_documents.append({
                         "type": "pnl_report",
@@ -2573,10 +2573,10 @@ async def send_chat_message(request: Request, message_req: MessageRequest):
                 
                 if forecast:
                     forecast_context = f"""
-**Cash Flow Forecast:**
-- Current Cash: ${forecast.get('current_cash', 0):,.2f}
-- Daily Burn Rate: ${forecast.get('burn_rate', 0):,.2f}
-- Runway Days: {forecast.get('runway_days', 0)}
+Cash Flow Forecast:
+• Current Cash: ${forecast.get('current_cash', 0):,.2f}
+• Daily Burn Rate: ${forecast.get('burn_rate', 0):,.2f}
+• Runway Days: {forecast.get('runway_days', 0)}
 """
                     retrieved_documents.append({
                         "type": "forecast",
@@ -2597,9 +2597,9 @@ async def send_chat_message(request: Request, message_req: MessageRequest):
                 )
                 
                 if campaigns:
-                    campaign_lines = ["**Top Campaigns by Spend:**"]
+                    campaign_lines = ["Top Campaigns by Spend:"]
                     for c in campaigns:
-                        campaign_lines.append(f"- {c['name']} ({c['platform']}): ${c.get('spend', 0):,.2f} spend, {c.get('conversions', 0)} conversions")
+                        campaign_lines.append(f"• {c['name']} ({c['platform']}): ${c.get('spend', 0):,.2f} spend, {c.get('conversions', 0)} conversions")
                     campaign_context = "\n".join(campaign_lines)
                     retrieved_documents.append({
                         "type": "campaigns",
@@ -2623,10 +2623,10 @@ async def send_chat_message(request: Request, message_req: MessageRequest):
                 
                 if tx_summary and tx_summary.get('tx_count', 0) > 0:
                     tx_context = f"""
-**Last 30 Days Transactions:**
-- Total Transactions: {tx_summary.get('tx_count', 0)}
-- Order Revenue: ${float(tx_summary.get('total_orders', 0) or 0):,.2f}
-- Ad Spend: ${float(tx_summary.get('total_ad_spend', 0) or 0):,.2f}
+Last 30 Days Transactions:
+• Total Transactions: {tx_summary.get('tx_count', 0)}
+• Order Revenue: ${float(tx_summary.get('total_orders', 0) or 0):,.2f}
+• Ad Spend: ${float(tx_summary.get('total_ad_spend', 0) or 0):,.2f}
 """
                     retrieved_documents.append({
                         "type": "transactions",
@@ -2648,15 +2648,20 @@ async def send_chat_message(request: Request, message_req: MessageRequest):
         try:
             from agents import Runner
             
-            # Build prompt with context
+            # Build prompt with context - emphasize using the formatted data
             if context_summary:
-                augmented_message = f"""Based on the user's financial data:
+                augmented_message = f"""You are a CFO AI assistant analyzing business data. Below is formatted business data - present it clearly without repeating raw JSON.
 
 {context_summary}
 
 User question: {message_req.message}
 
-Please provide insights and recommendations based on the data above."""
+Instructions:
+• Answer the user's question directly and conversationally
+• Use the formatted data above to provide insights
+• DO NOT show raw JSON or technical data structures
+• Focus on business insights and actionable recommendations
+• Keep responses clear and professional"""
             else:
                 augmented_message = message_req.message
             
@@ -2693,14 +2698,11 @@ Please provide insights and recommendations based on the data above."""
             # Add to in-memory history
             _chat_histories[user.id].append(assistant_message)
             
-            return {
-                "message": assistant_message,
-                "context": {
-                    "retrievedDocuments": [doc["content"] for doc in retrieved_documents],
-                    "relevanceScores": [1.0] * len(retrieved_documents),
-                    "usedInResponse": len(retrieved_documents) > 0,
-                },
-            }
+            # Return plain text response instead of JSON
+            return Response(
+                content=assistant_content,
+                media_type="text/plain"
+            )
             
         except Exception as e:
             print(f"Agent error: {e}")
@@ -2711,7 +2713,7 @@ Please provide insights and recommendations based on the data above."""
     
     # Fallback response when agent is not available
     # Include context summary if available
-    fallback_content = f"Hello! I'm your AI CFO assistant."
+    fallback_content = "Hello! I'm your AI CFO assistant."
     
     if context_summary:
         fallback_content = f"""Hello! I'm your AI CFO assistant. Based on your data:
@@ -2722,10 +2724,10 @@ I received your message: '{message_req.message}'. How can I help you analyze thi
     else:
         fallback_content = f"""Hello! I'm your AI CFO assistant. I received your message: '{message_req.message}'. I can help you with:
 
-• **Financial Analysis** - P&L statements, cash flow forecasts
-• **SKU Performance** - Product profitability analysis
-• **Campaign Insights** - Marketing ROI and optimization
-• **Business Recommendations** - Data-driven suggestions
+• Financial Analysis - P&L statements, cash flow forecasts
+• SKU Performance - Product profitability analysis
+• Campaign Insights - Marketing ROI and optimization
+• Business Recommendations - Data-driven suggestions
 
 Please connect your platforms (Shopify, Meta Ads, Google Ads) from Settings to get personalized insights based on your actual business data."""
     
@@ -2743,14 +2745,11 @@ Please connect your platforms (Shopify, Meta Ads, Google Ads) from Settings to g
     # Add to in-memory history
     _chat_histories[user.id].append(assistant_message)
     
-    return {
-        "message": assistant_message,
-        "context": {
-            "retrievedDocuments": [doc["content"] for doc in retrieved_documents],
-            "relevanceScores": [1.0] * len(retrieved_documents),
-            "usedInResponse": len(retrieved_documents) > 0,
-        },
-    }
+    # Return plain text response instead of JSON
+    return Response(
+        content=fallback_content,
+        media_type="text/plain"
+    )
 
 
 @app.get("/chat/history")
