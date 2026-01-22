@@ -48,7 +48,7 @@ spring:
   datasource:
     url: jdbc:postgresql://aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres?sslmode=require
     username: postgres.bgaecbubyufmiwitlhoq
-    password: ${DATABASE_PASSWORD:S%3Fa2%2AHw%26a%3FedzE%23}
+    password: "S?a2*Hw&a?edzE#"
     driver-class-name: org.postgresql.Driver
     hikari:
       minimum-idle: 2

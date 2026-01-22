@@ -170,8 +170,8 @@ function CashFlowBar({ month, value, maxValue, isHighlighted = false, delay = 0 
         >
           {/* Bar gradient */}
           <div className={`absolute inset-0 ${showTooltip
-              ? "bg-gradient-to-t from-[#ff6d06] via-[#ff5500] to-[#ff3d00]"
-              : "bg-gradient-to-t from-[#3a3a3a] to-[#4a4a4a]"
+            ? "bg-gradient-to-t from-[#ff6d06] via-[#ff5500] to-[#ff3d00]"
+            : "bg-gradient-to-t from-[#3a3a3a] to-[#4a4a4a]"
             }`} />
 
           {/* Top indicator dot */}
@@ -268,12 +268,12 @@ export default function DashboardPage() {
 
       {/* Balance Cards Row */}
       <div className="grid grid-cols-3 gap-4">
-        <MainBalanceCard amount={data?.revenue || 28520.30} change="+15%" />
+        <MainBalanceCard amount={data?.revenue || 185420.75} change="+22%" />
         <DarkBalanceCard
           title="Savings account"
           subtitle="Steady Growth Savings"
-          amount={data?.netProfit || 24800.45}
-          change="+3.2%"
+          amount={data?.netProfit || 68750.30}
+          change="+8.5%"
           icon={PiggyBank}
           actionText="View summary"
           iconBg="bg-[#3a3a3a]"
@@ -281,8 +281,8 @@ export default function DashboardPage() {
         <DarkBalanceCard
           title="Investment portfolio"
           subtitle="Track Your Wealth Growth"
-          amount={70120.78}
-          change="+6.7%"
+          amount={92340.50}
+          change="+12.3%"
           icon={TrendingUp}
           actionText="Analyze performance"
           iconBg="bg-[#3a3a3a]"
@@ -322,8 +322,8 @@ export default function DashboardPage() {
               <button
                 onClick={() => setTimeFilter("Monthly")}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${timeFilter === "Monthly"
-                    ? "bg-[#1e1e1e] text-white"
-                    : "text-gray-400 hover:text-white"
+                  ? "bg-[#1e1e1e] text-white"
+                  : "text-gray-400 hover:text-white"
                   }`}
               >
                 Monthly
@@ -331,8 +331,8 @@ export default function DashboardPage() {
               <button
                 onClick={() => setTimeFilter("Yearly")}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${timeFilter === "Yearly"
-                    ? "bg-credora-orange text-white"
-                    : "text-gray-400 hover:text-white"
+                  ? "bg-credora-orange text-white"
+                  : "text-gray-400 hover:text-white"
                   }`}
               >
                 Yearly

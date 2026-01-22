@@ -1561,28 +1561,126 @@ async def get_dashboard_kpis(request: Request):
     """Get dashboard KPIs - aggregates data from multiple sources."""
     user = require_auth(request)
     
-    # Check for mock mode - return demo KPIs without hitting Java engine
+    # Check for mock mode - compute KPIs directly from mock JSON files
     if os.getenv("MOCK_MODE", "").lower() == "true":
-        print(f"📦 [DASHBOARD] MOCK_MODE enabled, returning demo KPIs")
-        return {
-            "revenue": 125840.50,
-            "netProfit": 42520.30,
-            "cashRunway": 185,
-            "topSku": {
-                "sku": "SKU-WATCH-001",
-                "name": "Premium Smart Watch",
-                "contribution_margin": 45.2,
-                "units_sold": 342
-            },
-            "worstCampaign": {
-                "id": "camp_2385123456789",
-                "name": "Winter Promo 2025",
-                "roas": 0.85,
-                "spend": 1250.00
-            },
-            "hasConnectedPlatforms": True,
-            "isMockData": True
-        }
+        print(f"📦 [DASHBOARD] MOCK_MODE enabled, computing KPIs from mock JSON files")
+        
+        try:
+            import json
+            from pathlib import Path
+            
+            # Find mock_data directory
+            base_path = Path(__file__).parent.parent / "mock_data"
+            
+            # Load Shopify orders
+            orders_file = base_path / "shopify" / "orders.json"
+            orders_data = {}
+            if orders_file.exists():
+                with open(orders_file, "r") as f:
+                    orders_data = json.load(f)
+            
+            # Load Shopify products
+            products_file = base_path / "shopify" / "products.json"
+            products_data = {}
+            if products_file.exists():
+                with open(products_file, "r") as f:
+                    products_data = json.load(f)
+            
+            # Load Meta campaigns
+            meta_campaigns_file = base_path / "meta" / "campaigns.json"
+            meta_campaigns_data = {}
+            if meta_campaigns_file.exists():
+                with open(meta_campaigns_file, "r") as f:
+                    meta_campaigns_data = json.load(f)
+            
+            # Calculate revenue from orders (sum of total_price for paid orders)
+            orders = orders_data.get("orders", [])
+            revenue = sum(
+                float(order.get("total_price", 0)) 
+                for order in orders 
+                if order.get("financial_status") == "paid"
+            )
+            
+            # Calculate expenses from ad campaigns
+            campaigns = meta_campaigns_data.get("campaigns", [])
+            ad_spend = sum(
+                float(campaign.get("spend", 0)) 
+                for campaign in campaigns
+            )
+            
+            # Estimated COGS (30% of revenue)
+            cogs = revenue * 0.30
+            
+            # Net profit = revenue - COGS - ad spend
+            net_profit = revenue - cogs - ad_spend
+            
+            # Get products
+            products = products_data.get("products", [])
+            
+            # Find top product by price
+            top_sku = None
+            if products:
+                top_product = max(products, key=lambda p: float(p.get("selling_price", 0) or 0))
+                top_sku = {
+                    "sku": top_product.get("sku") or str(top_product.get("id")),
+                    "name": top_product.get("title") or top_product.get("name") or "Unknown Product",
+                    "contribution_margin": 35.0,
+                    "units_sold": 150
+                }
+            
+            # Find worst campaign by ROAS
+            worst_campaign = None
+            if campaigns:
+                # Sort by ROAS (revenue/spend), lowest first
+                campaigns_with_roas = []
+                for camp in campaigns:
+                    spend = float(camp.get("spend", 0))
+                    rev = float(camp.get("revenue", 0))
+                    roas = rev / spend if spend > 0 else 0
+                    campaigns_with_roas.append({**camp, "roas": roas})
+                
+                campaigns_with_roas.sort(key=lambda c: c["roas"])
+                worst = campaigns_with_roas[0] if campaigns_with_roas else None
+                if worst:
+                    worst_campaign = {
+                        "id": str(worst.get("id")),
+                        "name": worst.get("name") or "Unknown Campaign",
+                        "roas": worst.get("roas", 0),
+                        "spend": float(worst.get("spend", 0))
+                    }
+            
+            # Calculate runway (estimate)
+            monthly_burn = (cogs + ad_spend) / 1  # Assume 1 month of data
+            cash_on_hand = 50000
+            runway_days = int((cash_on_hand / monthly_burn) * 30) if monthly_burn > 0 else 365
+            
+            print(f"📊 [DASHBOARD] From mock files: revenue=${revenue:.2f}, profit=${net_profit:.2f}, orders={len(orders)}, products={len(products)}")
+            
+            return {
+                "revenue": revenue,
+                "netProfit": net_profit,
+                "cashRunway": runway_days,
+                "topSku": top_sku,
+                "worstCampaign": worst_campaign,
+                "hasConnectedPlatforms": True,
+                "isMockData": True,
+                "source": "mock_json_files"
+            }
+            
+        except Exception as e:
+            print(f"⚠️ [DASHBOARD] Error reading mock files: {e}, returning fallback")
+            import traceback
+            traceback.print_exc()
+            return {
+                "revenue": 3849.92,
+                "netProfit": 1924.96,
+                "cashRunway": 185,
+                "topSku": {"sku": "MKR-001", "name": "Mechanical Keyboard RGB", "contribution_margin": 35.0, "units_sold": 150},
+                "worstCampaign": None,
+                "hasConnectedPlatforms": True,
+                "isMockData": True,
+                "error": str(e)
+            }
     
     # Get the actual database UUID for the user
     user_uuid = await db_get_user_uuid(user.id)
