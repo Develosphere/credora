@@ -161,9 +161,10 @@ def create_faiss_index(force_rebuild: bool = False) -> FAISS:
 
 def retrieve_business_data(
     query: str,
-    k: int = 5,
+    k: int = 3,  # Reduced from 5 to 3 for faster processing
     platform_filter: Optional[str] = None,
-    data_type_filter: Optional[str] = None
+    data_type_filter: Optional[str] = None,
+    similarity_threshold: float = 0.7  # Only return relevant results
 ) -> str:
     """Retrieve relevant business data from FAISS vector store.
     
@@ -171,9 +172,10 @@ def retrieve_business_data(
     
     Args:
         query: Natural language query about business data
-        k: Number of results to retrieve
+        k: Number of results to retrieve (default 3 for speed)
         platform_filter: Optional filter by platform (shopify, google, meta)
         data_type_filter: Optional filter by data type (products, orders, campaigns)
+        similarity_threshold: Minimum similarity score (0-1)
         
     Returns:
         Formatted string with retrieved data
@@ -189,27 +191,52 @@ def retrieve_business_data(
         if data_type_filter:
             filter_dict["data_type"] = data_type_filter
         
-        # Perform similarity search
+        # Perform similarity search with scores
         if filter_dict:
-            docs = vectorstore.similarity_search(
+            docs_with_scores = vectorstore.similarity_search_with_score(
                 query,
                 k=k,
                 filter=filter_dict
             )
         else:
-            docs = vectorstore.similarity_search(query, k=k)
+            docs_with_scores = vectorstore.similarity_search_with_score(query, k=k)
         
-        if not docs:
-            return "No relevant data found for your query."
+        # Filter by similarity threshold (lower score = more similar in FAISS)
+        # FAISS uses L2 distance, so lower is better. Threshold of 0.7 means distance < 0.7
+        relevant_docs = [(doc, score) for doc, score in docs_with_scores if score < similarity_threshold]
         
-        # Format results
+        if not relevant_docs:
+            return "No highly relevant data found for your query. Try rephrasing or being more specific."
+        
+        # Format results (only top 3 for speed)
         results = []
-        for i, doc in enumerate(docs, 1):
+        for i, (doc, score) in enumerate(relevant_docs[:3], 1):
             platform = doc.metadata.get("platform", "unknown")
             data_type = doc.metadata.get("data_type", "unknown")
-            results.append(
-                f"Result {i} [{platform}/{data_type}]:\n{doc.page_content}\n"
-            )
+            # Parse JSON for cleaner display
+            try:
+                data = json.loads(doc.page_content)
+                # Format based on data type
+                if data_type == "products":
+                    formatted = f"**{data.get('title', 'Unknown Product')}**\n"
+                    formatted += f"  - SKU: {data.get('sku', 'N/A')}\n"
+                    formatted += f"  - Price: ${data.get('price', 0):.2f}\n"
+                    formatted += f"  - Inventory: {data.get('total_inventory', 0)} units\n"
+                elif data_type == "orders":
+                    formatted = f"**Order {data.get('order_number', 'N/A')}**\n"
+                    formatted += f"  - Customer: {data.get('customer_name', 'Unknown')}\n"
+                    formatted += f"  - Total: ${data.get('total_price', 0):.2f}\n"
+                    formatted += f"  - Date: {data.get('created_at', 'N/A')[:10]}\n"
+                elif data_type == "campaigns":
+                    formatted = f"**{data.get('name', 'Unknown Campaign')}**\n"
+                    formatted += f"  - Spend: ${data.get('cost', data.get('spend', 0)):.2f}\n"
+                    formatted += f"  - Status: {data.get('status', 'unknown').title()}\n"
+                else:
+                    formatted = doc.page_content
+            except:
+                formatted = doc.page_content
+            
+            results.append(f"{i}. [{platform}/{data_type}]\n{formatted}")
         
         return "\n".join(results)
     
@@ -222,7 +249,7 @@ def search_products(query: str, k: int = 3) -> str:
     
     Args:
         query: Product search query (name, SKU, category, etc.)
-        k: Number of results to return
+        k: Number of results to return (default 3 for speed)
         
     Returns:
         Formatted product information
@@ -235,12 +262,12 @@ def search_products(query: str, k: int = 3) -> str:
     )
 
 
-def search_orders(query: str, k: int = 5) -> str:
+def search_orders(query: str, k: int = 3) -> str:
     """Search for order information.
     
     Args:
         query: Order search query (customer, date, product, etc.)
-        k: Number of results to return
+        k: Number of results to return (default 3 for speed)
         
     Returns:
         Formatted order information
@@ -259,7 +286,7 @@ def search_campaigns(query: str, platform: Optional[str] = None, k: int = 3) -> 
     Args:
         query: Campaign search query (name, performance, etc.)
         platform: Optional platform filter ('google' or 'meta')
-        k: Number of results to return
+        k: Number of results to return (default 3 for speed)
         
     Returns:
         Formatted campaign information
@@ -272,14 +299,14 @@ def search_campaigns(query: str, platform: Optional[str] = None, k: int = 3) -> 
     )
 
 
-def get_business_context(query: str, k: int = 10) -> str:
+def get_business_context(query: str, k: int = 5) -> str:
     """Get comprehensive business context for a query.
     
     Retrieves relevant data across all platforms and data types.
     
     Args:
         query: Business question or context query
-        k: Number of results to retrieve
+        k: Number of results to retrieve (default 5 for broader context)
         
     Returns:
         Formatted business context

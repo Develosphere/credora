@@ -2449,7 +2449,17 @@ async def load_chat_history_from_db(user_id: str, limit: int = 50) -> list:
 @app.post("/chat/message")
 async def send_chat_message(request: Request, message_req: MessageRequest):
     """Send a chat message to the AI CFO agent with RAG context."""
-    user = require_auth(request)
+    # Try to get authenticated user, fallback to guest user for development
+    try:
+        user = require_auth(request)
+    except HTTPException:
+        # Create a guest user for unauthenticated requests (development only)
+        user = User(
+            id="guest@credora.local",
+            email="guest@credora.local",
+            name="Guest User",
+            picture=None
+        )
     
     # Initialize chat history for user if not exists (in-memory fallback)
     if user.id not in _chat_histories:
@@ -2464,10 +2474,15 @@ async def send_chat_message(request: Request, message_req: MessageRequest):
         "sources": [],
     }
     
-    # Save user message to database
-    await save_chat_message_to_db(user.id, user_message)
+    # Save user message to database (skip for guest users)
+    try:
+        await save_chat_message_to_db(user.id, user_message)
+    except Exception as e:
+        print(f"Could not save message to DB (guest user?): {e}")
     
     # Also keep in memory for quick access
+    if user.id not in _chat_histories:
+        _chat_histories[user.id] = []
     _chat_histories[user.id].append(user_message)
     
     # =========================================================================
@@ -2532,7 +2547,7 @@ async def send_chat_message(request: Request, message_req: MessageRequest):
                     })
                     context_summary += platform_context + "\n\n"
                 
-                # Retrieve recent P&L data
+                # Retrieve recent P&L data from database OR use mock data summary
                 pnl = await db.fetchrow(
                     """
                     SELECT * FROM pnl_reports
@@ -2559,6 +2574,18 @@ Recent P&L Summary:
                         "content": pnl_context.strip(),
                     })
                     context_summary += pnl_context
+                else:
+                    # No P&L data in database - use mock data summary
+                    try:
+                        from credora.tools.mock_data_reader import get_business_summary
+                        mock_summary = get_business_summary()
+                        retrieved_documents.append({
+                            "type": "mock_data_summary",
+                            "content": mock_summary,
+                        })
+                        context_summary += "\n" + mock_summary + "\n"
+                    except Exception as e:
+                        print(f"Could not load mock data summary: {e}")
                 
                 # Retrieve recent forecast data
                 forecast = await db.fetchrow(
@@ -2692,17 +2719,19 @@ Instructions:
                 "sources": sources,
             }
             
-            # Save assistant message to database
-            await save_chat_message_to_db(user.id, assistant_message)
+            # Save assistant message to database (skip for guest users)
+            try:
+                await save_chat_message_to_db(user.id, assistant_message)
+            except Exception as e:
+                print(f"Could not save assistant message to DB (guest user?): {e}")
             
             # Add to in-memory history
             _chat_histories[user.id].append(assistant_message)
             
-            # Return plain text response instead of JSON
-            return Response(
-                content=assistant_content,
-                media_type="text/plain"
-            )
+            # Return JSON response with message object
+            return JSONResponse(content={
+                "message": assistant_message
+            })
             
         except Exception as e:
             print(f"Agent error: {e}")
@@ -2739,17 +2768,19 @@ Please connect your platforms (Shopify, Meta Ads, Google Ads) from Settings to g
         "sources": [doc["type"] for doc in retrieved_documents],
     }
     
-    # Save fallback assistant message to database
-    await save_chat_message_to_db(user.id, assistant_message)
+    # Save fallback assistant message to database (skip for guest users)
+    try:
+        await save_chat_message_to_db(user.id, assistant_message)
+    except Exception as e:
+        print(f"Could not save fallback message to DB (guest user?): {e}")
     
     # Add to in-memory history
     _chat_histories[user.id].append(assistant_message)
     
-    # Return plain text response instead of JSON
-    return Response(
-        content=fallback_content,
-        media_type="text/plain"
-    )
+    # Return JSON response with message object
+    return JSONResponse(content={
+        "message": assistant_message
+    })
 
 
 @app.get("/chat/history")

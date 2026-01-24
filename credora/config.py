@@ -13,7 +13,7 @@ from typing import Optional
 class ModelConfig:
     """Configuration for LLM model."""
     
-    model_name: str = "google/gemma-3-27b-it:free"  # More reliable free model
+    model_name: str = "xiaomi/mimo-v2-flash:free"  # Free model with tool support
     base_url: str = "https://openrouter.ai/api/v1"
     temperature: float = 0.7
     max_tokens: int = 4096
@@ -66,6 +66,10 @@ def get_api_key() -> str:
     """
     global _current_key_index
     
+    # Force reload from .env file
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+    
     # Get all available keys
     keys = []
     key1 = os.environ.get("OPENROUTER_API_KEY", "")
@@ -82,8 +86,12 @@ def get_api_key() -> str:
             "Please set it in your .env file or environment."
         )
     
+    # Debug: Print which key is being used
+    current_key = keys[_current_key_index % len(keys)]
+    print(f"Using OpenRouter API key: {current_key[:20]}... (length: {len(current_key)})")
+    
     # Return current key (with bounds check)
-    return keys[_current_key_index % len(keys)]
+    return current_key
 
 
 def rotate_api_key() -> str:

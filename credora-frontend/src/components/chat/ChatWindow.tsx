@@ -92,15 +92,23 @@ export function ChatWindow({ className = "" }: ChatWindowProps) {
       className={`flex flex-col overflow-y-auto ${className}`}
     >
       <div className="flex-1 space-y-6 p-6">
-        {messages.map((message, index) => (
-          <div
-            key={message.id}
-            className="animate-fade-in-up"
-            style={{ animationDelay: `${index * 50}ms` }}
-          >
-            <ChatMessage message={message} />
-          </div>
-        ))}
+        {messages.map((message, index) => {
+          // Safety check for null/undefined messages
+          if (!message || !message.id) {
+            console.warn('Invalid message at index', index, message);
+            return null;
+          }
+          
+          return (
+            <div
+              key={message.id}
+              className="animate-fade-in-up"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <ChatMessage message={message} />
+            </div>
+          );
+        })}
         
         {isLoading && (
           <div className="flex items-start gap-4 animate-fade-in">

@@ -2,6 +2,8 @@
 
 An intelligent CFO agent system that provides financial analysis, insights, and recommendations for e-commerce businesses using AI agents, RAG (Retrieval-Augmented Generation), and real-time data integration.
 
+> **📝 Latest Updates:** See [UPDATES.md](UPDATES.md) for recent changes and improvements
+
 ## 🚀 Features
 
 ### ✅ Implemented Features
@@ -97,7 +99,9 @@ An intelligent CFO agent system that provides financial analysis, insights, and 
 - PostgreSQL (or Supabase account)
 - OpenRouter API key
 
-## 🛠️ Installation
+## 🛠️ Installation & Setup
+
+> **⚡ Quick Start:** For a faster setup guide, see [QUICK_START.md](QUICK_START.md)
 
 ### 1. Clone Repository
 ```bash
@@ -127,22 +131,28 @@ cd ..
 cp .env.example .env
 
 # Edit .env and add your credentials:
-# - OPENROUTER_API_KEY (required)
-# - DATABASE_URL (required)
-# - Platform credentials (optional)
+# - OPENROUTER_API_KEY (required) - Get from https://openrouter.ai/
+# - DATABASE_URL (required) - PostgreSQL connection string
+# - Platform credentials (optional) - For Shopify, Google Ads, Meta Ads
+```
+
+**Important:** Make sure to set the correct OpenRouter model in `credora/config.py`:
+```python
+model_name: str = "openai/gpt-4o-mini"  # Or any working model
 ```
 
 ### 5. Setup Database
 ```bash
-# Run migrations
+# Run migrations to create tables
 uv run python run_migration.py
 ```
 
-### 6. Build FAISS Index
+### 6. Build FAISS Index (Optional but Recommended)
 ```bash
 # Build vector database from mock data
 uv run python build_faiss_index.py
 ```
+This creates the FAISS index for RAG functionality. Takes 2-3 minutes on first run.
 
 ## 🚀 Running the Application
 
@@ -165,6 +175,8 @@ cd credora-engine
 mvn spring-boot:run
 ```
 Engine runs on: http://localhost:8081
+
+> **Note:** The Java engine is optional. Core features work without it.
 
 ## 📖 Usage
 
