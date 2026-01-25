@@ -29,29 +29,6 @@ export default function DashboardLayout({
     onWakeWordDetected: handleWakeWordDetected,
   });
 
-  // Voice agent handlers - direct API integration
-  const handleVoiceTranscript = useCallback(async (transcript: string) => {
-    console.log('[DashboardLayout] Voice transcript:', transcript);
-    try {
-      // Call API directly for fast response
-      const response = await chatApi.sendMessage(transcript);
-      console.log('[DashboardLayout] API response:', response);
-      
-      // Speak the response immediately
-      if (response.message?.content) {
-        speak(response.message.content);
-      }
-    } catch (error) {
-      console.error('[DashboardLayout] API error:', error);
-      speak("Sorry, I encountered an error. Please try again.");
-    }
-  }, []);
-
-  const handleVoiceResponse = useCallback((response: string) => {
-    console.log('[DashboardLayout] Voice response complete:', response);
-    // Response is complete, conversation saved in background
-  }, []);
-
   // Voice agent hook
   const {
     isListening,
@@ -63,8 +40,26 @@ export default function DashboardLayout({
     speak,
     reset: resetVoiceAgent,
   } = useVoiceAgent({
-    onTranscript: handleVoiceTranscript,
-    onResponse: handleVoiceResponse,
+    onTranscript: async (transcript: string) => {
+      console.log('[DashboardLayout] Voice transcript:', transcript);
+      try {
+        // Call API directly for fast response
+        const response = await chatApi.sendMessage(transcript);
+        console.log('[DashboardLayout] API response:', response);
+        
+        // Speak the response immediately
+        if (response.message?.content) {
+          speak(response.message.content);
+        }
+      } catch (error) {
+        console.error('[DashboardLayout] API error:', error);
+        speak("Sorry, I encountered an error. Please try again.");
+      }
+    },
+    onResponse: (response: string) => {
+      console.log('[DashboardLayout] Voice response complete:', response);
+      // Response is complete, conversation saved in background
+    },
   });
 
   // Handle floating button click
