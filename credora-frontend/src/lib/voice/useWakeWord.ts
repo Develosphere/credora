@@ -195,6 +195,8 @@ export function useWakeWord({ enabled, onWakeWordDetected }: UseWakeWordProps) {
 
   // Start/stop based on enabled prop
   useEffect(() => {
+    console.log('[WakeWord] enabled prop changed:', enabled);
+    
     if (enabled) {
       console.log('[WakeWord] 🚀 Wake word detection enabled');
       // Small delay to avoid React strict mode double-mount issues
