@@ -2,12 +2,13 @@
 
 /**
  * AI Chat Page - Premium Modern Design
- * Full chat interface with history, input, and RAG-powered responses
+ * Full chat interface - Voice agent now global in DashboardLayout
  * Requirements: 12.1, 12.2, 12.4, 12.6
  */
 
+import { useState } from "react";
 import Image from "next/image";
-import { MessageSquare, Trash2, RefreshCw, AlertCircle, Sparkles } from "lucide-react";
+import { Trash2, RefreshCw, AlertCircle } from "lucide-react";
 import { ChatWindow, ChatInput } from "@/components/chat";
 import { useChat } from "@/lib/hooks/useChat";
 

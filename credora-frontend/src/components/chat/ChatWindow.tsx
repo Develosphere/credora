@@ -1,8 +1,9 @@
 "use client";
 
 /**
- * Chat Window Component - Modern Design
- * Displays message history with auto-scroll to latest message
+ * Chat Window Component - Modern Design with Voice Output
+ * Displays message history with auto-scroll and voice playback
+ * Requirements: US-2.1, US-2.4
  */
 
 import { useEffect, useRef } from "react";
@@ -10,6 +11,7 @@ import Image from "next/image";
 import { MessageSquare, Loader2, Sparkles, Zap, TrendingUp, DollarSign } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { useChatStore } from "@/lib/store/chatStore";
+import { useVoiceOutput, useVoiceSettingsStore, useSelectedVoice } from "@/lib/voice";
 import { cn } from "@/lib/utils";
 
 interface ChatWindowProps {
@@ -20,12 +22,50 @@ export function ChatWindow({ className = "" }: ChatWindowProps) {
   const { messages, isLoading, isHistoryLoaded } = useChatStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastMessageIdRef = useRef<string | null>(null);
 
+  // Voice settings
+  const { voiceOutputEnabled, autoPlayResponses, speechRate, speechPitch, speechVolume } = useVoiceSettingsStore();
+  
+  // Voice output hook
+  const { availableVoices, speak, isSpeaking } = useVoiceOutput({
+    rate: speechRate,
+    pitch: speechPitch,
+    volume: speechVolume,
+  });
+  
+  const selectedVoice = useSelectedVoice(availableVoices);
+
+  // Auto-scroll to latest message
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+
+  // Auto-play voice output for new assistant messages
+  useEffect(() => {
+    if (!voiceOutputEnabled || !autoPlayResponses || messages.length === 0) {
+      return;
+    }
+
+    const lastMessage = messages[messages.length - 1];
+    
+    // Only play if it's a new assistant message
+    if (
+      lastMessage &&
+      lastMessage.role === 'assistant' &&
+      lastMessage.id !== lastMessageIdRef.current &&
+      !isLoading
+    ) {
+      lastMessageIdRef.current = lastMessage.id;
+      
+      // Small delay to ensure message is rendered
+      setTimeout(() => {
+        speak(lastMessage.content);
+      }, 300);
+    }
+  }, [messages, voiceOutputEnabled, autoPlayResponses, isLoading, speak]);
 
   if (!isHistoryLoaded) {
     return (

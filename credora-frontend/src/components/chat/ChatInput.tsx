@@ -3,11 +3,12 @@
 /**
  * Chat Input Component - Modern Design
  * Handles message submission with loading state
- * Requirements: 12.2
+ * Voice input now available globally via floating button
+ * Requirements: 12.2, US-1.3, US-3.2
  */
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Paperclip, FileText, Sparkles } from "lucide-react";
+import { Send, Loader2, Paperclip, Sparkles } from "lucide-react";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -62,7 +63,7 @@ export function ChatInput({
   const canSubmit = message.trim().length > 0 && !isLoading && !disabled;
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
+    <form onSubmit={handleSubmit} className="relative space-y-3">
       {/* Main Input Container */}
       <div className="relative bg-[#2a2a2a]/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 focus-within:border-primary/50 focus-within:shadow-primary/20">
         {/* Glow effect on focus */}
@@ -91,15 +92,6 @@ export function ChatInput({
             style={{ maxHeight: "200px" }}
           />
 
-          {/* Import Button */}
-          <button
-            type="button"
-            className="flex-shrink-0 p-2.5 text-gray-400 hover:text-primary hover:bg-white/5 rounded-xl transition-all duration-200 hover:scale-105"
-            title="Import data"
-          >
-            <FileText className="h-5 w-5" />
-          </button>
-          
           {/* Send Button */}
           <button
             type="submit"
@@ -141,7 +133,7 @@ export function ChatInput({
       <div className="mt-3 flex items-center justify-between px-2">
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <Sparkles className="h-3.5 w-3.5 text-primary" />
-          <span>AI-powered responses with real-time data</span>
+          <span>AI-powered responses • Use floating voice button for voice input</span>
         </div>
         <span className="text-xs text-gray-500">
           Press <kbd className="px-1.5 py-0.5 bg-white/5 border border-white/10 rounded text-[10px]">Enter</kbd> to send

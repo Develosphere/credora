@@ -65,6 +65,17 @@ An intelligent CFO agent system that provides financial analysis, insights, and 
 - Environment-based configuration
 - Database connection pooling
 
+#### 8. **Voice-Controlled AI CFO** ⭐ NEW!
+- **Wake Word Detection**: Say "Hey Credora" or "Hey CFO" to activate
+- **Global Voice Agent**: Available on all dashboard pages
+- **Hands-Free Interaction**: No button clicks needed
+- **Fast Response**: 1-2 second response time
+- **Continuous Conversation**: Auto-restarts listening after response
+- **Background Listening**: Always ready for wake words
+- **Web Speech API**: Free, unlimited voice recognition
+- **Natural Conversations**: Speak naturally, get instant answers
+- **Chat History**: All voice conversations saved automatically
+
 ### 🔧 Technical Stack
 
 **Backend:**
@@ -80,6 +91,7 @@ An intelligent CFO agent system that provides financial analysis, insights, and 
 - TailwindCSS for styling
 - Framer Motion for animations
 - React Query for state management
+- Web Speech API for voice input/output
 
 **FP&A Engine:**
 - Java 17 with Spring Boot
@@ -194,12 +206,14 @@ Open http://localhost:3000 in your browser
 
 ### 4. Chat with AI CFO
 - Navigate to "AI CFO Chat" page
+- **Type** your questions OR **say "Hey Credora"** to use voice
 - Ask questions like:
   - "What products do we sell?"
   - "Show me recent orders"
   - "Which campaigns have the best ROAS?"
   - "Give me a business overview"
   - "What should I focus on to grow?"
+- Voice agent works on ALL pages - just say "Hey Credora" or "Hey CFO"
 
 ### 5. Explore Features
 - **Dashboard**: View key metrics and trends
@@ -209,6 +223,32 @@ Open http://localhost:3000 in your browser
 - **SKU Analysis**: Product profitability breakdown
 - **Campaigns**: Ad performance tracking
 - **Competitor**: Market research and analysis
+
+## 🎤 Voice Agent Usage
+
+### Wake Word Activation
+Simply say **"Hey Credora"** or **"Hey CFO"** from any dashboard page:
+1. Voice agent modal opens automatically
+2. Starts listening for your question
+3. Speak naturally: "What's my revenue today?"
+4. AI responds with voice and text
+5. Continues listening for follow-up questions
+
+### Manual Activation
+Click the floating microphone button (bottom-right corner) on any page.
+
+### Supported Browsers
+- ✅ Chrome/Edge (Recommended)
+- ⚠️ Safari (Partial support)
+- ❌ Firefox (Limited support - use button instead)
+
+### Voice Features
+- **100% Free** - No API costs for voice recognition
+- **Fast** - 1-2 second response time
+- **Always Ready** - Background wake word detection
+- **Natural** - Speak conversationally
+- **Continuous** - Auto-restarts after each response
+- **History** - All conversations saved to chat
 
 ## 🎯 RAG Query Examples
 
@@ -282,6 +322,14 @@ The RAG agent automatically retrieves data from the vector database:
 **Issue:** First run downloads ~90MB model
 **Impact:** Initial FAISS index build takes 2-3 minutes
 **Workaround:** Pre-build index with `build_faiss_index.py`
+
+### 11. **Voice Agent Limitations**
+**Issue:** Wake word detection has browser limitations
+**Impact:** 
+- 60-second timeout on continuous listening (auto-restarts)
+- Requires HTTPS in production (localhost OK for dev)
+- Background noise may cause false positives
+**Workaround:** Use floating button as fallback
 
 ## 🔧 Configuration
 
@@ -381,6 +429,12 @@ For issues and questions:
 - Documentation: [Add docs link]
 
 ## 🎯 Roadmap
+
+### Recently Added ✅
+- [x] Voice-controlled AI CFO with wake word detection
+- [x] Global voice agent on all pages
+- [x] Hands-free interaction ("Hey Credora")
+- [x] Fast 1-2 second response time
 
 ### Planned Features
 - [ ] Real-time data synchronization
