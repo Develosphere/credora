@@ -14,6 +14,7 @@ import os
 import secrets
 import base64
 import json
+import asyncio
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from contextlib import asynccontextmanager
@@ -600,6 +601,19 @@ def require_auth(request: Request) -> User:
 async def lifespan(app: FastAPI):
     """Application lifespan handler."""
     print("Credora API server starting...")
+    
+    # Disable agent pre-loading for now - it takes too long (60+ seconds)
+    # The agent will be loaded on first use, and fallback response will be used initially
+    # async def preload_agent():
+    #     print("[STARTUP] Pre-loading CFO agent in background...")
+    #     try:
+    #         get_agent()
+    #         print("[STARTUP] CFO agent pre-loaded successfully")
+    #     except Exception as e:
+    #         print(f"[STARTUP] Could not pre-load agent: {e}")
+    
+    # asyncio.create_task(preload_agent())
+    
     yield
     print("Credora API server shutting down...")
 
@@ -2453,21 +2467,25 @@ _chat_histories: Dict[str, list] = {}
 
 # Import the CFO agent - lazy loading to avoid startup issues
 _cfo_agent = None
-_agent_available = None  # None = not checked yet, True/False = checked
+_agent_available = None  # None = not checked yet, will load on first request
 
 
 def get_agent():
-    """Lazy load the CFO agent."""
+    """Lazy load the CFO agent with timeout."""
     global _cfo_agent, _agent_available
     
     if _agent_available is None:
         try:
+            print("[AGENT] Starting CFO agent load...")
             from credora.agents.cfo import get_cfo_agent
+            
+            # Note: Agent loading can take 30-60 seconds on first load
+            # due to initializing 7 sub-agents
             _cfo_agent = get_cfo_agent()
             _agent_available = True
-            print("CFO Agent loaded successfully")
+            print("[AGENT] CFO Agent loaded successfully")
         except Exception as e:
-            print(f"Warning: Could not load CFO agent: {e}")
+            print(f"[AGENT] Warning: Could not load CFO agent: {e}")
             import traceback
             traceback.print_exc()
             _cfo_agent = None
@@ -2595,7 +2613,9 @@ async def send_chat_message(request: Request, message_req: MessageRequest):
             id="guest@credora.local",
             email="guest@credora.local",
             name="Guest User",
-            picture=None
+            picture=None,
+            createdAt=datetime.now().isoformat(),
+            onboardingComplete=False
         )
     
     # Initialize chat history for user if not exists (in-memory fallback)
@@ -2623,11 +2643,81 @@ async def send_chat_message(request: Request, message_req: MessageRequest):
     _chat_histories[user.id].append(user_message)
     
     # =========================================================================
-    # RAG: Retrieve financial context from database
+    # RAG: Retrieve financial context from database AND vector search
     # =========================================================================
     retrieved_documents = []
     context_summary = ""
     platform_connections = []
+    
+    # =========================================================================
+    # RAG VECTOR SEARCH: Find relevant data based on user's question
+    # =========================================================================
+    print(f"[RAG] Searching for relevant data for query: '{message_req.message}'")
+    try:
+        from credora.rag.vector_store import VectorStoreManager
+        vector_store = VectorStoreManager.get_instance()
+        
+        # Search for relevant documents
+        rag_results = vector_store.similarity_search_with_score(message_req.message, k=5)
+        
+        if rag_results:
+            print(f"[RAG] Found {len(rag_results)} relevant documents")
+            rag_context_lines = ["Relevant Business Data:"]
+            
+            for doc, score in rag_results:
+                source = doc.metadata.get('source', 'unknown')
+                content = doc.page_content
+                
+                # Parse JSON content if possible
+                try:
+                    import json
+                    data = json.loads(content)
+                    
+                    # Format based on source type
+                    if 'campaigns' in source:
+                        name = data.get('name', 'Unknown')
+                        status = data.get('status', 'Unknown')
+                        spend = data.get('cost', data.get('spend', 0))
+                        conversions = data.get('conversions', 0)
+                        rag_context_lines.append(
+                            f"• Campaign '{name}' ({status}): ${spend:,.2f} spend, {conversions} conversions"
+                        )
+                    elif 'products' in source:
+                        title = data.get('title', 'Unknown')
+                        price = data.get('price', 0)
+                        inventory = data.get('inventory_quantity', 0)
+                        rag_context_lines.append(
+                            f"• Product '{title}': ${price} price, {inventory} in stock"
+                        )
+                    elif 'orders' in source:
+                        order_num = data.get('order_number', data.get('id', 'Unknown'))
+                        total = data.get('total_price', data.get('total', 0))
+                        items = data.get('line_items', [])
+                        item_count = len(items) if isinstance(items, list) else 0
+                        rag_context_lines.append(
+                            f"• Order #{order_num}: ${total} total, {item_count} items"
+                        )
+                    else:
+                        # Generic formatting
+                        rag_context_lines.append(f"• {source}: {str(data)[:100]}...")
+                        
+                except:
+                    # If not JSON, use raw content
+                    rag_context_lines.append(f"• {source}: {content[:100]}...")
+            
+            rag_context = "\n".join(rag_context_lines)
+            retrieved_documents.append({
+                "type": "rag_vector_search",
+                "content": rag_context,
+            })
+            context_summary += rag_context + "\n\n"
+        else:
+            print("[RAG] No relevant documents found")
+            
+    except Exception as e:
+        print(f"[RAG] Vector search error: {e}")
+        import traceback
+        traceback.print_exc()
     
     try:
         db = await get_db()
@@ -2812,6 +2902,8 @@ Last 30 Days Transactions:
         try:
             from agents import Runner
             
+            print(f"[CHAT] Running CFO agent for message: {message_req.message[:50]}...")
+            
             # Build prompt with context - emphasize using the formatted data
             if context_summary:
                 augmented_message = f"""You are a CFO AI assistant analyzing business data. Below is formatted business data - present it clearly without repeating raw JSON.
@@ -2829,8 +2921,17 @@ Instructions:
             else:
                 augmented_message = message_req.message
             
-            # Run the agent with context-augmented message
-            result = await Runner.run(cfo_agent, input=augmented_message)
+            # Run the agent with context-augmented message (with timeout)
+            print("[CHAT] Calling Runner.run()...")
+            try:
+                result = await asyncio.wait_for(
+                    Runner.run(cfo_agent, input=augmented_message),
+                    timeout=30.0  # 30 second timeout
+                )
+                print(f"[CHAT] Runner.run() completed. Result type: {type(result)}")
+            except asyncio.TimeoutError:
+                print("[CHAT] ERROR: Agent execution timed out after 30 seconds")
+                raise Exception("Agent execution timed out")
             
             # Extract the response
             assistant_content = ""
@@ -2838,13 +2939,16 @@ Instructions:
             
             if result and hasattr(result, 'final_output') and result.final_output:
                 assistant_content = result.final_output
+                print(f"[CHAT] Got final_output: {assistant_content[:100]}...")
             elif result and hasattr(result, 'messages') and result.messages:
                 for msg in result.messages:
                     if hasattr(msg, 'content') and msg.content:
                         assistant_content = msg.content
+                        print(f"[CHAT] Got message content: {assistant_content[:100]}...")
                         break
             
             if not assistant_content:
+                print("[CHAT] WARNING: No content extracted from agent result")
                 assistant_content = "I apologize, but I couldn't process your request. Please try again."
             
             # Create assistant message
@@ -2865,10 +2969,15 @@ Instructions:
             # Add to in-memory history
             _chat_histories[user.id].append(assistant_message)
             
-            # Return JSON response with message object
-            return JSONResponse(content={
-                "message": assistant_message
-            })
+            # Return JSON response with message and context
+            return {
+                "message": assistant_message,
+                "context": {
+                    "retrievedDocuments": [doc["content"] for doc in retrieved_documents],
+                    "relevanceScores": [1.0] * len(retrieved_documents),
+                    "usedInResponse": len(retrieved_documents) > 0,
+                },
+            }
             
         except Exception as e:
             print(f"Agent error: {e}")
@@ -2914,10 +3023,22 @@ Please connect your platforms (Shopify, Meta Ads, Google Ads) from Settings to g
     # Add to in-memory history
     _chat_histories[user.id].append(assistant_message)
     
-    # Return JSON response with message object
-    return JSONResponse(content={
-        "message": assistant_message
-    })
+    # Return JSON response with message and context
+    response_data = {
+        "message": assistant_message,
+        "context": {
+            "retrievedDocuments": [doc["content"] for doc in retrieved_documents],
+            "relevanceScores": [1.0] * len(retrieved_documents),
+            "usedInResponse": len(retrieved_documents) > 0,
+        },
+    }
+    
+    print(f"[CHAT] Returning response for user {user.id}")
+    print(f"[CHAT] Message ID: {assistant_message['id']}")
+    print(f"[CHAT] Content length: {len(assistant_message['content'])} chars")
+    print(f"[CHAT] Retrieved docs: {len(retrieved_documents)}")
+    
+    return response_data
 
 
 @app.get("/chat/history")

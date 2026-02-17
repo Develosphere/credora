@@ -13,11 +13,11 @@ from typing import Optional
 class ModelConfig:
     """Configuration for LLM model."""
     
-    model_name: str = "xiaomi/mimo-v2-flash:free"  # Free model with tool support
+    model_name: str = "openai/gpt-4o-mini"  # GPT-4o-mini via OpenRouter
     base_url: str = "https://openrouter.ai/api/v1"
     temperature: float = 0.7
     max_tokens: int = 4096
-
+6
 
 # Shared encryption key file for token storage
 ENCRYPTION_KEY_FILE = ".credora_key"
