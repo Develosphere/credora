@@ -134,7 +134,7 @@ export function InsightCard({
 
   return (
     <div
-      className={`rounded-2xl border bg-[#1e1e1e] ${impactIndicator.borderColor} overflow-hidden transition-all duration-300 hover:border-credora-orange/50 ${
+      className={`rounded-2xl bg-[#1e1e1e] overflow-hidden transition-all duration-300 hover:bg-[#232323] ${
         insight.dismissed ? "opacity-60" : ""
       }`}
     >
@@ -208,7 +208,7 @@ export function InsightCard({
 
       {/* Expanded Content */}
       {isExpanded && (
-        <div className="px-5 pb-5 border-t border-[#2a2a2a]">
+        <div className="px-5 pb-5">
           <div className="pt-4">
             <h4 className="text-sm font-semibold text-gray-300 mb-2">Reasoning</h4>
             <p className="text-sm text-gray-400 leading-relaxed">{insight.reasoning}</p>
@@ -237,7 +237,7 @@ export function InsightCard({
  */
 export function InsightCardSkeleton() {
   return (
-    <div className="rounded-2xl border border-[#2a2a2a] bg-[#1e1e1e] p-5 animate-pulse">
+    <div className="rounded-2xl bg-[#1e1e1e] p-5 animate-pulse">
       <div className="flex items-start gap-3">
         <div className="h-4 w-4 bg-[#333] rounded mt-0.5" />
         <div className="flex-1">

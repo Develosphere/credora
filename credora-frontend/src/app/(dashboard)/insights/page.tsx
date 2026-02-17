@@ -39,7 +39,7 @@ export default function InsightsPage() {
         <button
           onClick={() => refetch()}
           disabled={isLoading}
-          className="flex items-center gap-2 px-4 py-2 bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl text-gray-300 hover:border-credora-orange/50 hover:text-white disabled:opacity-50 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#1e1e1e] rounded-xl text-gray-300 hover:bg-[#2a2a2a] hover:text-white disabled:opacity-50 transition-colors"
         >
           <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
           Refresh
@@ -49,7 +49,7 @@ export default function InsightsPage() {
       {/* Summary Stats */}
       {!isLoading && !isError && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] p-4">
+          <div className="bg-[#1e1e1e] rounded-xl p-4">
             <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
               <Lightbulb className="h-4 w-4 text-credora-orange" />
               <span>Total Insights</span>
@@ -58,7 +58,7 @@ export default function InsightsPage() {
               {activeInsights.length}
             </p>
           </div>
-          <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] p-4">
+          <div className="bg-[#1e1e1e] rounded-xl p-4">
             <div className="flex items-center gap-2 text-sm mb-2">
               <span className="h-2 w-2 rounded-full bg-red-500" />
               <span className="text-red-400">High Impact</span>
@@ -67,7 +67,7 @@ export default function InsightsPage() {
               {activeInsights.filter((i) => i.impact === "high").length}
             </p>
           </div>
-          <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] p-4">
+          <div className="bg-[#1e1e1e] rounded-xl p-4">
             <div className="flex items-center gap-2 text-sm mb-2">
               <span className="h-2 w-2 rounded-full bg-yellow-500" />
               <span className="text-yellow-400">Medium Impact</span>
@@ -76,7 +76,7 @@ export default function InsightsPage() {
               {activeInsights.filter((i) => i.impact === "medium").length}
             </p>
           </div>
-          <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] p-4">
+          <div className="bg-[#1e1e1e] rounded-xl p-4">
             <div className="flex items-center gap-2 text-sm mb-2">
               <span className="h-2 w-2 rounded-full bg-blue-500" />
               <span className="text-blue-400">Low Impact</span>
@@ -99,7 +99,7 @@ export default function InsightsPage() {
 
       {/* Error State */}
       {isError && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+        <div className="bg-red-500/10 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-red-400 font-medium">
@@ -123,7 +123,7 @@ export default function InsightsPage() {
       {!isLoading && !isError && (
         <>
           {activeInsights.length === 0 ? (
-            <div className="bg-[#1e1e1e] rounded-xl border border-[#2a2a2a] p-8 text-center">
+            <div className="bg-[#1e1e1e] rounded-xl p-8 text-center">
               <Lightbulb className="h-12 w-12 text-credora-orange/50 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-white mb-2">
                 No insights available

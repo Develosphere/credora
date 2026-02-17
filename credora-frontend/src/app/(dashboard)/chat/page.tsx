@@ -74,7 +74,7 @@ export default function ChatPage() {
 
       {/* Error Banner */}
       {error && (
-        <div className="relative z-10 mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3 text-red-400 backdrop-blur-sm">
+        <div className="relative z-10 mb-4 p-4 bg-red-500/10 rounded-2xl flex items-center gap-3 text-red-400 backdrop-blur-sm">
           <AlertCircle className="h-5 w-5 flex-shrink-0" />
           <span className="text-sm flex-1">{error.message}</span>
           <button
@@ -87,7 +87,7 @@ export default function ChatPage() {
       )}
 
       {/* Chat Window */}
-      <div className="relative z-10 flex-1 bg-[#1a1a1a]/50 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+      <div className="relative z-10 flex-1 bg-[#1a1a1a]/80 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl">
         <ChatWindow className="h-full" />
       </div>
 

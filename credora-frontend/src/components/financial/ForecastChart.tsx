@@ -35,16 +35,16 @@ export function ForecastChart({ data }: ForecastChartProps) {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white/95 backdrop-blur-sm p-4 border border-gray-200/60 rounded-xl shadow-xl">
-          <p className="font-semibold text-gray-900 mb-2">{formatDate(label)}</p>
+        <div className="bg-[#2a2a2a] backdrop-blur-sm p-4 rounded-xl shadow-xl">
+          <p className="font-semibold text-white mb-2">{formatDate(label)}</p>
           <div className="space-y-1.5 text-sm">
-            <p className="text-emerald-600 font-medium">
+            <p className="text-emerald-400 font-medium">
               High: {formatCompactCurrency(payload[2]?.value || 0)}
             </p>
-            <p className="text-primary font-medium">
+            <p className="text-credora-orange font-medium">
               Mid: {formatCompactCurrency(payload[1]?.value || 0)}
             </p>
-            <p className="text-amber-600 font-medium">
+            <p className="text-amber-400 font-medium">
               Low: {formatCompactCurrency(payload[0]?.value || 0)}
             </p>
           </div>
@@ -55,8 +55,8 @@ export function ForecastChart({ data }: ForecastChartProps) {
   };
 
   return (
-    <div className="glass-card rounded-2xl p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-[#1e1e1e] rounded-2xl p-6">
+      <h3 className="text-lg font-semibold text-white mb-4">
         Cash Flow Projection
       </h3>
       <div className="h-80">
@@ -68,7 +68,7 @@ export function ForecastChart({ data }: ForecastChartProps) {
                 <stop offset="95%" stopColor="#ff6d06" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
             <XAxis
               dataKey="date"
               tickFormatter={formatDate}
@@ -114,15 +114,15 @@ export function ForecastChart({ data }: ForecastChartProps) {
       <div className="mt-4 flex justify-center gap-6 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-          <span className="text-gray-600">Conservative</span>
+          <span className="text-gray-400">Conservative</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-primary"></div>
-          <span className="text-gray-600">Expected</span>
+          <div className="w-3 h-3 rounded-full bg-credora-orange"></div>
+          <span className="text-gray-400">Expected</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-          <span className="text-gray-600">Optimistic</span>
+          <span className="text-gray-400">Optimistic</span>
         </div>
       </div>
     </div>

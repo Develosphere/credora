@@ -8,7 +8,7 @@
 
 import { useEffect, useRef } from 'react';
 import { X, Mic, Volume2, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 interface VoiceAgentModalProps {
   isOpen: boolean;

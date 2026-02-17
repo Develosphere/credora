@@ -37,7 +37,7 @@ export default function SKUAnalysisPage() {
       </div>
 
       {/* Filter Controls */}
-      <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-5">
+      <div className="bg-[#1e1e1e] rounded-2xl p-5">
         <div className="flex flex-wrap items-center gap-4">
           {/* Search Input */}
           <div className="relative flex-1 min-w-[200px] max-w-md">
@@ -47,7 +47,7 @@ export default function SKUAnalysisPage() {
               placeholder="Search by SKU name or ID..."
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-[#282828] border border-[#333] text-white placeholder-gray-500 rounded-xl shadow-sm focus:ring-2 focus:ring-credora-orange/20 focus:border-credora-orange/50 transition-all duration-200"
+              className="w-full pl-10 pr-4 py-2.5 bg-[#282828] text-white placeholder-gray-500 rounded-xl border-0 outline-none focus:ring-2 focus:ring-credora-orange/20 focus:bg-[#2a2a2a] transition-all duration-200"
             />
           </div>
 
@@ -67,7 +67,7 @@ export default function SKUAnalysisPage() {
       {isLoading && <SKUTableSkeleton />}
 
       {isError && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-5">
+        <div className="bg-red-500/10 rounded-2xl p-5">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-red-400 font-semibold">

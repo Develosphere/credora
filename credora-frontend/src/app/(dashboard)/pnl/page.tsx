@@ -71,7 +71,7 @@ export default function PnLPage() {
       </div>
 
       {/* Date Range Selector */}
-      <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-5">
+      <div className="bg-[#1e1e1e] rounded-2xl p-5">
         <div className="flex flex-wrap items-end gap-4">
           {/* Date Inputs */}
           <div className="flex gap-4">
@@ -87,7 +87,7 @@ export default function PnLPage() {
                 id="start-date"
                 value={startDate}
                 onChange={(e) => handleDateChange("start", e.target.value)}
-                className="px-3 py-2.5 bg-[#282828] border border-[#333] text-white rounded-xl shadow-sm focus:ring-2 focus:ring-credora-orange/20 focus:border-credora-orange/50 transition-all duration-200"
+                className="px-3 py-2.5 bg-[#282828] text-white rounded-xl shadow-sm focus:ring-2 focus:ring-credora-orange/20 focus:bg-[#2a2a2a] transition-all duration-200"
               />
             </div>
             <div>
@@ -102,7 +102,7 @@ export default function PnLPage() {
                 id="end-date"
                 value={endDate}
                 onChange={(e) => handleDateChange("end", e.target.value)}
-                className="px-3 py-2.5 bg-[#282828] border border-[#333] text-white rounded-xl shadow-sm focus:ring-2 focus:ring-credora-orange/20 focus:border-credora-orange/50 transition-all duration-200"
+                className="px-3 py-2.5 bg-[#282828] text-white rounded-xl shadow-sm focus:ring-2 focus:ring-credora-orange/20 focus:bg-[#2a2a2a] transition-all duration-200"
               />
             </div>
           </div>
@@ -123,7 +123,7 @@ export default function PnLPage() {
               <button
                 key={days}
                 onClick={() => handlePresetClick(days)}
-                className="px-3.5 py-1.5 text-sm bg-[#282828] border border-[#333] text-gray-300 rounded-xl hover:bg-credora-orange/10 hover:border-credora-orange/30 hover:text-credora-orange transition-all duration-200"
+                className="px-3.5 py-1.5 text-sm bg-[#282828] text-gray-300 rounded-xl hover:bg-credora-orange/10 hover:text-credora-orange transition-all duration-200"
               >
                 {days}d
               </button>
@@ -139,7 +139,7 @@ export default function PnLPage() {
 
       {/* P&L Statement Content */}
       {isLoading && (
-        <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-6">
+        <div className="bg-[#1e1e1e] rounded-2xl p-6">
           <div className="animate-pulse space-y-4">
             <div className="h-4 bg-[#333] rounded-full w-1/4"></div>
             <div className="space-y-3">
@@ -155,7 +155,7 @@ export default function PnLPage() {
       )}
 
       {isError && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-5">
+        <div className="bg-red-500/10 rounded-2xl p-5">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-red-400 font-semibold">

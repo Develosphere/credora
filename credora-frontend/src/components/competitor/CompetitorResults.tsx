@@ -81,7 +81,7 @@ export function CompetitorResults({ result, onReset, businessName }: CompetitorR
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Success/Error Status */}
-      <div className="rounded-2xl bg-[#1e1e1e] border border-[#2a2a2a] p-6 transition-all duration-300 hover:border-credora-orange/30">
+      <div className="rounded-2xl bg-[#1a1a1a] p-6 shadow-lg transition-all duration-300 hover:bg-[#1e1e1e]">
         <div className="flex items-start gap-4">
           {/* Icon */}
           <div className={`p-3 rounded-xl ${isSuccess ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
@@ -130,7 +130,7 @@ export function CompetitorResults({ result, onReset, businessName }: CompetitorR
 
       {/* Key Findings */}
       {isSuccess && result.result && (
-        <div className="rounded-2xl bg-[#1e1e1e] border border-[#2a2a2a] p-6 transition-all duration-300 hover:border-credora-orange/30">
+        <div className="rounded-2xl bg-[#1a1a1a] p-6 shadow-lg transition-all duration-300 hover:bg-[#1e1e1e]">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-credora-orange/10">
               <TrendingUp className="h-5 w-5 text-credora-orange" />
@@ -141,7 +141,7 @@ export function CompetitorResults({ result, onReset, businessName }: CompetitorR
             </div>
           </div>
 
-          <div className="rounded-xl bg-[#282828] border border-[#333] p-5">
+          <div className="rounded-xl bg-[#0f0f0f] p-5">
             <div className="prose prose-sm max-w-none">
               <div className="whitespace-pre-wrap text-sm text-gray-300 leading-relaxed">
                 {result.result}
@@ -153,7 +153,7 @@ export function CompetitorResults({ result, onReset, businessName }: CompetitorR
 
       {/* Comprehensive Report */}
       {isSuccess && result.report_path && (
-        <div className="rounded-2xl bg-[#1e1e1e] border border-[#2a2a2a] p-6 transition-all duration-300 hover:border-credora-orange/30">
+        <div className="rounded-2xl bg-[#1a1a1a] p-6 shadow-lg transition-all duration-300 hover:bg-[#1e1e1e]">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-credora-orange/10">
               <FileText className="h-5 w-5 text-credora-orange" />
@@ -165,7 +165,7 @@ export function CompetitorResults({ result, onReset, businessName }: CompetitorR
           </div>
 
           {/* Report Card */}
-          <div className="rounded-xl bg-[#282828] border border-[#333] p-5 mb-5 transition-all duration-200 hover:border-credora-orange/30">
+          <div className="rounded-xl bg-[#0f0f0f] p-5 mb-5 transition-all duration-200 hover:bg-[#1a1a1a]">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-credora-orange to-credora-red flex-shrink-0">
                 <FileText className="h-6 w-6 text-white" />
@@ -179,7 +179,7 @@ export function CompetitorResults({ result, onReset, businessName }: CompetitorR
               <div className="flex gap-2 flex-shrink-0">
                 <button
                   onClick={handleViewFullReport}
-                  className="px-4 py-2 bg-[#333] border border-[#444] text-gray-300 rounded-xl text-sm font-medium hover:border-credora-orange/30 hover:text-credora-orange transition-all duration-200 flex items-center gap-2"
+                  className="px-4 py-2 bg-[#1a1a1a] text-gray-300 rounded-xl text-sm font-medium hover:bg-[#1e1e1e] hover:text-credora-orange transition-all duration-200 flex items-center gap-2"
                 >
                   <Eye className="h-4 w-4" />
                   View
@@ -207,7 +207,7 @@ export function CompetitorResults({ result, onReset, businessName }: CompetitorR
 
           {/* Download Error */}
           {downloadError && (
-            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 mb-5 animate-slide-up">
+            <div className="p-4 rounded-xl bg-red-500/10 mb-5 animate-slide-up">
               <div className="flex items-start gap-3">
                 <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
                 <div>
@@ -237,7 +237,7 @@ export function CompetitorResults({ result, onReset, businessName }: CompetitorR
 
       {/* Error Details */}
       {!isSuccess && (
-        <div className="p-5 rounded-xl bg-red-500/10 border border-red-500/30 animate-slide-up">
+        <div className="p-5 rounded-xl bg-red-500/10 animate-slide-up">
           <div className="flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
             <div>
@@ -255,7 +255,7 @@ export function CompetitorResults({ result, onReset, businessName }: CompetitorR
       <div className="flex gap-3">
         <button
           onClick={onReset}
-          className="flex-1 px-6 py-3.5 bg-[#282828] border border-[#333] text-gray-300 rounded-xl font-medium hover:border-credora-orange/30 hover:text-credora-orange transition-all duration-200 flex items-center justify-center gap-2"
+          className="flex-1 px-6 py-3.5 bg-[#1a1a1a] text-gray-300 rounded-xl font-medium hover:bg-[#1e1e1e] hover:text-credora-orange transition-all duration-200 flex items-center justify-center gap-2"
         >
           <Users className="h-5 w-5" />
           Analyze Another Business
@@ -265,14 +265,14 @@ export function CompetitorResults({ result, onReset, businessName }: CompetitorR
           <>
             <button
               onClick={handleViewFullReport}
-              className="px-6 py-3.5 bg-[#282828] border border-[#333] text-gray-300 rounded-xl font-medium hover:border-credora-orange/30 hover:text-credora-orange transition-all duration-200 flex items-center gap-2"
+              className="px-6 py-3.5 bg-[#1a1a1a] text-gray-300 rounded-xl font-medium hover:bg-[#1e1e1e] hover:text-credora-orange transition-all duration-200 flex items-center gap-2"
             >
               <ExternalLink className="h-5 w-5" />
               View Report
             </button>
             <button
               onClick={handleShareResults}
-              className="px-6 py-3.5 bg-[#282828] border border-[#333] text-gray-300 rounded-xl font-medium hover:border-credora-orange/30 hover:text-credora-orange transition-all duration-200 flex items-center gap-2"
+              className="px-6 py-3.5 bg-[#1a1a1a] text-gray-300 rounded-xl font-medium hover:bg-[#1e1e1e] hover:text-credora-orange transition-all duration-200 flex items-center gap-2"
             >
               <Globe className="h-5 w-5" />
               Share Results

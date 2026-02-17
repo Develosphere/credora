@@ -117,7 +117,7 @@ function ExpandedRow({ sku }: ExpandedRowProps) {
             <span className="ml-2 font-medium text-white">{formatDays(sku.inventoryDays)}</span>
           </div>
         </div>
-        <div className="mt-4 p-3 bg-[#282828] rounded border border-[#333]">
+        <div className="mt-4 p-3 bg-[#282828] rounded-xl">
           <h4 className="text-sm font-medium text-gray-300 mb-2">Profitability Breakdown</h4>
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div className="flex justify-between">
@@ -164,7 +164,7 @@ export function SKUTable({ data, sortField, sortDirection, onSort, filterText }:
 
   if (processedData.length === 0) {
     return (
-      <div className="bg-[#1e1e1e] rounded-lg border border-[#2a2a2a] p-8 text-center">
+      <div className="bg-[#1e1e1e] rounded-2xl p-8 text-center">
         <p className="text-gray-500">
           {filterText ? "No SKUs match your filter criteria" : "No SKU data available"}
         </p>
@@ -173,16 +173,16 @@ export function SKUTable({ data, sortField, sortDirection, onSort, filterText }:
   }
 
   return (
-    <div className="bg-[#1e1e1e] rounded-lg border border-[#2a2a2a] overflow-hidden">
+    <div className="bg-[#1e1e1e] rounded-2xl overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-[#2a2a2a]">
+        <table className="min-w-full">
           <thead className="bg-[#1a1a1a]">
             <tr>
               <th className="w-10 px-3 py-3"></th>
               {columns.map((col) => (
                 <th
                   key={col.field}
-                  className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-[#282828] ${
+                  className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-[#282828] transition-colors ${
                     col.align === "right" ? "text-right" : "text-left"
                   }`}
                   onClick={() => onSort(col.field)}
@@ -195,14 +195,14 @@ export function SKUTable({ data, sortField, sortDirection, onSort, filterText }:
               ))}
             </tr>
           </thead>
-          <tbody className="bg-[#1e1e1e] divide-y divide-[#2a2a2a]">
+          <tbody className="bg-[#1e1e1e]">
             {processedData.map((sku) => {
               const isExpanded = expandedRows.has(sku.skuId);
               return (
                 <>
                   <tr
                     key={sku.skuId}
-                    className="hover:bg-[#282828] cursor-pointer"
+                    className="hover:bg-[#282828] cursor-pointer transition-colors border-t border-[#2a2a2a] first:border-t-0"
                     onClick={() => toggleRow(sku.skuId)}
                   >
                     <td className="px-3 py-4">
@@ -245,9 +245,9 @@ export function SKUTable({ data, sortField, sortDirection, onSort, filterText }:
  */
 export function SKUTableSkeleton() {
   return (
-    <div className="bg-[#1e1e1e] rounded-lg border border-[#2a2a2a] overflow-hidden">
+    <div className="bg-[#1e1e1e] rounded-2xl overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-[#2a2a2a]">
+        <table className="min-w-full">
           <thead className="bg-[#1a1a1a]">
             <tr>
               <th className="w-10 px-3 py-3"></th>
@@ -263,9 +263,9 @@ export function SKUTableSkeleton() {
               ))}
             </tr>
           </thead>
-          <tbody className="bg-[#1e1e1e] divide-y divide-[#2a2a2a]">
+          <tbody className="bg-[#1e1e1e]">
             {[...Array(5)].map((_, i) => (
-              <tr key={i}>
+              <tr key={i} className="border-t border-[#2a2a2a] first:border-t-0">
                 <td className="px-3 py-4">
                   <div className="h-4 w-4 bg-[#333] rounded animate-pulse" />
                 </td>

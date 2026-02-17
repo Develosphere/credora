@@ -104,7 +104,7 @@ export default function WhatIfPage() {
       </div>
 
       {/* Scenario Type Selector - Requirements: 11.1 */}
-      <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-5">
+      <div className="bg-[#1a1a1a] rounded-2xl p-5 shadow-lg">
         <h2 className="text-sm font-semibold text-gray-300 mb-4">
           Select Scenario Type
         </h2>
@@ -113,10 +113,10 @@ export default function WhatIfPage() {
             <button
               key={scenario.value}
               onClick={() => handleScenarioChange(scenario.value)}
-              className={`p-5 rounded-2xl border-2 text-left transition-all duration-300 ${
+              className={`p-5 rounded-2xl text-left transition-all duration-300 ${
                 selectedScenario === scenario.value
-                  ? "border-credora-orange bg-credora-orange/10 shadow-lg shadow-credora-orange/10"
-                  : "border-[#333] hover:border-credora-orange/30 bg-[#1a1a1a]"
+                  ? "bg-gradient-to-br from-credora-orange/20 to-credora-red/20 shadow-lg shadow-credora-orange/20 ring-2 ring-credora-orange"
+                  : "bg-[#0f0f0f] hover:bg-[#1a1a1a]"
               }`}
             >
               <div className="flex items-center gap-3">
@@ -150,7 +150,7 @@ export default function WhatIfPage() {
       </div>
 
       {/* Scenario Form - Requirements: 11.2 */}
-      <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-6">
+      <div className="bg-[#1a1a1a] rounded-2xl p-6 shadow-lg">
         <h2 className="text-lg font-semibold text-white mb-4">
           Configure {SCENARIO_TYPES.find((s) => s.value === selectedScenario)?.label}
         </h2>

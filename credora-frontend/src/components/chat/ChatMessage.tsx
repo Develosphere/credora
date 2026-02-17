@@ -8,6 +8,7 @@
 
 import Image from "next/image";
 import { User, Bot, ExternalLink, FileText, Sparkles } from "lucide-react";
+import { useAuth } from "@/lib/hooks/useAuth";
 import type { ChatMessage as ChatMessageType, DataSource } from "@/lib/api/types";
 
 interface ChatMessageProps {
@@ -16,6 +17,7 @@ interface ChatMessageProps {
 
 export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === "user";
+  const { user } = useAuth();
 
   return (
     <div
@@ -23,14 +25,22 @@ export function ChatMessage({ message }: ChatMessageProps) {
     >
       {/* Avatar */}
       <div
-        className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg transition-all duration-300 hover:scale-110 ${
+        className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg transition-all duration-300 hover:scale-110 overflow-hidden ${
           isUser 
-            ? "bg-white/10 border border-white/20" 
-            : "bg-gradient-to-br from-primary to-secondary shadow-primary/30 p-2"
+            ? "bg-gradient-to-br from-credora-orange to-credora-red shadow-credora-orange/30" 
+            : "bg-gradient-to-br from-credora-orange to-credora-red shadow-credora-orange/30 p-2"
         }`}
       >
         {isUser ? (
-          <User className="h-5 w-5 text-white" />
+          user?.picture ? (
+            <img 
+              src={user.picture} 
+              alt={user.name || "User"} 
+              className="w-full h-full object-cover rounded-xl"
+            />
+          ) : (
+            <User className="h-5 w-5 text-white" />
+          )
         ) : (
           <div className="relative w-full h-full">
             <Image
@@ -49,14 +59,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
       >
         {/* Role Label */}
         <span className="text-xs font-medium text-gray-500 mb-2">
-          {isUser ? "You" : "AI Assistant"}
+          {isUser ? (user?.name || "You") : "Credora CFO"}
         </span>
 
         <div
-          className={`rounded-2xl px-5 py-4 shadow-lg transition-all duration-300 hover:shadow-xl ${
+          className={`rounded-2xl px-5 py-4 shadow-lg transition-all duration-300 hover:shadow-xl animate-slide-in ${
             isUser
-              ? "bg-gradient-to-br from-primary to-secondary text-white"
-              : "bg-[#2a2a2a]/80 backdrop-blur-xl border border-white/10 text-white"
+              ? "bg-gradient-to-br from-credora-orange to-credora-red text-white shadow-credora-orange/20"
+              : "bg-[#2a2a2a]/80 backdrop-blur-xl text-white"
           }`}
         >
           <MessageContent content={message.content} isUser={isUser} />
@@ -110,7 +120,7 @@ function MessageContent({
         elements.push(
           <pre
             key={`code-${index}`}
-            className="bg-black/40 border border-white/10 text-gray-100 rounded-xl p-4 my-3 overflow-x-auto text-xs font-mono"
+            className="bg-black/40 text-gray-100 rounded-xl p-4 my-3 overflow-x-auto text-xs font-mono"
           >
             <code>{codeContent.join("\n")}</code>
           </pre>
@@ -129,7 +139,7 @@ function MessageContent({
     // Headers
     if (line.startsWith("### ")) {
       elements.push(
-        <h4 key={index} className="font-semibold text-sm mt-4 mb-2 text-primary">
+        <h4 key={index} className="font-semibold text-sm mt-4 mb-2 text-credora-orange">
           {line.slice(4)}
         </h4>
       );
@@ -137,7 +147,7 @@ function MessageContent({
     }
     if (line.startsWith("## ")) {
       elements.push(
-        <h3 key={index} className="font-semibold text-base mt-4 mb-2 text-primary">
+        <h3 key={index} className="font-semibold text-base mt-4 mb-2 text-credora-orange">
           {line.slice(3)}
         </h3>
       );
@@ -145,7 +155,7 @@ function MessageContent({
     }
     if (line.startsWith("# ")) {
       elements.push(
-        <h2 key={index} className="font-bold text-lg mt-4 mb-2 text-primary">
+        <h2 key={index} className="font-bold text-lg mt-4 mb-2 text-credora-orange">
           {line.slice(2)}
         </h2>
       );
@@ -202,7 +212,7 @@ function renderInlineFormatting(text: string): React.ReactNode {
       return (
         <code
           key={index}
-          className="bg-primary/20 text-primary px-2 py-0.5 rounded-lg text-xs font-mono border border-primary/30"
+          className="bg-credora-orange/20 text-credora-orange px-2 py-0.5 rounded-lg text-xs font-mono"
         >
           {part.slice(1, -1)}
         </code>
@@ -259,8 +269,8 @@ function SourceAttribution({ sources }: { sources: DataSource[] }) {
   };
 
   return (
-    <div className="mt-3 p-4 bg-primary/10 backdrop-blur-xl rounded-xl border border-primary/20">
-      <div className="flex items-center gap-2 text-xs text-primary mb-3">
+    <div className="mt-3 p-4 bg-credora-orange/10 backdrop-blur-xl rounded-xl">
+      <div className="flex items-center gap-2 text-xs text-credora-orange mb-3">
         <FileText className="h-3.5 w-3.5" />
         <span className="font-semibold">Data Sources</span>
       </div>
@@ -269,7 +279,7 @@ function SourceAttribution({ sources }: { sources: DataSource[] }) {
           <a
             key={index}
             href={getSourceLink(source.type)}
-            className="flex items-center gap-2.5 text-xs text-gray-300 hover:text-primary transition-all duration-200 group p-2 rounded-lg hover:bg-white/5"
+            className="flex items-center gap-2.5 text-xs text-gray-300 hover:text-credora-orange transition-all duration-200 group p-2 rounded-lg hover:bg-[#2a2a2a]"
           >
             <span className="text-base">{getSourceIcon(source.type)}</span>
             <span className="group-hover:underline flex-1">{source.summary || source.reference}</span>

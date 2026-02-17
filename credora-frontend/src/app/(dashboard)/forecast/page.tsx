@@ -31,9 +31,9 @@ function MetricCard({
   variant = "default",
 }: MetricCardProps) {
   const variantStyles = {
-    default: "bg-[#1e1e1e] border-[#2a2a2a]",
-    warning: "bg-amber-500/10 border-amber-500/30",
-    critical: "bg-red-500/10 border-red-500/30",
+    default: "bg-[#1e1e1e]",
+    warning: "bg-amber-500/10",
+    critical: "bg-red-500/10",
   };
 
   const valueStyles = {
@@ -44,7 +44,7 @@ function MetricCard({
 
   return (
     <div
-      className={`rounded-2xl border p-5 transition-all duration-300 hover:border-credora-orange/30 hover:-translate-y-0.5 ${variantStyles[variant]}`}
+      className={`rounded-2xl p-5 transition-all duration-300 hover:bg-[#232323] hover:-translate-y-0.5 ${variantStyles[variant]}`}
     >
       <p className="text-sm font-medium text-gray-400">{title}</p>
       <p className={`text-2xl font-bold mt-1.5 ${valueStyles[variant]}`}>
@@ -89,7 +89,7 @@ export default function ForecastPage() {
               className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                 selectedPeriod === option.value
                   ? "bg-gradient-to-r from-credora-orange to-credora-red text-white shadow-lg shadow-credora-orange/25"
-                  : "bg-[#1e1e1e] border border-[#2a2a2a] text-gray-300 hover:border-credora-orange/30 hover:text-credora-orange"
+                  : "bg-[#1e1e1e] text-gray-300 hover:bg-[#2a2a2a] hover:text-credora-orange"
               }`}
             >
               {option.label}
@@ -100,7 +100,7 @@ export default function ForecastPage() {
 
       {/* Runway Warning Alert */}
       {data && runwayStatus?.status === "critical" && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-5 flex items-start gap-3 animate-slide-up">
+        <div className="bg-red-500/10 rounded-2xl p-5 flex items-start gap-3 animate-slide-up">
           <svg
             className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0"
             fill="none"
@@ -131,14 +131,14 @@ export default function ForecastPage() {
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
-                className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-5 animate-pulse"
+                className="bg-[#1e1e1e] rounded-2xl p-5 animate-pulse"
               >
                 <div className="h-4 bg-[#333] rounded-full w-1/2 mb-3"></div>
                 <div className="h-8 bg-[#333] rounded-full w-3/4"></div>
               </div>
             ))}
           </div>
-          <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-6 animate-pulse">
+          <div className="bg-[#1e1e1e] rounded-2xl p-6 animate-pulse">
             <div className="h-4 bg-[#333] rounded-full w-1/4 mb-4"></div>
             <div className="h-64 bg-[#282828] rounded-xl"></div>
           </div>
@@ -147,7 +147,7 @@ export default function ForecastPage() {
 
       {/* Insufficient Data State */}
       {isInsufficientData && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-8 text-center">
+        <div className="bg-amber-500/10 rounded-2xl p-8 text-center">
           <svg
             className="w-12 h-12 text-amber-400 mx-auto mb-4"
             fill="none"
@@ -180,7 +180,7 @@ export default function ForecastPage() {
 
       {/* Error State */}
       {isError && !isInsufficientData && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-5">
+        <div className="bg-red-500/10 rounded-2xl p-5">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-red-400 font-semibold">
@@ -230,7 +230,7 @@ export default function ForecastPage() {
           </div>
 
           {/* Scenario Summary */}
-          <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-5 mb-6">
+          <div className="bg-[#1e1e1e] rounded-2xl p-5 mb-6">
             <h3 className="text-sm font-semibold text-gray-400 mb-4">
               {selectedPeriod}-Day Projection Summary
             </h3>

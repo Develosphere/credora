@@ -35,9 +35,9 @@ function LineItem({
     <div
       className={`flex justify-between py-2.5 transition-colors duration-200 hover:bg-[#282828] rounded-lg px-2 -mx-2 ${
         isTotal
-          ? "border-t-2 border-b-2 border-credora-orange font-bold text-lg bg-[#1a1a1a]"
+          ? "font-bold text-lg bg-[#1a1a1a]"
           : isSubtotal
-          ? "border-t border-[#333] font-semibold"
+          ? "font-semibold"
           : ""
       } ${indent ? "pl-6" : ""}`}
     >
@@ -77,12 +77,12 @@ function MarginDisplay({ label, value }: MarginDisplayProps) {
 
 export function PnLStatement({ data }: PnLStatementProps) {
   return (
-    <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-6">
+    <div className="bg-[#1e1e1e] rounded-2xl p-6">
       <div className="space-y-1">
         {/* Revenue Section */}
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-credora-orange uppercase tracking-wide mb-3">
-            Revenue
+            REVENUE
           </h3>
           <LineItem label="Gross Revenue" value={data.revenue} />
           <LineItem
@@ -97,7 +97,7 @@ export function PnLStatement({ data }: PnLStatementProps) {
         {/* Cost of Goods Sold Section */}
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-credora-orange uppercase tracking-wide mb-3">
-            Cost of Goods Sold
+            COST OF GOODS SOLD
           </h3>
           <LineItem label="COGS" value={data.cogs} isNegative indent />
           <LineItem label="Gross Profit" value={data.grossProfit} isSubtotal />
@@ -107,7 +107,7 @@ export function PnLStatement({ data }: PnLStatementProps) {
         {/* Operating Expenses Section */}
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-credora-orange uppercase tracking-wide mb-3">
-            Operating Expenses
+            OPERATING EXPENSES
           </h3>
           <LineItem label="Advertising Spend" value={data.adSpend} isNegative indent />
           <LineItem

@@ -92,7 +92,7 @@ function CampaignRow({ campaign, isExpanded, onToggle }: CampaignRowProps) {
   return (
     <>
       <tr
-        className="hover:bg-[#282828] cursor-pointer"
+        className="hover:bg-[#282828] cursor-pointer transition-colors border-t border-[#2a2a2a] first:border-t-0"
         onClick={onToggle}
       >
         <td className="px-3 py-4">
@@ -212,7 +212,7 @@ function ExpandedCampaignRow({ campaign }: ExpandedCampaignRowProps) {
           </div>
 
           {/* Profitability Breakdown */}
-          <div className="p-3 bg-[#282828] rounded border border-[#333]">
+          <div className="p-3 bg-[#282828] rounded-xl">
             <h4 className="text-sm font-medium text-gray-300 mb-2">
               Profitability Breakdown
             </h4>
@@ -238,7 +238,7 @@ function ExpandedCampaignRow({ campaign }: ExpandedCampaignRowProps) {
                 </span>
               </div>
             </div>
-            <div className="mt-2 pt-2 border-t border-[#333] flex justify-between text-sm">
+            <div className="mt-2 pt-2 flex justify-between text-sm">
               <span className="text-gray-500">Profit Margin:</span>
               <span
                 className={`font-mono ${
@@ -253,10 +253,10 @@ function ExpandedCampaignRow({ campaign }: ExpandedCampaignRowProps) {
           {/* Data Quality Note */}
           {campaign.dataQuality !== "high" && (
             <div
-              className={`p-3 rounded border ${
+              className={`p-3 rounded-xl ${
                 campaign.dataQuality === "low"
-                  ? "bg-red-500/10 border-red-500/30"
-                  : "bg-yellow-500/10 border-yellow-500/30"
+                  ? "bg-red-500/10"
+                  : "bg-yellow-500/10"
               }`}
             >
               <div className="flex items-start gap-2">
@@ -319,8 +319,8 @@ function CampaignTable({ campaigns, title, icon, emptyMessage }: CampaignTablePr
   };
 
   return (
-    <div className="bg-[#1e1e1e] rounded-lg border border-[#2a2a2a] overflow-hidden">
-      <div className="px-6 py-4 border-b border-[#2a2a2a] flex items-center gap-2">
+    <div className="bg-[#1e1e1e] rounded-2xl overflow-hidden">
+      <div className="px-6 py-4 flex items-center gap-2">
         {icon}
         <h3 className="text-lg font-medium text-white">{title}</h3>
         <span className="text-sm text-gray-500">({campaigns.length})</span>
@@ -330,7 +330,7 @@ function CampaignTable({ campaigns, title, icon, emptyMessage }: CampaignTablePr
         <div className="p-8 text-center text-gray-500">{emptyMessage}</div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-[#2a2a2a]">
+          <table className="min-w-full">
             <thead className="bg-[#1a1a1a]">
               <tr>
                 <th className="w-10 px-3 py-3"></th>
@@ -354,7 +354,7 @@ function CampaignTable({ campaigns, title, icon, emptyMessage }: CampaignTablePr
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-[#1e1e1e] divide-y divide-[#2a2a2a]">
+            <tbody className="bg-[#1e1e1e]">
               {campaigns.map((campaign) => (
                 <CampaignRow
                   key={campaign.id}
@@ -398,12 +398,12 @@ export function CampaignRanking({ data }: CampaignRankingProps) {
  */
 export function CampaignRankingSkeleton() {
   const SkeletonTable = () => (
-    <div className="bg-[#1e1e1e] rounded-lg border border-[#2a2a2a] overflow-hidden">
-      <div className="px-6 py-4 border-b border-[#2a2a2a]">
+    <div className="bg-[#1e1e1e] rounded-2xl overflow-hidden">
+      <div className="px-6 py-4">
         <div className="h-6 w-40 bg-[#333] rounded animate-pulse" />
       </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-[#2a2a2a]">
+        <table className="min-w-full">
           <thead className="bg-[#1a1a1a]">
             <tr>
               <th className="w-10 px-3 py-3"></th>
@@ -427,9 +427,9 @@ export function CampaignRankingSkeleton() {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-[#1e1e1e] divide-y divide-[#2a2a2a]">
+          <tbody className="bg-[#1e1e1e]">
             {[...Array(3)].map((_, i) => (
-              <tr key={i}>
+              <tr key={i} className="border-t border-[#2a2a2a] first:border-t-0">
                 <td className="px-3 py-4">
                   <div className="h-4 w-4 bg-[#333] rounded animate-pulse" />
                 </td>

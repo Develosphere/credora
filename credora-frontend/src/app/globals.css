@@ -980,3 +980,52 @@ input[type="radio"] {
 .animation-delay-400 {
   animation-delay: 400ms;
 }
+
+/* Chat-specific animations */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradient-flow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes ping-slow {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out forwards;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-flow 3s ease infinite;
+}
+
+.animate-ping-slow {
+  animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}

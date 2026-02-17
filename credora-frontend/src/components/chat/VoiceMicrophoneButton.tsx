@@ -9,7 +9,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Mic } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { useVoiceInput, useVoiceSettingsStore } from '@/lib/voice';
 import type { VoiceMicrophoneButtonProps } from '@/lib/voice/types';
 

@@ -104,7 +104,7 @@ export default function CompetitorAnalysisPage() {
         {/* Analysis Form */}
         <div className="lg:col-span-2 space-y-6">
           {/* Main Form Card */}
-          <div className="rounded-2xl bg-[#1e1e1e] border border-[#2a2a2a] p-6 transition-all duration-300 hover:border-credora-orange/30">
+          <div className="rounded-2xl bg-[#1a1a1a] p-6 shadow-lg transition-all duration-300 hover:bg-[#1e1e1e]">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 rounded-lg bg-credora-orange/10">
                 <Search className="h-5 w-5 text-credora-orange" />
@@ -127,7 +127,7 @@ export default function CompetitorAnalysisPage() {
                   value={formData.businessName}
                   onChange={(e) => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
                   disabled={isLoading}
-                  className="w-full px-4 py-3 bg-[#282828] border border-[#333] text-white rounded-xl placeholder-gray-500 focus:outline-none focus:border-credora-orange/50 focus:ring-2 focus:ring-credora-orange/20 transition-all duration-200 disabled:opacity-50"
+                  className="w-full px-4 py-3 bg-[#0f0f0f] text-white rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-credora-orange/30 transition-all duration-200 disabled:opacity-50"
                 />
               </div>
 
@@ -140,7 +140,7 @@ export default function CompetitorAnalysisPage() {
                   value={formData.businessType}
                   onChange={(e) => setFormData(prev => ({ ...prev, businessType: e.target.value }))}
                   disabled={isLoading}
-                  className="w-full px-4 py-3 bg-[#282828] border border-[#333] text-white rounded-xl focus:outline-none focus:border-credora-orange/50 focus:ring-2 focus:ring-credora-orange/20 transition-all duration-200 disabled:opacity-50"
+                  className="w-full px-4 py-3 bg-[#0f0f0f] text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-credora-orange/30 transition-all duration-200 disabled:opacity-50"
                 >
                   <option value="">Select your business category</option>
                   {BUSINESS_CATEGORIES.map((category) => (
@@ -157,7 +157,7 @@ export default function CompetitorAnalysisPage() {
                     value={formData.city}
                     onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
                     disabled={isLoading}
-                    className="w-full px-4 py-3 bg-[#282828] border border-[#333] text-white rounded-xl focus:outline-none focus:border-credora-orange/50 focus:ring-2 focus:ring-credora-orange/20 transition-all duration-200 disabled:opacity-50"
+                    className="w-full px-4 py-3 bg-[#0f0f0f] text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-credora-orange/30 transition-all duration-200 disabled:opacity-50"
                   >
                     {PAKISTANI_CITIES.map((city) => (
                       <option key={city} value={city}>{city}</option>
@@ -171,7 +171,7 @@ export default function CompetitorAnalysisPage() {
                     value={formData.maxCompetitors.toString()}
                     onChange={(e) => setFormData(prev => ({ ...prev, maxCompetitors: parseInt(e.target.value) }))}
                     disabled={isLoading}
-                    className="w-full px-4 py-3 bg-[#282828] border border-[#333] text-white rounded-xl focus:outline-none focus:border-credora-orange/50 focus:ring-2 focus:ring-credora-orange/20 transition-all duration-200 disabled:opacity-50"
+                    className="w-full px-4 py-3 bg-[#0f0f0f] text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-credora-orange/30 transition-all duration-200 disabled:opacity-50"
                   >
                     {[3, 5, 7, 10].map((num) => (
                       <option key={num} value={num}>{num} competitors</option>
@@ -181,7 +181,7 @@ export default function CompetitorAnalysisPage() {
               </div>
 
               {/* Divider */}
-              <div className="border-t border-[#2a2a2a] my-6"></div>
+              <div className="border-t border-[#0f0f0f] my-6"></div>
 
               {/* Options */}
               <div className="space-y-4">
@@ -191,13 +191,13 @@ export default function CompetitorAnalysisPage() {
                 </h3>
                 
                 {/* Generate Report */}
-                <label className="flex items-center gap-3 p-4 rounded-xl bg-[#282828] border border-[#333] cursor-pointer hover:border-credora-orange/30 transition-all duration-200 group">
+                <label className="flex items-center gap-3 p-4 rounded-xl bg-[#0f0f0f] cursor-pointer hover:bg-[#1a1a1a] transition-all duration-200 group">
                   <input
                     type="checkbox"
                     checked={formData.generateReport}
                     onChange={(e) => setFormData(prev => ({ ...prev, generateReport: e.target.checked }))}
                     disabled={isLoading}
-                    className="w-5 h-5 rounded border-[#444] bg-[#1e1e1e] text-credora-orange focus:ring-2 focus:ring-credora-orange/20 transition-all"
+                    className="w-5 h-5 rounded bg-[#1a1a1a] text-credora-orange focus:ring-2 focus:ring-credora-orange/20 transition-all"
                   />
                   <div className="flex items-center gap-2 flex-1">
                     <FileText className="h-4 w-4 text-gray-400 group-hover:text-credora-orange transition-colors" />
@@ -208,13 +208,13 @@ export default function CompetitorAnalysisPage() {
                 </label>
 
                 {/* Visible Browser */}
-                <label className="flex items-center gap-3 p-4 rounded-xl bg-[#282828] border border-[#333] cursor-pointer hover:border-credora-orange/30 transition-all duration-200 group">
+                <label className="flex items-center gap-3 p-4 rounded-xl bg-[#0f0f0f] cursor-pointer hover:bg-[#1a1a1a] transition-all duration-200 group">
                   <input
                     type="checkbox"
                     checked={formData.visibleBrowser}
                     onChange={(e) => setFormData(prev => ({ ...prev, visibleBrowser: e.target.checked }))}
                     disabled={isLoading}
-                    className="w-5 h-5 rounded border-[#444] bg-[#1e1e1e] text-credora-orange focus:ring-2 focus:ring-credora-orange/20 transition-all"
+                    className="w-5 h-5 rounded bg-[#1a1a1a] text-credora-orange focus:ring-2 focus:ring-credora-orange/20 transition-all"
                   />
                   <div className="flex items-center gap-2 flex-1">
                     {formData.visibleBrowser ? (
@@ -230,7 +230,7 @@ export default function CompetitorAnalysisPage() {
                 
                 {/* Visible Browser Alert */}
                 {formData.visibleBrowser && (
-                  <div className="p-4 rounded-xl bg-credora-orange/10 border border-credora-orange/30 animate-slide-up">
+                  <div className="p-4 rounded-xl bg-credora-orange/10 animate-slide-up">
                     <div className="flex items-start gap-3">
                       <Eye className="h-5 w-5 text-credora-orange mt-0.5 flex-shrink-0" />
                       <div>
@@ -246,7 +246,7 @@ export default function CompetitorAnalysisPage() {
 
               {/* Error Alert */}
               {error && (
-                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 animate-slide-up">
+                <div className="p-4 rounded-xl bg-red-500/10 animate-slide-up">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
                     <div>
@@ -259,7 +259,7 @@ export default function CompetitorAnalysisPage() {
 
               {/* Estimated Duration */}
               {isFormValid && !isLoading && (
-                <div className="p-4 rounded-xl bg-[#282828] border border-[#333] animate-slide-up">
+                <div className="p-4 rounded-xl bg-[#0f0f0f] animate-slide-up">
                   <div className="flex items-center gap-3">
                     <Clock className="h-4 w-4 text-gray-400" />
                     <span className="text-sm text-gray-400">
@@ -301,7 +301,7 @@ export default function CompetitorAnalysisPage() {
                   type="button"
                   onClick={handleReset}
                   disabled={isLoading}
-                  className="px-6 py-3.5 bg-[#282828] border-2 border-[#333] text-gray-300 rounded-xl font-medium hover:border-credora-orange/50 hover:text-white hover:bg-[#2a2a2a] transition-all duration-200 disabled:opacity-50 hover:scale-105 active:scale-95"
+                  className="px-6 py-3.5 bg-[#0f0f0f] text-gray-300 rounded-xl font-medium hover:bg-[#1a1a1a] hover:text-white transition-all duration-200 disabled:opacity-50 hover:scale-105 active:scale-95"
                 >
                   Reset
                 </button>
@@ -313,7 +313,7 @@ export default function CompetitorAnalysisPage() {
         {/* Info Panels */}
         <div className="space-y-6">
           {/* What We Analyze */}
-          <div className="rounded-2xl bg-[#1e1e1e] border border-[#2a2a2a] p-5 transition-all duration-300 hover:border-credora-orange/30 hover:-translate-y-1">
+          <div className="rounded-2xl bg-[#1a1a1a] p-5 shadow-lg transition-all duration-300 hover:bg-[#1e1e1e] hover:-translate-y-1">
             <div className="flex items-center gap-2 mb-4">
               <div className="p-2 rounded-lg bg-emerald-500/10">
                 <Target className="h-4 w-4 text-emerald-400" />
@@ -338,7 +338,7 @@ export default function CompetitorAnalysisPage() {
           </div>
 
           {/* Analysis Process */}
-          <div className="rounded-2xl bg-[#1e1e1e] border border-[#2a2a2a] p-5 transition-all duration-300 hover:border-credora-orange/30 hover:-translate-y-1">
+          <div className="rounded-2xl bg-[#1a1a1a] p-5 shadow-lg transition-all duration-300 hover:bg-[#1e1e1e] hover:-translate-y-1">
             <div className="flex items-center gap-2 mb-4">
               <div className="p-2 rounded-lg bg-credora-orange/10">
                 <Zap className="h-4 w-4 text-credora-orange" />

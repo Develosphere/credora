@@ -38,7 +38,7 @@ export function InventoryOrderForm({ onSubmit, isLoading = false }: InventoryOrd
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Order Amount */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
           Order Amount
         </label>
         <div className="relative">
@@ -48,12 +48,12 @@ export function InventoryOrderForm({ onSubmit, isLoading = false }: InventoryOrd
             min="1"
             value={orderAmount}
             onChange={(e) => setOrderAmount(Number(e.target.value))}
-            className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 pl-10 bg-[#0f0f0f] text-white rounded-xl focus:ring-2 focus:ring-credora-orange/30 focus:outline-none"
             placeholder="Enter order amount"
           />
         </div>
         {orderAmount <= 0 && (
-          <p className="mt-1 text-sm text-red-600">
+          <p className="mt-1 text-sm text-red-400">
             Order amount must be greater than 0
           </p>
         )}
@@ -61,7 +61,7 @@ export function InventoryOrderForm({ onSubmit, isLoading = false }: InventoryOrd
 
       {/* Lead Time */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
           Lead Time (Days)
         </label>
         <input
@@ -70,11 +70,11 @@ export function InventoryOrderForm({ onSubmit, isLoading = false }: InventoryOrd
           max="180"
           value={leadTimeDays}
           onChange={(e) => setLeadTimeDays(Number(e.target.value))}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-3 bg-[#0f0f0f] text-white rounded-xl focus:ring-2 focus:ring-credora-orange/30 focus:outline-none"
           placeholder="Enter lead time in days"
         />
         {leadTimeDays <= 0 && (
-          <p className="mt-1 text-sm text-red-600">
+          <p className="mt-1 text-sm text-red-400">
             Lead time must be at least 1 day
           </p>
         )}
@@ -82,13 +82,13 @@ export function InventoryOrderForm({ onSubmit, isLoading = false }: InventoryOrd
 
       {/* Payment Terms */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
           Payment Terms
         </label>
         <select
           value={paymentTerms}
           onChange={(e) => setPaymentTerms(e.target.value as "immediate" | "net30" | "net60")}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-4 py-3 bg-[#0f0f0f] text-white rounded-xl focus:ring-2 focus:ring-credora-orange/30 focus:outline-none"
         >
           <option value="immediate">Immediate Payment</option>
           <option value="net30">Net 30 Days</option>
@@ -97,13 +97,13 @@ export function InventoryOrderForm({ onSubmit, isLoading = false }: InventoryOrd
       </div>
 
       {/* Summary */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Package className="h-4 w-4" />
+      <div className="bg-[#0f0f0f] rounded-xl p-4">
+        <div className="flex items-center gap-2 text-sm text-gray-400">
+          <Package className="h-4 w-4 text-credora-orange" />
           <span>
-            Order <strong>${orderAmount.toLocaleString()}</strong> of inventory with{" "}
-            <strong>{leadTimeDays} day</strong> lead time,{" "}
-            <strong>
+            Order <strong className="text-white">${orderAmount.toLocaleString()}</strong> of inventory with{" "}
+            <strong className="text-white">{leadTimeDays} day</strong> lead time,{" "}
+            <strong className="text-white">
               {paymentTerms === "immediate"
                 ? "paid immediately"
                 : paymentTerms === "net30"
@@ -118,7 +118,7 @@ export function InventoryOrderForm({ onSubmit, isLoading = false }: InventoryOrd
       <button
         type="submit"
         disabled={!isValid || isLoading}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-credora-orange to-credora-red text-white rounded-xl font-medium hover:shadow-lg hover:shadow-credora-orange/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
       >
         {isLoading ? (
           <>

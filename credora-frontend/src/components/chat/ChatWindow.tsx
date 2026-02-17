@@ -83,7 +83,7 @@ export function ChatWindow({ className = "" }: ChatWindowProps) {
       <div className={`flex flex-col items-center justify-center h-full px-4 ${className}`}>
         {/* AI Icon with Logo */}
         <div className="relative">
-          <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-6 shadow-2xl shadow-primary/30 animate-float p-4">
+          <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-credora-orange to-credora-red flex items-center justify-center mb-6 shadow-2xl shadow-credora-orange/30 animate-float p-4">
             <div className="relative w-full h-full">
               <Image
                 src="/images/circlelogo.png"
@@ -94,7 +94,7 @@ export function ChatWindow({ className = "" }: ChatWindowProps) {
             </div>
           </div>
           {/* Glow effect */}
-          <div className="absolute inset-0 w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-secondary blur-2xl opacity-50 animate-pulse"></div>
+          <div className="absolute inset-0 w-24 h-24 rounded-2xl bg-gradient-to-br from-credora-orange to-credora-red blur-2xl opacity-50 animate-pulse"></div>
         </div>
 
         {/* Welcome Text */}
@@ -152,7 +152,7 @@ export function ChatWindow({ className = "" }: ChatWindowProps) {
         
         {isLoading && (
           <div className="flex items-start gap-4 animate-fade-in">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-lg shadow-primary/30 p-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-credora-orange to-credora-red flex items-center justify-center flex-shrink-0 shadow-lg shadow-credora-orange/30 p-2">
               <div className="relative w-full h-full">
                 <Image
                   src="/images/circlelogo.png"
@@ -162,11 +162,11 @@ export function ChatWindow({ className = "" }: ChatWindowProps) {
                 />
               </div>
             </div>
-            <div className="bg-[#2a2a2a]/80 backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-4 flex items-center gap-3">
+            <div className="bg-[#2a2a2a]/80 backdrop-blur-xl rounded-2xl px-5 py-4 flex items-center gap-3">
               <div className="flex gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+                <span className="w-2 h-2 rounded-full bg-credora-orange animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-2 h-2 rounded-full bg-credora-orange animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 rounded-full bg-credora-orange animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
               <span className="text-sm text-gray-400 ml-2">AI is thinking...</span>
             </div>
@@ -196,18 +196,18 @@ function SuggestionChip({ text, icon }: { text: string; icon: React.ReactNode })
       onClick={handleClick}
       className={cn(
         "group relative px-5 py-4 text-sm font-medium rounded-xl overflow-hidden",
-        "bg-white/5 backdrop-blur-sm border border-white/10",
+        "bg-[#2a2a2a]/80 backdrop-blur-sm",
         "text-gray-300 hover:text-white",
-        "hover:border-primary/50 hover:bg-white/10",
-        "transition-all duration-300 hover:translate-y-[-2px] hover:shadow-lg hover:shadow-primary/20",
+        "hover:bg-[#2d2d2d]",
+        "transition-all duration-300 hover:translate-y-[-2px] hover:shadow-lg hover:shadow-credora-orange/20",
         "text-left"
       )}
     >
       {/* Glow effect on hover */}
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-credora-orange/10 to-credora-red/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       
       <div className="relative z-10 flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+        <div className="p-2 rounded-lg bg-credora-orange/20 text-credora-orange group-hover:bg-credora-orange group-hover:text-white transition-all duration-300">
           {icon}
         </div>
         <span>{text}</span>

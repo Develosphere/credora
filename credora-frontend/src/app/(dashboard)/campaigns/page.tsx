@@ -29,7 +29,7 @@ export default function CampaignsPage() {
       {/* Summary Stats */}
       {data && !isLoading && !isError && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-5 transition-all duration-300 hover:border-credora-orange/30 hover:-translate-y-0.5">
+          <div className="bg-[#1e1e1e] rounded-2xl p-5 transition-all duration-300 hover:bg-[#232323] hover:-translate-y-0.5">
             <div className="flex items-center gap-2 text-gray-400 text-sm mb-1.5">
               <Target className="h-4 w-4 text-credora-orange" />
               <span>Total Ad Spend</span>
@@ -38,7 +38,7 @@ export default function CampaignsPage() {
               {formatCurrency(data.totalSpend)}
             </p>
           </div>
-          <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-5 transition-all duration-300 hover:border-credora-orange/30 hover:-translate-y-0.5">
+          <div className="bg-[#1e1e1e] rounded-2xl p-5 transition-all duration-300 hover:bg-[#232323] hover:-translate-y-0.5">
             <div className="flex items-center gap-2 text-gray-400 text-sm mb-1.5">
               <TrendingUp className="h-4 w-4 text-emerald-400" />
               <span>Total Revenue</span>
@@ -47,7 +47,7 @@ export default function CampaignsPage() {
               {formatCurrency(data.totalRevenue)}
             </p>
           </div>
-          <div className="bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl p-5 transition-all duration-300 hover:border-credora-orange/30 hover:-translate-y-0.5">
+          <div className="bg-[#1e1e1e] rounded-2xl p-5 transition-all duration-300 hover:bg-[#232323] hover:-translate-y-0.5">
             <div className="flex items-center gap-2 text-gray-400 text-sm mb-1.5">
               <TrendingDown className="h-4 w-4 text-red-400" />
               <span>Overall ROAS</span>
@@ -64,7 +64,7 @@ export default function CampaignsPage() {
 
       {/* Error State */}
       {isError && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-5">
+        <div className="bg-red-500/10 rounded-2xl p-5">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-red-400 font-semibold">
