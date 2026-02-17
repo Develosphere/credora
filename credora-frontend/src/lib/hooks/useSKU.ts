@@ -6,6 +6,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { analyzeSKUs } from "@/lib/api/fpa";
 import type { SKUAnalysis } from "@/lib/api/types";
+import { usePlatform } from "@/lib/hooks/usePlatform";
 
 export interface UseSKUResult {
   data: SKUAnalysis[] | undefined;
@@ -19,9 +20,11 @@ export interface UseSKUResult {
  * Hook to fetch SKU unit economics data
  */
 export function useSKU(): UseSKUResult {
+  const { platform } = usePlatform();
+
   const query = useQuery({
-    queryKey: ["sku-analysis"],
-    queryFn: () => analyzeSKUs(),
+    queryKey: ["sku-analysis", platform],
+    queryFn: () => analyzeSKUs(platform),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
   });

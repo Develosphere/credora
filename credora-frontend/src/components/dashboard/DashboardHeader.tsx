@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { LogOut, User, Settings, ChevronLeft, ChevronRight, Share2 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { PlatformSelector } from "@/components/layout/PlatformSelector";
 
 export function DashboardHeader() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export function DashboardHeader() {
 
   const handleLogout = async () => {
     setShowProfileMenu(false);
-    try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
+    try { await fetch("/api/auth/logout", { method: "POST" }); } catch { }
     document.cookie = "session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     window.location.href = "/";
@@ -48,14 +49,14 @@ export function DashboardHeader() {
     <header className="flex h-12 items-center justify-between px-4 bg-[#121212] border-b border-[#2a2a2a]">
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1">
-          <button 
+          <button
             onClick={handleBack}
             className="p-1 rounded bg-[#252525] text-gray-400 hover:text-white hover:bg-[#333] transition-colors"
             title="Go back"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <button 
+          <button
             onClick={handleForward}
             className="p-1 rounded bg-[#252525] text-gray-400 hover:text-white hover:bg-[#333] transition-colors"
             title="Go forward"
@@ -64,7 +65,7 @@ export function DashboardHeader() {
           </button>
         </div>
         <div className="flex items-center gap-2 text-sm">
-          <button 
+          <button
             onClick={handleBreadcrumbClick}
             className="text-gray-500 hover:text-credora-orange transition-colors cursor-pointer"
           >
@@ -75,7 +76,8 @@ export function DashboardHeader() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+        <PlatformSelector />
         <div className="relative" ref={menuRef}>
           <button onClick={() => setShowProfileMenu(!showProfileMenu)} className="w-8 h-8 rounded-full overflow-hidden border-2 border-credora-orange/50 hover:border-credora-orange transition-colors" disabled={isLoading}>
             {user?.picture ? <img src={user.picture} alt={displayName} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gradient-to-br from-credora-orange to-credora-red flex items-center justify-center text-white text-xs font-bold">{displayName[0]}</div>}

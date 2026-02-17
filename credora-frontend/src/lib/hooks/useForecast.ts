@@ -6,6 +6,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getForecast } from "@/lib/api/fpa";
 import type { ForecastReport } from "@/lib/api/types";
+import { usePlatform } from "@/lib/hooks/usePlatform";
 
 export interface UseForecastOptions {
   days: number;
@@ -28,9 +29,11 @@ export function useForecast({
   days,
   enabled = true,
 }: UseForecastOptions): UseForecastResult {
+  const { platform } = usePlatform();
+
   const query = useQuery({
-    queryKey: ["forecast", days],
-    queryFn: () => getForecast(days),
+    queryKey: ["forecast", days, platform],
+    queryFn: () => getForecast(days, platform),
     enabled: enabled && days > 0,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,

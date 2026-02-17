@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased cursor-none`}>
+      <body className={`${inter.variable} font-sans antialiased cursor-none`} suppressHydrationWarning>
         <ThemeProvider defaultTheme="system" storageKey="credora-theme">
           <QueryProvider>
             <CustomCursor />

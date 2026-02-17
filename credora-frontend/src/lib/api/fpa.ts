@@ -19,27 +19,30 @@ import type {
  */
 export async function calculatePnL(
   startDate: string,
-  endDate: string
+  endDate: string,
+  platform?: string
 ): Promise<PnLReport> {
   return pythonApi.get<PnLReport>("/fpa/pnl", {
-    params: { start_date: startDate, end_date: endDate },
+    params: { start_date: startDate, end_date: endDate, ...(platform && { platform }) },
   });
 }
 
 /**
  * Get cash flow forecast for specified number of days
  */
-export async function getForecast(days: number): Promise<ForecastReport> {
+export async function getForecast(days: number, platform?: string): Promise<ForecastReport> {
   return pythonApi.get<ForecastReport>("/fpa/forecast", {
-    params: { days },
+    params: { days, ...(platform && { platform }) },
   });
 }
 
 /**
  * Get SKU unit economics analysis
  */
-export async function analyzeSKUs(): Promise<SKUAnalysis[]> {
-  return pythonApi.get<SKUAnalysis[]>("/fpa/sku-analysis");
+export async function analyzeSKUs(platform?: string): Promise<SKUAnalysis[]> {
+  return pythonApi.get<SKUAnalysis[]>("/fpa/sku-analysis", {
+    params: platform ? { platform } : undefined,
+  });
 }
 
 /**
@@ -47,10 +50,11 @@ export async function analyzeSKUs(): Promise<SKUAnalysis[]> {
  */
 export async function getRankedCampaigns(
   top: number = 5,
-  bottom: number = 5
+  bottom: number = 5,
+  platform?: string
 ): Promise<CampaignRanking> {
   return pythonApi.get<CampaignRanking>("/fpa/campaigns", {
-    params: { top, bottom },
+    params: { top, bottom, ...(platform && { platform }) },
   });
 }
 
@@ -66,8 +70,10 @@ export async function simulateWhatIf(
 /**
  * Get dashboard KPIs (aggregated metrics)
  */
-export async function getDashboardKPIs(): Promise<DashboardKPIs> {
-  return pythonApi.get<DashboardKPIs>("/fpa/dashboard");
+export async function getDashboardKPIs(platform?: string): Promise<DashboardKPIs> {
+  return pythonApi.get<DashboardKPIs>("/fpa/dashboard", {
+    params: platform ? { platform } : undefined,
+  });
 }
 
 /**

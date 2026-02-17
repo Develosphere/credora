@@ -6,6 +6,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { calculatePnL } from "@/lib/api/fpa";
 import type { PnLReport } from "@/lib/api/types";
+import { usePlatform } from "@/lib/hooks/usePlatform";
 
 export interface UsePnLOptions {
   startDate: string;
@@ -29,9 +30,11 @@ export function usePnL({
   endDate,
   enabled = true,
 }: UsePnLOptions): UsePnLResult {
+  const { platform } = usePlatform();
+
   const query = useQuery({
-    queryKey: ["pnl", startDate, endDate],
-    queryFn: () => calculatePnL(startDate, endDate),
+    queryKey: ["pnl", startDate, endDate, platform],
+    queryFn: () => calculatePnL(startDate, endDate, platform),
     enabled: enabled && !!startDate && !!endDate,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,

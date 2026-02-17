@@ -30,7 +30,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("competitor-spy")
 
 # Initialize the FastMCP server
-mcp = FastMCP("Competitor-Spy")
+competitor_mcp = FastMCP("Competitor-Spy")
 
 # Store for competitor data during analysis session
 competitor_data = []
@@ -40,7 +40,7 @@ competitor_data = []
 # Tool 1: Full Competitor Research (Visible Browser + Search + Analysis)
 # =============================================================================
 
-@mcp.tool()
+@competitor_mcp.tool()
 def analyze_competitors(
     business_type: str,
     city: str = "Karachi",
@@ -350,7 +350,7 @@ def _generate_report(business_type: str, city: str, data: List[Dict]) -> str:
 # Tool 2: Quick Search (No browser visible)
 # =============================================================================
 
-@mcp.tool()
+@competitor_mcp.tool()
 def search_competitors(query: str, max_results: int = 5) -> str:
     """
     Quick search for competitors using DuckDuckGo (no visible browser).
@@ -397,7 +397,7 @@ def search_competitors(query: str, max_results: int = 5) -> str:
 # Tool 3: Scrape Single Website
 # =============================================================================
 
-@mcp.tool()
+@competitor_mcp.tool()
 def scrape_website(url: str, visible: bool = False) -> str:
     """
     Scrape and extract content from a single website.
@@ -456,4 +456,4 @@ if __name__ == "__main__":
     print("  3. scrape_website(url, visible)")
     print("     - Scrape a single website")
     print("\n" + "=" * 60 + "\n")
-    mcp.run()
+    competitor_mcp.run()

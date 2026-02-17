@@ -6,6 +6,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getRankedCampaigns } from "@/lib/api/fpa";
 import type { CampaignRanking } from "@/lib/api/types";
+import { usePlatform } from "@/lib/hooks/usePlatform";
 
 export interface UseCampaignsOptions {
   top?: number;
@@ -25,10 +26,11 @@ export interface UseCampaignsResult {
  */
 export function useCampaigns(options: UseCampaignsOptions = {}): UseCampaignsResult {
   const { top = 5, bottom = 5 } = options;
+  const { platform } = usePlatform();
 
   const query = useQuery({
-    queryKey: ["campaigns", top, bottom],
-    queryFn: () => getRankedCampaigns(top, bottom),
+    queryKey: ["campaigns", top, bottom, platform],
+    queryFn: () => getRankedCampaigns(top, bottom, platform),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
   });

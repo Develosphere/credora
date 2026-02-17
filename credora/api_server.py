@@ -1557,13 +1557,13 @@ JAVA_ENGINE_URL = os.environ.get("JAVA_ENGINE_URL", f"{JAVA_ENGINE_HOST}:{JAVA_E
 
 
 @app.get("/fpa/dashboard")
-async def get_dashboard_kpis(request: Request):
+async def get_dashboard_kpis(request: Request, platform: Optional[str] = Query(None, description="Platform filter: shopify, meta, or google")):
     """Get dashboard KPIs - aggregates data from multiple sources."""
     user = require_auth(request)
     
     # Check for mock mode - compute KPIs directly from mock JSON files
     if os.getenv("MOCK_MODE", "").lower() == "true":
-        print(f"📦 [DASHBOARD] MOCK_MODE enabled, computing KPIs from mock JSON files")
+        print(f"📦 [DASHBOARD] MOCK_MODE enabled, platform={platform}, computing KPIs from mock JSON files")
         
         try:
             import json
@@ -1572,100 +1572,234 @@ async def get_dashboard_kpis(request: Request):
             # Find mock_data directory
             base_path = Path(__file__).parent.parent / "mock_data"
             
-            # Load Shopify orders
-            orders_file = base_path / "shopify" / "orders.json"
-            orders_data = {}
-            if orders_file.exists():
-                with open(orders_file, "r") as f:
-                    orders_data = json.load(f)
+            # Helper to safely load a JSON file
+            def load_mock_json(filepath):
+                if filepath.exists():
+                    with open(filepath, "r") as f:
+                        return json.load(f)
+                return {}
             
-            # Load Shopify products
-            products_file = base_path / "shopify" / "products.json"
-            products_data = {}
-            if products_file.exists():
-                with open(products_file, "r") as f:
-                    products_data = json.load(f)
-            
-            # Load Meta campaigns
-            meta_campaigns_file = base_path / "meta" / "campaigns.json"
-            meta_campaigns_data = {}
-            if meta_campaigns_file.exists():
-                with open(meta_campaigns_file, "r") as f:
-                    meta_campaigns_data = json.load(f)
-            
-            # Calculate revenue from orders (sum of total_price for paid orders)
-            orders = orders_data.get("orders", [])
-            revenue = sum(
-                float(order.get("total_price", 0)) 
-                for order in orders 
-                if order.get("financial_status") == "paid"
-            )
-            
-            # Calculate expenses from ad campaigns
-            campaigns = meta_campaigns_data.get("campaigns", [])
-            ad_spend = sum(
-                float(campaign.get("spend", 0)) 
-                for campaign in campaigns
-            )
-            
-            # Estimated COGS (30% of revenue)
-            cogs = revenue * 0.30
-            
-            # Net profit = revenue - COGS - ad spend
-            net_profit = revenue - cogs - ad_spend
-            
-            # Get products
-            products = products_data.get("products", [])
-            
-            # Find top product by price
-            top_sku = None
-            if products:
-                top_product = max(products, key=lambda p: float(p.get("selling_price", 0) or 0))
-                top_sku = {
-                    "sku": top_product.get("sku") or str(top_product.get("id")),
-                    "name": top_product.get("title") or top_product.get("name") or "Unknown Product",
-                    "contribution_margin": 35.0,
-                    "units_sold": 150
+            # ===== SHOPIFY PLATFORM =====
+            if platform == "shopify":
+                orders_data = load_mock_json(base_path / "shopify" / "orders.json")
+                products_data = load_mock_json(base_path / "shopify" / "products.json")
+                
+                orders = orders_data.get("orders", [])
+                revenue = sum(
+                    float(order.get("total_price", 0)) 
+                    for order in orders 
+                    if order.get("financial_status") == "paid"
+                )
+                
+                products = products_data.get("products", [])
+                cogs = revenue * 0.30
+                net_profit = revenue - cogs
+                
+                top_sku = None
+                if products:
+                    top_product = max(products, key=lambda p: float(p.get("selling_price", 0) or 0))
+                    top_sku = {
+                        "sku": top_product.get("sku") or str(top_product.get("id")),
+                        "name": top_product.get("title") or "Unknown Product",
+                        "contribution_margin": 35.0,
+                        "units_sold": sum(1 for o in orders if o.get("financial_status") == "paid")
+                    }
+                
+                print(f"📊 [DASHBOARD/shopify] revenue=${revenue:.2f}, profit=${net_profit:.2f}, orders={len(orders)}, products={len(products)}")
+                
+                return {
+                    "revenue": revenue,
+                    "netProfit": net_profit,
+                    "cashRunway": int((50000 / max(cogs, 1)) * 30) if cogs > 0 else 365,
+                    "topSku": top_sku,
+                    "worstCampaign": None,
+                    "hasConnectedPlatforms": True,
+                    "isMockData": True,
+                    "platform": "shopify",
+                    "platformLabel": "Shopify",
+                    "cardLabels": {
+                        "card1": {"title": "Store Revenue", "subtitle": "Total Sales"},
+                        "card2": {"title": "Net Profit", "subtitle": "After COGS"},
+                        "card3": {"title": "Products", "subtitle": "Active Listings", "value": len(products)},
+                    }
                 }
             
-            # Find worst campaign by ROAS
-            worst_campaign = None
-            if campaigns:
-                # Sort by ROAS (revenue/spend), lowest first
-                campaigns_with_roas = []
-                for camp in campaigns:
-                    spend = float(camp.get("spend", 0))
-                    rev = float(camp.get("revenue", 0))
-                    roas = rev / spend if spend > 0 else 0
-                    campaigns_with_roas.append({**camp, "roas": roas})
+            # ===== META ADS PLATFORM =====
+            elif platform == "meta":
+                meta_data = load_mock_json(base_path / "meta" / "campaigns.json")
+                campaigns = meta_data.get("campaigns", [])
                 
-                campaigns_with_roas.sort(key=lambda c: c["roas"])
-                worst = campaigns_with_roas[0] if campaigns_with_roas else None
-                if worst:
+                total_spend = sum(float(c.get("spend", 0)) for c in campaigns)
+                total_revenue = sum(float(c.get("revenue", 0)) for c in campaigns)
+                total_impressions = sum(int(c.get("impressions", 0)) for c in campaigns)
+                total_clicks = sum(int(c.get("clicks", 0)) for c in campaigns)
+                total_conversions = sum(int(c.get("conversions", 0)) for c in campaigns)
+                overall_roas = total_revenue / total_spend if total_spend > 0 else 0
+                net_profit = total_revenue - total_spend
+                
+                # Find worst campaign by ROAS
+                worst_campaign = None
+                if campaigns:
+                    campaigns_with_roas = []
+                    for camp in campaigns:
+                        spend = float(camp.get("spend", 0))
+                        rev = float(camp.get("revenue", 0))
+                        roas = rev / spend if spend > 0 else 0
+                        campaigns_with_roas.append({**camp, "calc_roas": roas})
+                    campaigns_with_roas.sort(key=lambda c: c["calc_roas"])
+                    worst = campaigns_with_roas[0]
                     worst_campaign = {
                         "id": str(worst.get("id")),
                         "name": worst.get("name") or "Unknown Campaign",
-                        "roas": worst.get("roas", 0),
+                        "roas": worst.get("calc_roas", 0),
                         "spend": float(worst.get("spend", 0))
                     }
+                
+                print(f"📊 [DASHBOARD/meta] spend=${total_spend:.2f}, revenue=${total_revenue:.2f}, roas={overall_roas:.2f}")
+                
+                return {
+                    "revenue": total_revenue,
+                    "netProfit": net_profit,
+                    "cashRunway": int((50000 / max(total_spend, 1)) * 30) if total_spend > 0 else 365,
+                    "topSku": None,
+                    "worstCampaign": worst_campaign,
+                    "hasConnectedPlatforms": True,
+                    "isMockData": True,
+                    "platform": "meta",
+                    "platformLabel": "Meta Ads",
+                    "cardLabels": {
+                        "card1": {"title": "Ad Revenue", "subtitle": "Campaign Revenue"},
+                        "card2": {"title": "ROAS", "subtitle": "Return on Ad Spend", "value": round(overall_roas, 2)},
+                        "card3": {"title": "Ad Spend", "subtitle": "Total Investment", "value": total_spend},
+                    },
+                    "metrics": {
+                        "impressions": total_impressions,
+                        "clicks": total_clicks,
+                        "conversions": total_conversions,
+                        "campaigns_count": len(campaigns),
+                    }
+                }
             
-            # Calculate runway (estimate)
-            monthly_burn = (cogs + ad_spend) / 1  # Assume 1 month of data
-            cash_on_hand = 50000
-            runway_days = int((cash_on_hand / monthly_burn) * 30) if monthly_burn > 0 else 365
+            # ===== GOOGLE ADS PLATFORM =====
+            elif platform == "google":
+                google_data = load_mock_json(base_path / "google" / "campaigns.json")
+                campaigns = google_data.get("campaigns", [])
+                
+                total_cost = sum(float(c.get("cost", 0)) for c in campaigns)
+                total_conv_value = sum(float(c.get("conversion_value", 0)) for c in campaigns)
+                total_impressions = sum(int(c.get("impressions", 0)) for c in campaigns)
+                total_clicks = sum(int(c.get("clicks", 0)) for c in campaigns)
+                total_conversions = sum(int(c.get("conversions", 0)) for c in campaigns)
+                overall_roas = total_conv_value / total_cost if total_cost > 0 else 0
+                net_profit = total_conv_value - total_cost
+                
+                # Find worst campaign by ROAS
+                worst_campaign = None
+                if campaigns:
+                    campaigns_with_roas = []
+                    for camp in campaigns:
+                        cost = float(camp.get("cost", 0))
+                        conv_val = float(camp.get("conversion_value", 0))
+                        roas = conv_val / cost if cost > 0 else 0
+                        campaigns_with_roas.append({**camp, "calc_roas": roas})
+                    campaigns_with_roas.sort(key=lambda c: c["calc_roas"])
+                    worst = campaigns_with_roas[0]
+                    worst_campaign = {
+                        "id": str(worst.get("id")),
+                        "name": worst.get("name") or "Unknown Campaign",
+                        "roas": worst.get("calc_roas", 0),
+                        "spend": float(worst.get("cost", 0))
+                    }
+                
+                print(f"📊 [DASHBOARD/google] cost=${total_cost:.2f}, conv_value=${total_conv_value:.2f}, roas={overall_roas:.2f}")
+                
+                return {
+                    "revenue": total_conv_value,
+                    "netProfit": net_profit,
+                    "cashRunway": int((50000 / max(total_cost, 1)) * 30) if total_cost > 0 else 365,
+                    "topSku": None,
+                    "worstCampaign": worst_campaign,
+                    "hasConnectedPlatforms": True,
+                    "isMockData": True,
+                    "platform": "google",
+                    "platformLabel": "Google Ads",
+                    "cardLabels": {
+                        "card1": {"title": "Conversion Value", "subtitle": "Total Value"},
+                        "card2": {"title": "ROAS", "subtitle": "Return on Ad Spend", "value": round(overall_roas, 2)},
+                        "card3": {"title": "Ad Cost", "subtitle": "Total Spend", "value": total_cost},
+                    },
+                    "metrics": {
+                        "impressions": total_impressions,
+                        "clicks": total_clicks,
+                        "conversions": total_conversions,
+                        "campaigns_count": len(campaigns),
+                    }
+                }
             
-            print(f"📊 [DASHBOARD] From mock files: revenue=${revenue:.2f}, profit=${net_profit:.2f}, orders={len(orders)}, products={len(products)}")
-            
-            return {
-                "revenue": revenue,
-                "netProfit": net_profit,
-                "cashRunway": runway_days,
-                "topSku": top_sku,
-                "worstCampaign": worst_campaign,
-                "hasConnectedPlatforms": True,
-                "isMockData": True,
-                "source": "mock_json_files"
-            }
+            # ===== DEFAULT (combined / no platform specified) =====
+            else:
+                orders_data = load_mock_json(base_path / "shopify" / "orders.json")
+                products_data = load_mock_json(base_path / "shopify" / "products.json")
+                meta_data = load_mock_json(base_path / "meta" / "campaigns.json")
+                
+                orders = orders_data.get("orders", [])
+                revenue = sum(
+                    float(order.get("total_price", 0)) 
+                    for order in orders 
+                    if order.get("financial_status") == "paid"
+                )
+                
+                campaigns = meta_data.get("campaigns", [])
+                ad_spend = sum(float(campaign.get("spend", 0)) for campaign in campaigns)
+                cogs = revenue * 0.30
+                net_profit = revenue - cogs - ad_spend
+                
+                products = products_data.get("products", [])
+                
+                top_sku = None
+                if products:
+                    top_product = max(products, key=lambda p: float(p.get("selling_price", 0) or 0))
+                    top_sku = {
+                        "sku": top_product.get("sku") or str(top_product.get("id")),
+                        "name": top_product.get("title") or "Unknown Product",
+                        "contribution_margin": 35.0,
+                        "units_sold": 150
+                    }
+                
+                worst_campaign = None
+                if campaigns:
+                    campaigns_with_roas = []
+                    for camp in campaigns:
+                        spend = float(camp.get("spend", 0))
+                        rev = float(camp.get("revenue", 0))
+                        roas = rev / spend if spend > 0 else 0
+                        campaigns_with_roas.append({**camp, "roas": roas})
+                    campaigns_with_roas.sort(key=lambda c: c["roas"])
+                    worst = campaigns_with_roas[0] if campaigns_with_roas else None
+                    if worst:
+                        worst_campaign = {
+                            "id": str(worst.get("id")),
+                            "name": worst.get("name") or "Unknown Campaign",
+                            "roas": worst.get("roas", 0),
+                            "spend": float(worst.get("spend", 0))
+                        }
+                
+                monthly_burn = (cogs + ad_spend) / 1
+                cash_on_hand = 50000
+                runway_days = int((cash_on_hand / monthly_burn) * 30) if monthly_burn > 0 else 365
+                
+                print(f"📊 [DASHBOARD] From mock files: revenue=${revenue:.2f}, profit=${net_profit:.2f}, orders={len(orders)}, products={len(products)}")
+                
+                return {
+                    "revenue": revenue,
+                    "netProfit": net_profit,
+                    "cashRunway": runway_days,
+                    "topSku": top_sku,
+                    "worstCampaign": worst_campaign,
+                    "hasConnectedPlatforms": True,
+                    "isMockData": True,
+                    "source": "mock_json_files"
+                }
             
         except Exception as e:
             print(f"⚠️ [DASHBOARD] Error reading mock files: {e}, returning fallback")
@@ -1811,6 +1945,7 @@ async def get_pnl(
     start_date: str = Query(..., description="Start date (YYYY-MM-DD)"),
     end_date: str = Query(..., description="End date (YYYY-MM-DD)"),
     force_refresh: bool = Query(False, description="Force fresh computation"),
+    platform: Optional[str] = Query(None, description="Platform filter: shopify, meta, or google"),
 ):
     """Get P&L statement - uses database cache, falls back to Java FPA Engine."""
     user = require_auth(request)
@@ -1859,6 +1994,7 @@ async def get_forecast(
     request: Request,
     days: int = Query(30, description="Forecast period in days"),
     force_refresh: bool = Query(False, description="Force fresh computation"),
+    platform: Optional[str] = Query(None, description="Platform filter: shopify, meta, or google"),
 ):
     """Get cash flow forecast - uses database cache, falls back to Java FPA Engine."""
     user = require_auth(request)
@@ -1908,7 +2044,7 @@ async def get_forecast(
 
 
 @app.get("/fpa/sku-analysis")
-async def get_sku_analysis(request: Request):
+async def get_sku_analysis(request: Request, platform: Optional[str] = Query(None, description="Platform filter: shopify, meta, or google")):
     """Get SKU unit economics - proxies to Java FPA Engine."""
     user = require_auth(request)
     
@@ -2023,6 +2159,7 @@ async def get_campaigns(
     request: Request,
     top: int = Query(5, description="Number of top performers"),
     bottom: int = Query(5, description="Number of bottom performers"),
+    platform: Optional[str] = Query(None, description="Platform filter: shopify, meta, or google"),
 ):
     """Get ranked campaigns - proxies to Java FPA Engine."""
     user = require_auth(request)
