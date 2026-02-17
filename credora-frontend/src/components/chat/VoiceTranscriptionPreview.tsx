@@ -9,7 +9,7 @@
 
 import { useState, useEffect } from 'react';
 import { Check, X, Edit2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import type { VoiceTranscriptionPreviewProps } from '@/lib/voice/types';
 
@@ -57,7 +57,7 @@ export function VoiceTranscriptionPreview({
   const handleCancel = () => {
     setIsEditing(false);
     setEditedText(transcript);
-    
+
     if (onCancel) {
       onCancel();
     }
@@ -70,11 +70,11 @@ export function VoiceTranscriptionPreview({
     if (onEdit && editedText !== transcript) {
       onEdit(editedText);
     }
-    
+
     if (onConfirm) {
       onConfirm();
     }
-    
+
     setIsEditing(false);
   };
 
@@ -138,7 +138,7 @@ export function VoiceTranscriptionPreview({
               >
                 <Check className="h-4 w-4 text-green-600" />
               </Button>
-              
+
               {/* Cancel edit */}
               <Button
                 type="button"
@@ -166,7 +166,7 @@ export function VoiceTranscriptionPreview({
               >
                 <Edit2 className="h-4 w-4" />
               </Button>
-              
+
               {/* Confirm button */}
               <Button
                 type="button"
@@ -179,7 +179,7 @@ export function VoiceTranscriptionPreview({
               >
                 <Check className="h-4 w-4 text-green-600" />
               </Button>
-              
+
               {/* Cancel button */}
               <Button
                 type="button"

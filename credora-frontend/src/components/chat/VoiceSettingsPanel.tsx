@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 import { Volume2, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -63,7 +63,7 @@ export function VoiceSettingsPanel({ isOpen, onClose }: VoiceSettingsPanelProps)
     volume: speechVolume,
     onEnd: () => setIsTestingVoice(false),
   });
-  
+
   // Get selected voice from available voices
   const selectedVoice = availableVoices.find((v) => v.voiceURI === selectedVoiceURI);
 
@@ -126,7 +126,7 @@ export function VoiceSettingsPanel({ isOpen, onClose }: VoiceSettingsPanelProps)
           {/* Voice Input Settings */}
           <div className="space-y-4">
             <h3 className="font-medium">Voice Input</h3>
-            
+
             <div className="flex items-center justify-between">
               <Label htmlFor="voice-input-toggle">Enable Voice Input</Label>
               <input
@@ -145,7 +145,7 @@ export function VoiceSettingsPanel({ isOpen, onClose }: VoiceSettingsPanelProps)
           {/* Voice Output Settings */}
           <div className="space-y-4">
             <h3 className="font-medium">Voice Output</h3>
-            
+
             <div className="flex items-center justify-between">
               <Label htmlFor="voice-output-toggle">Enable Voice Output</Label>
               <input

@@ -8,7 +8,7 @@
 
 import { useEffect, useRef } from 'react';
 import { X, Mic, Volume2, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 interface VoiceAgentModalProps {
   isOpen: boolean;
@@ -43,12 +43,12 @@ export function VoiceAgentModal({
     if (isOpen && !hasPrimedSpeechRef.current && typeof window !== 'undefined') {
       console.log('[VoiceAgentModal] Priming speech synthesis...');
       hasPrimedSpeechRef.current = true;
-      
+
       // Trigger voice loading
       const loadVoices = () => {
         const voices = window.speechSynthesis.getVoices();
         console.log('[VoiceAgentModal] Available voices:', voices.length);
-        
+
         if (voices.length === 0) {
           console.log('[VoiceAgentModal] Waiting for voices to load...');
           // Voices will load async
@@ -56,20 +56,20 @@ export function VoiceAgentModal({
           console.log('[VoiceAgentModal] Voices already loaded');
         }
       };
-      
+
       // Load voices
       loadVoices();
-      
+
       // Also listen for voices changed event
       window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
-      
+
       // Speak empty utterance to prime the system (Chrome requirement)
       const primeUtterance = new SpeechSynthesisUtterance('');
       primeUtterance.volume = 0; // Silent
       window.speechSynthesis.speak(primeUtterance);
-      
+
       console.log('[VoiceAgentModal] ✅ Speech synthesis primed');
-      
+
       return () => {
         window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
       };
@@ -81,18 +81,18 @@ export function VoiceAgentModal({
     if (isOpen && !hasAutoStartedRef.current) {
       console.log('[VoiceAgentModal] Modal opened, auto-starting listening in 300ms...');
       hasAutoStartedRef.current = true;
-      
+
       const timer = setTimeout(() => {
         console.log('[VoiceAgentModal] Calling onStartListening()');
         onStartListening();
       }, 300);
-      
+
       return () => {
         console.log('[VoiceAgentModal] Cleaning up timer');
         clearTimeout(timer);
       };
     }
-    
+
     // Reset flag when modal closes
     if (!isOpen) {
       hasAutoStartedRef.current = false;
@@ -135,17 +135,16 @@ export function VoiceAgentModal({
               <div className="absolute inset-0 rounded-full bg-primary/10 animate-ping" style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
             </>
           )}
-          
+
           {/* Icon */}
-          <div className={`relative w-32 h-32 rounded-full flex items-center justify-center transition-all duration-300 ${
-            isListening 
-              ? 'bg-gradient-to-br from-primary to-secondary shadow-2xl shadow-primary/50 scale-110' 
+          <div className={`relative w-32 h-32 rounded-full flex items-center justify-center transition-all duration-300 ${isListening
+              ? 'bg-gradient-to-br from-primary to-secondary shadow-2xl shadow-primary/50 scale-110'
               : isProcessing
-              ? 'bg-gradient-to-br from-yellow-500 to-orange-500 shadow-2xl shadow-yellow-500/50'
-              : isSpeaking
-              ? 'bg-gradient-to-br from-blue-500 to-purple-500 shadow-2xl shadow-blue-500/50'
-              : 'bg-white/10'
-          }`}>
+                ? 'bg-gradient-to-br from-yellow-500 to-orange-500 shadow-2xl shadow-yellow-500/50'
+                : isSpeaking
+                  ? 'bg-gradient-to-br from-blue-500 to-purple-500 shadow-2xl shadow-blue-500/50'
+                  : 'bg-white/10'
+            }`}>
             {isListening ? (
               <Mic className="h-16 w-16 text-white animate-pulse" />
             ) : isProcessing ? (

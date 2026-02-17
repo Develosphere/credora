@@ -9,7 +9,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Mic } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { useVoiceInput, useVoiceSettingsStore } from '@/lib/voice';
 import type { VoiceMicrophoneButtonProps } from '@/lib/voice/types';
 
@@ -32,12 +32,12 @@ export function VoiceMicrophoneButton({
 }: VoiceMicrophoneButtonProps) {
   const [isMounted, setIsMounted] = useState(false);
   const voiceInputEnabled = useVoiceSettingsStore((state) => state.voiceInputEnabled);
-  
+
   // Only run on client side
   useEffect(() => {
     setIsMounted(true);
   }, []);
-  
+
   const {
     isListening,
     isSupported,
@@ -67,7 +67,7 @@ export function VoiceMicrophoneButton({
     if (error) {
       clearError();
     }
-    
+
     if (isListening) {
       stopListening();
     } else {
@@ -87,7 +87,7 @@ export function VoiceMicrophoneButton({
         event.key.toLowerCase() === 'm'
       ) {
         event.preventDefault();
-        
+
         if (!disabled && voiceInputEnabled && isSupported) {
           toggleListening();
         }
@@ -108,12 +108,12 @@ export function VoiceMicrophoneButton({
     console.log('[VoiceMicrophoneButton] Browser not supported for voice input');
     return null;
   }
-  
+
   if (!voiceInputEnabled) {
     console.log('[VoiceMicrophoneButton] Voice input disabled in settings');
     return null;
   }
-  
+
   console.log('[VoiceMicrophoneButton] Rendering button', { isSupported, voiceInputEnabled, isListening });
 
   // Determine button state

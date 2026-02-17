@@ -4,12 +4,12 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  X, 
-  Download, 
-  FileText, 
+import {
+  X,
+  Download,
+  FileText,
   Loader2,
   AlertCircle,
   Copy,
@@ -40,7 +40,7 @@ export function ReportViewer({ reportPath, businessName, isOpen, onClose }: Repo
   const loadReportContent = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const reportContent = await getReportContent(reportPath);
       setContent(reportContent);
@@ -53,7 +53,7 @@ export function ReportViewer({ reportPath, businessName, isOpen, onClose }: Repo
 
   const handleDownload = async () => {
     setIsDownloading(true);
-    
+
     try {
       const blob = await downloadReport(reportPath);
       const url = window.URL.createObjectURL(blob);
